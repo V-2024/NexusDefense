@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "S_DamageInfo.generated.h"
+#include "ND_S_DamageInfo.generated.h"
 
 UENUM(BlueprintType)
 enum class E_DamageType : uint8

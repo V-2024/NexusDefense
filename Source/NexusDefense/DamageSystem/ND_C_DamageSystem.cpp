@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "C_Damageable.h"
+#include "ND_C_DamageSystem.h"
 
 // Sets default values for this component's properties
 UC_Damageable::UC_Damageable()

@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "S_DamageInfo.h"
-#include "C_Damageable.generated.h"
+#include "ND_S_DamageInfo.h"
+#include "ND_C_DamageSystem.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDamageResponseSignature);
