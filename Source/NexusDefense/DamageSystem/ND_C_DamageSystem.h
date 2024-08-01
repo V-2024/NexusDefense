@@ -45,11 +45,24 @@ public:
 	void OnDamageResponse() const;
 
 public:	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float Health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	float MaxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	bool IsInvincible;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	bool IsDead;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	bool IsInterrup;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	bool IsBlocking;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	int32 AttackTokenCount;
 };
