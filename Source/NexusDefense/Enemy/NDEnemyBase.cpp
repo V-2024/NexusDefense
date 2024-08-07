@@ -4,19 +4,21 @@
 // Sets default values
 ANDEnemyBase::ANDEnemyBase()
 {
-	Name = TEXT("Default Enemy");
-	ExperiencePoints = 10;
+
 }
 
 void ANDEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 	PlaySpawnEffect();
+    PlaySpawnAnimation();
 }
 
 void ANDEnemyBase::Destroyed()
 {
-
+    Super::Destroyed();
+    PlayDestroyEffect();
+    PlayDeathAnimation();
 }
 
 
@@ -42,4 +44,20 @@ void ANDEnemyBase::PlayDestroyEffect()
     {
         UGameplayStatics::PlaySoundAtLocation(this, DestroySound, GetActorLocation());
     }
+}
+
+void ANDEnemyBase::PlaySpawnAnimation()
+{
+    if (MeshComponent && SpawnAnimMontage)
+	{
+		MeshComponent->PlayAnimation(SpawnAnimMontage, false);
+	}
+}
+
+void ANDEnemyBase::PlayDeathAnimation()
+{
+    if(MeshComponent && DeathAnimMontage)
+    {
+		MeshComponent->PlayAnimation(DeathAnimMontage, false);
+	}
 }

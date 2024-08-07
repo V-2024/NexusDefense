@@ -14,6 +14,18 @@ class NEXUSDEFENSE_API ANDEnemyBase : public APawn
 public:
 	ANDEnemyBase();
 
+    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    void PlaySpawnEffect();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    void PlayDestroyEffect();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    void PlaySpawnAnimation();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    void PlayDeathAnimation();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
@@ -37,9 +49,13 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
     int32 ExperiencePoints;
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
-    void PlaySpawnEffect();
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    UAnimMontage* SpawnAnimMontage;
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
-    void PlayDestroyEffect();
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    UAnimMontage* DeathAnimMontage;
+
+protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    USkeletalMeshComponent* MeshComponent;
 };
