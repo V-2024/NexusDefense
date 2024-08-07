@@ -16,6 +16,7 @@ void ANDAICBase::BeginPlay()
     Super::BeginPlay();
 }
 
+// 현재 상태 검사 및 해당 상태
 void ANDAICBase::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
@@ -58,7 +59,6 @@ void ANDAICBase::UpdateEnemyState()
 	{
 		CurrentState = EEnemyState::Pursuit;
 	}
-
 }
 
 void ANDAICBase::PursuitPlayer()
