@@ -4,6 +4,7 @@
 // Sets default values
 ANDEnemyBase::ANDEnemyBase()
 {
+    PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -11,14 +12,12 @@ void ANDEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 	PlaySpawnEffect();
-    PlaySpawnAnimation();
 }
 
 void ANDEnemyBase::Destroyed()
 {
     Super::Destroyed();
     PlayDestroyEffect();
-    PlayDeathAnimation();
 }
 
 
@@ -46,18 +45,4 @@ void ANDEnemyBase::PlayDestroyEffect()
     }
 }
 
-void ANDEnemyBase::PlaySpawnAnimation()
-{
-    if (MeshComponent && SpawnAnimMontage)
-	{
-		MeshComponent->PlayAnimation(SpawnAnimMontage, false);
-	}
-}
 
-void ANDEnemyBase::PlayDeathAnimation()
-{
-    if(MeshComponent && DeathAnimMontage)
-    {
-		MeshComponent->PlayAnimation(DeathAnimMontage, false);
-	}
-}

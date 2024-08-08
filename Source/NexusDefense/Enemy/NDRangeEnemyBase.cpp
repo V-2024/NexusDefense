@@ -23,6 +23,7 @@ void ANDRangeEnemyBase::PerformAttack()
 {
 
     FireProjectile();
+	UE_LOG(LogTemp, Warning, TEXT("PerformAttack"));
     
 }
 
