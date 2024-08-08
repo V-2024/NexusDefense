@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
 #include "NDEnemyBase.generated.h"
 
 UCLASS()
-class NEXUSDEFENSE_API ANDEnemyBase : public APawn
+class NEXUSDEFENSE_API ANDEnemyBase : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -19,12 +19,6 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
     void PlayDestroyEffect();
-
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
-    void PlaySpawnAnimation();
-
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
-    void PlayDeathAnimation();
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,8 +48,4 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
     UAnimMontage* DeathAnimMontage;
-
-protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    USkeletalMeshComponent* MeshComponent;
 };

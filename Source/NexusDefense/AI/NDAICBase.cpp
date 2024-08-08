@@ -14,6 +14,8 @@ ANDAICBase::ANDAICBase()
 void ANDAICBase::BeginPlay()
 {
     Super::BeginPlay();
+
+	FindPlayerCharacters();
 }
 
 // 현재 상태 검사 및 해당 상태
@@ -50,14 +52,17 @@ void ANDAICBase::UpdateEnemyState()
 	}
 
 	float Distance = GetPawn()->GetDistanceTo(TargetCharacter);
+	UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), Distance);
 
 	if (Distance < AttackRadius)
 	{
 		CurrentState = EEnemyState::Attack;
+		UE_LOG(LogTemp, Warning, TEXT("Attack State!!!"));
 	}
 	else
 	{
 		CurrentState = EEnemyState::Pursuit;
+		UE_LOG(LogTemp, Warning, TEXT("Pursuit State!!!"));
 	}
 }
 
@@ -90,6 +95,8 @@ void ANDAICBase::FindPlayerCharacters()
 
         return;
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Player Characters Found: %d"), PlayerCharacters.Num());
 
 	for (AActor* Player : PlayerActors)
 	{

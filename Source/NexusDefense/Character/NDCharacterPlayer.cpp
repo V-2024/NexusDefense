@@ -42,6 +42,9 @@ ANDCharacterPlayer::ANDCharacterPlayer()
 	{
 		LookAction = InputActionLookRef.Object;
 	}
+
+	// set tag "Player" for player character
+	Tags.Add(FName("Player"));
 }
 
 void ANDCharacterPlayer::BeginPlay()
