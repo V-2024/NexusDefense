@@ -6,6 +6,13 @@
 #include "GameFramework/Character.h"
 #include "NDCharacterBase.generated.h"
 
+UENUM()
+enum class ECharacterControlType : uint8
+{
+	Shoulder,
+	Quater
+};
+
 UCLASS()
 class NEXUSDEFENSE_API ANDCharacterBase : public ACharacter
 {
@@ -15,6 +22,10 @@ public:
 	// Sets default values for this character's properties
 	ANDCharacterBase();
 
+protected:
+	virtual void SetCharacterControlData(const class UNDCharacterControlData* CharacterControlData);
 
+	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
+	TMap<ECharacterControlType, class UNDCharacterControlData*> CharacterControlManager;
 
 };
