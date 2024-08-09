@@ -12,12 +12,20 @@ void ANDEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 	PlaySpawnEffect();
+    PlaySpawnSound();
+    PlaySpawnAnimMontage();
+
+    FVector NewLocation = GetMesh()->GetRelativeLocation();
+    NewLocation.Z -= 90.0f;  // Z축으로 -100 이동
+    GetMesh()->SetRelativeLocation(NewLocation);
 }
 
 void ANDEnemyBase::Destroyed()
 {
     Super::Destroyed();
     PlayDestroyEffect();
+    PlayDestroySound();
+    PlayDeathAnimMontage();
 }
 
 
@@ -44,5 +52,39 @@ void ANDEnemyBase::PlayDestroyEffect()
         UGameplayStatics::PlaySoundAtLocation(this, DestroySound, GetActorLocation());
     }
 }
+
+void ANDEnemyBase::PlaySpawnSound()
+{
+    if (SpawnSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, GetActorLocation());
+	}
+}
+
+void ANDEnemyBase::PlayDestroySound()
+{
+	if (DestroySound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DestroySound, GetActorLocation());
+	}
+}
+
+void ANDEnemyBase::PlaySpawnAnimMontage()
+{
+	if (SpawnAnimMontage)
+	{
+		PlayAnimMontage(SpawnAnimMontage);
+	}
+}
+
+void ANDEnemyBase::PlayDeathAnimMontage()
+{
+	if (DeathAnimMontage)
+	{
+		PlayAnimMontage(DeathAnimMontage);
+	}
+}
+
+
 
 

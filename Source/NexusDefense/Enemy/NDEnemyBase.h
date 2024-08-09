@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AIController.h"
 #include "NDEnemyBase.generated.h"
 
 UCLASS()
@@ -19,6 +20,18 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
     void PlayDestroyEffect();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    void PlaySpawnSound();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    void PlayDestroySound();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    void PlaySpawnAnimMontage();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    void PlayDeathAnimMontage();
 
 protected:
 	virtual void BeginPlay() override;
