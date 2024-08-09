@@ -4,7 +4,6 @@
 #include "Character/NDCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "NDCharacterControlData.h"
 
 // Sets default values
 ANDCharacterBase::ANDCharacterBase()
@@ -39,29 +38,6 @@ ANDCharacterBase::ANDCharacterBase()
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 
 	}
-
-	static ConstructorHelpers::FObjectFinder<UNDCharacterControlData> QuaterDataRef(TEXT("/Game/NexusDefense/CharacaterControl/NDC_Quater.NDC_Quater"));
-	if (QuaterDataRef.Object)
-	{
-		CharacterControlManager.Add(ECharacterControlType::Quater, QuaterDataRef.Object);
-	}
-
-	static ConstructorHelpers::FObjectFinder<UNDCharacterControlData> ShoulderDataRef(TEXT("/Game/NexusDefense/CharacaterControl/NDC_Shoulder.NDC_Shoulder"));
-	if (ShoulderDataRef.Object)
-	{
-		CharacterControlManager.Add(ECharacterControlType::Shoulder, ShoulderDataRef.Object);
-	}
-}
-
-void ANDCharacterBase::SetCharacterControlData(const UNDCharacterControlData* CharacterControlData)
-{
-	//Pawn
-	bUseControllerRotationYaw = CharacterControlData->bUseControllerRotationYaw;
-
-	//CharacterMovement
-	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
-	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
-	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
 
 }
 
