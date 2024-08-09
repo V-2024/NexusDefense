@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Enemy/NDEnemyBase.h"
-#include "AI/NDAICBase.h"
+#include "AIController.h"
 #include "NDNormalEnemyBase.generated.h"
 
 /**
@@ -28,6 +28,13 @@ public:
 
 	virtual void PerformAttack();
 
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyAI")
+	float AttackRange;
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyAI")
+	float PursuitRadius;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
 	float AttackCooldown;
@@ -36,6 +43,5 @@ protected:
 	float AttackDamage;
 
 private:
-	ANDAICBase* AIController;
-	float LastAttackTime;
+	float LastAttackTime = 0;
 };

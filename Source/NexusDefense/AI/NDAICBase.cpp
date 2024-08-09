@@ -9,6 +9,7 @@
 ANDAICBase::ANDAICBase()
 {
     ClosestDistance = MAX_FLT;
+	
 }
 
 void ANDAICBase::BeginPlay()

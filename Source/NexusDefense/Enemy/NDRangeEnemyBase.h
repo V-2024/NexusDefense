@@ -15,14 +15,15 @@ class NEXUSDEFENSE_API ANDRangeEnemyBase : public ANDNormalEnemyBase
 	GENERATED_BODY()
 	
 public:
-	ANDRangeEnemyBase();
+    ANDRangeEnemyBase() {};
+    ANDRangeEnemyBase(FString);
+    void LoadEnemyData();
+    void SetDataPath(FString);
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void PerformAttack() override;
-
-    UFUNCTION(BlueprintCallable, Category = "Range Enemy")
-    void FireProjectile();
+    virtual void FireProjectile();
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Range Enemy")
@@ -33,4 +34,7 @@ protected:
 
     UPROPERTY(VisibleAnywhere, Category = "Range Enemy")
     USceneComponent* ProjectileSpawnPoint;
+
+private:
+    FString DataAssetPath;
 };

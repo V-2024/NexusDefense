@@ -13,7 +13,7 @@ void ANDNormalEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-    AIController = Cast<ANDAICBase>(GetController());
+    
 }
 
 void ANDNormalEnemyBase::Tick(float DeltaTime)
