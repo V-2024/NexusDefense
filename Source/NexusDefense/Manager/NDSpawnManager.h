@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Manager/NDStageManager.h"
+#include "Stages/StageData.h"
 #include "NDSpawnManager.generated.h"
 
 class ANDEnemyBase;
+class ANDStage;
 
 UCLASS()
 class NEXUSDEFENSE_API ANDSpawnManager : public AActor
@@ -22,7 +23,7 @@ public:
 
 	static ANDSpawnManager* GetInstance();
 
-	void StartSpawning(const FWaveInfo& WaveInfo);
+	void StartSpawning(ANDStage*, const FWaveInfo&);
 	void StopSpawning();
 
 private:
@@ -39,11 +40,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	TSubclassOf<ANDEnemyBase> EnemyClass;
 
+	UPROPERTY(EditAnywhere, Category = "Spawn")
+	ANDStage* CurrentStage;
+
 	FWaveInfo CurrentWaveInfo;
 	FTimerHandle SpawnTimerHandle;
 	int32 EnemiesSpawned;
-	int32 CurrentWaveIndex;
-	int32 RemainingEnemyCount;
 	bool bIsSpawningActive;
-
 };

@@ -6,20 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "NDStageManager.generated.h"
 
-USTRUCT(BlueprintType)
-struct FWaveInfo
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 EnemyCount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SpawnInterval;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<class ANDEnemyBase>> EnemyTypes;
-};
+class UStageData;
+class ANDStage;
 
 UCLASS()
 class NEXUSDEFENSE_API ANDStageManager : public AActor
@@ -30,35 +18,28 @@ public:
 	ANDStageManager();
 
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 	static ANDStageManager* GetInstance();
 
-	void StartStage();
-	void EndStage();
+	void LoadStages();
 	void StartNextWave();
 	bool IsStageClreared() const;
-	int32 GetCurrentWaveIndex() const;
-	int32 GetTotalWaveCount() const;
-
-	void OnEnemyDefeated();
-
-	TArray<AActor*> GetSpawnPoints() const { return SpawnPoints; }
+	ANDStage* GetCurrentStage() const { return CurrentStage; }
 
 private:
-	void InitializeStage();
-	void CheckWaveCompletion();
-	void FindSpawnPoints();
+	void CreateStage();
 
 private:
 	static ANDStageManager* Instance;
 
 	UPROPERTY(EditAnywhere, Category = "Stage")
-	TArray<FWaveInfo> Waves;
-	TArray<AActor*> SpawnPoints;
+	TArray<TSoftObjectPtr<UStageData>> StageDataList;
 
-	int32 CurrentWaveIndex;
-	int32 RemainingEnemyCount;
-	bool bIsStageCleared;
-	bool bIsStageActive;
+	UPROPERTY()
+	TArray<UStageData*> LoadedStages;
+
+	UPROPERTY()
+	ANDStage* CurrentStage;
+
+	int32 CurrentStageIndex;
 };

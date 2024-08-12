@@ -2,18 +2,15 @@
 
 
 #include "Manager/NDStageManager.h"
-#include "Manager/NDGameManager.h"
-#include "Manager/NDSpawnManager.h"
-#include "Kismet/GameplayStatics.h"
+#include "Stages/NDStage.h"
+#include "Stages/StageData.h"
 
+ANDStageManager* ANDStageManager::Instance = nullptr;
 
 ANDStageManager::ANDStageManager()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	CurrentWaveIndex = 0;
-	RemainingEnemyCount = 0;
-	bIsStageCleared = false;
-	bIsStageActive = false;
+	PrimaryActorTick.bCanEverTick = false;
+	CurrentStageIndex = -1;
 }
 
 
@@ -24,7 +21,7 @@ void ANDStageManager::BeginPlay()
 	if(!Instance)
 	{
 		Instance = this;
-		InitializeStage();
+		LoadStages();
 	}
 	else
 	{
@@ -32,16 +29,6 @@ void ANDStageManager::BeginPlay()
 	}
 }
 
-
-void ANDStageManager::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (bIsStageCleared)
-	{
-		// Add Stage Clear Logic
-	}
-}
 
 ANDStageManager* ANDStageManager::GetInstance()
 {
@@ -54,88 +41,62 @@ ANDStageManager* ANDStageManager::GetInstance()
 	return Instance;
 }
 
-void ANDStageManager::StartStage()
-{
-	bIsStageActive = true;
-	StartNextWave();
-}
 
-void ANDStageManager::EndStage()
+void ANDStageManager::LoadStages()
 {
-	bIsStageActive = false;
-	// Add Stage End Logic, get Reward and move to main menu
+	for (const TSoftObjectPtr<UStageData>& StageDataAsset : StageDataList)
+	{
+		if (UStageData* LoadedStageData = StageDataAsset.LoadSynchronous())
+		{
+			LoadedStages.Add(LoadedStageData);
+		}
+	}
 }
 
 void ANDStageManager::StartNextWave()
 {
-	if (CurrentWaveIndex < Waves.Num())
+	CurrentStageIndex++;
+
+	if (CurrentStageIndex < LoadedStages.Num())
 	{
-		RemainingEnemyCount = Waves[CurrentWaveIndex].EnemyCount;
-		// SpawnManager를 통해 적 스폰 시작
-		ANDSpawnManager* SpawnManager = ANDGameManager::GetInstance()->GetSpawnManager();
-		if (SpawnManager)
-		{
-			SpawnManager->StartSpawning(Waves[CurrentWaveIndex]);
-		}
+		CreateStage();
 	}
 	else
 	{
-		EndStage();
+		// All stages cleared
+		UE_LOG(LogTemp, Warning, TEXT("All stages cleared!"));
 	}
 }
 
 bool ANDStageManager::IsStageClreared() const
 {
-	return CurrentWaveIndex >= Waves.Num() && RemainingEnemyCount == 0;
+	return CurrentStage ? CurrentStage->IsStageCleared() : false;
 }
 
-int32 ANDStageManager::GetCurrentWaveIndex() const
+void ANDStageManager::CreateStage()
 {
-	return CurrentWaveIndex;
-}
-
-int32 ANDStageManager::GetTotalWaveCount() const
-{
-	return Waves.Num();
-}
-
-void ANDStageManager::OnEnemyDefeated()
-{
-	RemainingEnemyCount--;
-
-	if (RemainingEnemyCount <= 0)
+	if (CurrentStage)
 	{
-		CheckWaveCompletion();
+		CurrentStage->Destroy();
 	}
-}
 
-void ANDStageManager::InitializeStage()
-{
-	// Initialize Waves, Enemy Types, Spawn Intervals
-
-}
-
-void ANDStageManager::CheckWaveCompletion()
-{
-	CurrentWaveIndex++;
-	if (CurrentWaveIndex < Waves.Num())
+	if (CurrentStageIndex < LoadedStages.Num())
 	{
-		StartNextWave();
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			CurrentStage = World->SpawnActor<ANDStage>(ANDStage::StaticClass(), SpawnParams);
+			CurrentStage->Initialize(LoadedStages[CurrentStageIndex]);
+			CurrentStage->StartStage();
+		}
 	}
 	else
 	{
-		EndStage();
-	}
-}
-
-void ANDStageManager::FindSpawnPoints()
-{
-	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		if (ActorItr->ActorHasTag("SpawnPoint"))
-		{
-			SpawnPoints.Add(*ActorItr);
-		}
+		UE_LOG(LogTemp, Error, TEXT("No more stages to create!"));
 	}
 }
 

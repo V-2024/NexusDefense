@@ -1,7 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "Manager/NDGameManager.h"
 #include "Manager/NDSpawnManager.h"
+#include "Stages/NDStage.h"
+#include "Enemy/NDEnemyBase.h"
+#include "EngineUtils.h"
+
+ANDSpawnManager* ANDSpawnManager::Instance = nullptr;
 
 // Sets default values
 ANDSpawnManager::ANDSpawnManager()
@@ -18,7 +24,7 @@ void ANDSpawnManager::BeginPlay()
 	if (!Instance)
 	{
 		Instance = this;
-		FindSpawnPoints();
+		GetSpawnPoint();
 	}
 	else
 	{
@@ -44,25 +50,19 @@ ANDSpawnManager* ANDSpawnManager::GetInstance()
 	return Instance;
 }
 
-void ANDSpawnManager::StartSpawning(const FWaveInfo& WaveInfo)
+void ANDSpawnManager::StartSpawning(ANDStage* Stage, const FWaveInfo& WaveInfo)
 {
 	if (SpawnPoints.Num() == 0)
 	{
-		UE_LOG(LogTemp, Error, TEXT("No Spawn Points Found"));
+		UE_LOG(LogTemp, Error, TEXT("No spawn points found!"));
 		return;
 	}
 
-
-	if (bIsSpawningActive)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Spawning Already Active"));
-		return;
-	}
-
-	bIsSpawningActive = true;
+	CurrentStage = Stage;
 	CurrentWaveInfo = WaveInfo;
-	RemainingEnemyCount = CurrentWaveInfo.EnemyCount;
-	CurrentWaveIndex = ANDStageManager::GetInstance()->GetCurrentWaveIndex();
+	EnemiesSpawned = 0;
+	bIsSpawningActive = true;
+
 	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ANDSpawnManager::SpawnEnemy, CurrentWaveInfo.SpawnInterval, true);
 }
 
@@ -86,11 +86,11 @@ void ANDSpawnManager::SpawnEnemy()
 		return;
 	}
 
-	
+	// Spawn enemy
 }
 
 void ANDSpawnManager::GetSpawnPoint()
 {
-	SpawnPoints = ANDStageManager::GetInstance()->GetSpawnPoints();
+	SpawnPoints = CurrentStage->GetSpawnPoints();
 }
 
