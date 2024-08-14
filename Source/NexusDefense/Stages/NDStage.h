@@ -15,6 +15,7 @@ class NEXUSDEFENSE_API ANDStage : public AActor
 public:	
 	ANDStage();
 
+    virtual void BeginPlay() override;
     void Initialize(UStageData* InStageData);
     void StartStage();
     void EndStage();
@@ -23,8 +24,6 @@ public:
     int32 GetCurrentWave() const { return CurrentWave; }
     int32 GetTotalWaves() const { return StageData ? StageData->Waves.Num() : 0; }
     int32 GetClearScore() const { return StageData ? StageData->ClearScore : 0; }
-
-    TArray<AActor*> GetSpawnPoints() const { return SpawnPoints; }
 
     UFUNCTION()
     void OnEnemyDefeated();
@@ -36,6 +35,8 @@ private:
 
 
 public:
+    static ANDStage* Instance;
+
     UPROPERTY()
     UStageData* StageData;
 

@@ -4,7 +4,10 @@
 #include "Stages/NDStage.h"
 #include "Manager/NDGameManager.h"
 #include "Manager/NDSpawnManager.h"
+#include "Stages/StageData.h"
+#include "Kismet/GameplayStatics.h"
 
+ANDStage* ANDStage::Instance = nullptr;
 
 ANDStage::ANDStage()
 {
@@ -12,6 +15,20 @@ ANDStage::ANDStage()
 	CurrentWave = 0;
 	RemainingEnemies = 0;
 	bIsStageActive = false;
+}
+
+void ANDStage::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (!Instance)
+	{
+		Instance = this;
+	}
+	else
+	{
+		Destroy();
+	}
 }
 
 void ANDStage::Initialize(UStageData* InStageData)
@@ -26,6 +43,9 @@ void ANDStage::StartStage()
 		UE_LOG(LogTemp, Error, TEXT("StageData is not set!"));
 		return;
 	}
+
+	// open Stage Level
+	UGameplayStatics::OpenLevel(GetWorld(), *StageData->LevelFath);
 
 	bIsStageActive = true;
 	CurrentWave = 0;
@@ -43,6 +63,7 @@ bool ANDStage::IsStageCleared() const
 {
 	return CurrentWave >= StageData->Waves.Num() && RemainingEnemies == 0;
 }
+
 
 void ANDStage::OnEnemyDefeated()
 {
@@ -67,6 +88,7 @@ void ANDStage::StartNextWave()
 
 	if (SpawnManager)
 	{
+		SpawnManager->SetSpawnPoint();
 		SpawnManager->StartSpawning(this, StageData->Waves[CurrentWave]);
 	}
 }
