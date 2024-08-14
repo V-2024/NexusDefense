@@ -23,12 +23,12 @@ public:
 
 	static ANDSpawnManager* GetInstance();
 
+	void SetSpawnPoint();
 	void StartSpawning(ANDStage*, const FWaveInfo&);
 	void StopSpawning();
 
 private:
 	void SpawnEnemy();
-	void GetSpawnPoint();
 
 
 private:

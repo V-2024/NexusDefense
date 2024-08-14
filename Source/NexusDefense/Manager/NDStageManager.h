@@ -21,13 +21,11 @@ public:
 
 	static ANDStageManager* GetInstance();
 
-	void LoadStages();
+	void LoadStages(int32);
 	void StartNextWave();
 	bool IsStageClreared() const;
 	ANDStage* GetCurrentStage() const { return CurrentStage; }
-
-private:
-	void CreateStage();
+	void CreateStage(int32);
 
 private:
 	static ANDStageManager* Instance;

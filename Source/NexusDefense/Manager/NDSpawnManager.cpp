@@ -6,6 +6,7 @@
 #include "Stages/NDStage.h"
 #include "Enemy/NDEnemyBase.h"
 #include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 
 ANDSpawnManager* ANDSpawnManager::Instance = nullptr;
 
@@ -24,7 +25,6 @@ void ANDSpawnManager::BeginPlay()
 	if (!Instance)
 	{
 		Instance = this;
-		GetSpawnPoint();
 	}
 	else
 	{
@@ -48,6 +48,19 @@ ANDSpawnManager* ANDSpawnManager::GetInstance()
 	}
 
 	return Instance;
+}
+
+void ANDSpawnManager::SetSpawnPoint()
+{
+	// Find all spawn points in the level with Tag "SpawnPoint"
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "SpawnPoint", FoundActors);
+
+	SpawnPoints.Empty();
+	for (AActor* Actor : FoundActors)
+	{
+		SpawnPoints.Add(Actor);
+	}
 }
 
 void ANDSpawnManager::StartSpawning(ANDStage* Stage, const FWaveInfo& WaveInfo)
@@ -88,9 +101,3 @@ void ANDSpawnManager::SpawnEnemy()
 
 	// Spawn enemy
 }
-
-void ANDSpawnManager::GetSpawnPoint()
-{
-	SpawnPoints = CurrentStage->GetSpawnPoints();
-}
-

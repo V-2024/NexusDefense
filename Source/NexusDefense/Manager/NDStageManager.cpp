@@ -4,6 +4,9 @@
 #include "Manager/NDStageManager.h"
 #include "Stages/NDStage.h"
 #include "Stages/StageData.h"
+#include "HAL/FileManagerGeneric.h"
+#include "Misc/Paths.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 
 ANDStageManager* ANDStageManager::Instance = nullptr;
 
@@ -11,6 +14,30 @@ ANDStageManager::ANDStageManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	CurrentStageIndex = -1;
+
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+	// Folder Path
+	FString AssetFolderPath = FPaths::ProjectContentDir() + "/NexusDefense/Stages/";
+
+	// Serach Folder Assets
+	TArray<FAssetData> AssetDatas;
+	AssetRegistry.GetAssetsByPath(*AssetFolderPath, AssetDatas, true);
+
+	// Load UStageData
+	for (const FAssetData& AssetData : AssetDatas)
+	{
+		// UStageData Check
+		if (AssetData.GetClass()->IsChildOf(UStageData::StaticClass()))
+		{
+			UStageData* StageData = Cast<UStageData>(AssetData.GetAsset());
+			if (StageData)
+			{
+				LoadedStages.Add(StageData);
+			}
+		}
+	}
 }
 
 
@@ -21,7 +48,6 @@ void ANDStageManager::BeginPlay()
 	if(!Instance)
 	{
 		Instance = this;
-		LoadStages();
 	}
 	else
 	{
@@ -42,30 +68,14 @@ ANDStageManager* ANDStageManager::GetInstance()
 }
 
 
-void ANDStageManager::LoadStages()
+void ANDStageManager::LoadStages(int32 StageNum)
 {
-	for (const TSoftObjectPtr<UStageData>& StageDataAsset : StageDataList)
-	{
-		if (UStageData* LoadedStageData = StageDataAsset.LoadSynchronous())
-		{
-			LoadedStages.Add(LoadedStageData);
-		}
-	}
+
 }
 
 void ANDStageManager::StartNextWave()
 {
-	CurrentStageIndex++;
 
-	if (CurrentStageIndex < LoadedStages.Num())
-	{
-		CreateStage();
-	}
-	else
-	{
-		// All stages cleared
-		UE_LOG(LogTemp, Warning, TEXT("All stages cleared!"));
-	}
 }
 
 bool ANDStageManager::IsStageClreared() const
@@ -73,7 +83,7 @@ bool ANDStageManager::IsStageClreared() const
 	return CurrentStage ? CurrentStage->IsStageCleared() : false;
 }
 
-void ANDStageManager::CreateStage()
+void ANDStageManager::CreateStage(int32 StageIndex)
 {
 	if (CurrentStage)
 	{

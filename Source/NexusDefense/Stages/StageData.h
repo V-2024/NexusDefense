@@ -6,6 +6,17 @@
 #include "Engine/DataAsset.h"
 #include "StageData.generated.h"
 
+USTRUCT(BlueprintType)
+struct FSpawnPointInfo
+{
+    GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AActor* SpawnPoint;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<TSubclassOf<class ANDEnemyBase>> EnemyTypes;
+};
 
 USTRUCT(BlueprintType)
 struct FWaveInfo
@@ -19,7 +30,10 @@ struct FWaveInfo
     float SpawnInterval;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TArray<TSubclassOf<class ANDEnemyBase>> EnemyTypes;
+    float EnhancedWeighting;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<FSpawnPointInfo> SpawnPoints;
 };
 
 
@@ -40,4 +54,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
     TArray<FWaveInfo> Waves;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
+    FString LevelFath;
 };
