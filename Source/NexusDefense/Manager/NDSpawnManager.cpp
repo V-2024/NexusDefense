@@ -1,8 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "Manager/NDGameManager.h"
 #include "Manager/NDSpawnManager.h"
+#include "Manager/NDGameManager.h"
 #include "Stages/NDStage.h"
 #include "Enemy/NDEnemyBase.h"
 #include "EngineUtils.h"
