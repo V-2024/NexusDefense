@@ -43,6 +43,12 @@ ANDCharacterPlayer::ANDCharacterPlayer()
 		LookAction = InputActionLookRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAttackRef(TEXT("/Script/EnhancedInput.InputAction'/Game/NexusDefense/Input/Actions/IA_Attack.IA_Attack'"));
+	if (nullptr != InputActionAttackRef.Object)
+	{
+		AttackAction = InputActionAttackRef.Object;
+	}
+
 	// set tag "Player" for player character
 	Tags.Add(FName("Player"));
 }
@@ -69,47 +75,21 @@ void ANDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Look);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Attack);
 }
-
-
-//void ANDCharacterPlayer::Move(const FInputActionValue& Value)
-//{
-//	FVector2D MovementVector = Value.Get<FVector2D>();
-//
-//	const FRotator Rotation = Controller->GetControlRotation();
-//	const FRotator YawRotation(0, Rotation.Yaw, 0);
-//
-//	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-//	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-//
-//	AddMovementInput(ForwardDirection, MovementVector.X);
-//	AddMovementInput(RightDirection, MovementVector.Y);
-//}
-//
-//void ANDCharacterPlayer::Look(const FInputActionValue& Value)
-//{
-//	FVector2D LookAxisVector = Value.Get<FVector2D>();
-//
-//	AddControllerYawInput(LookAxisVector.X);
-//	AddControllerPitchInput(LookAxisVector.Y);
-//}
 
 void ANDCharacterPlayer::Move(const FInputActionValue& Value)
 {
-	// 입력 값을 가져옵니다
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	if (Controller != nullptr)
 	{
-		// 캐릭터의 현재 회전을 가져옵니다
 		const FRotator Rotation = GetActorRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// 캐릭터의 로컬 전방 및 우측 벡터를 계산합니다
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// 이동 입력을 적용합니다
 		AddMovementInput(ForwardDirection, MovementVector.X);
 		AddMovementInput(RightDirection, MovementVector.Y);
 	}
@@ -121,8 +101,12 @@ void ANDCharacterPlayer::Look(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
-		// 카메라만 회전시킵니다
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void ANDCharacterPlayer::Attack()
+{
+	ProcessComboCommand();
 }
