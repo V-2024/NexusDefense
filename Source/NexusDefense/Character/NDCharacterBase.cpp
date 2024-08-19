@@ -10,6 +10,8 @@
 // Sets default values
 ANDCharacterBase::ANDCharacterBase()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = true;
@@ -29,6 +31,9 @@ ANDCharacterBase::ANDCharacterBase()
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
 
+	Health = 100.0f;
+	MovementSpeed = 600.0f;
+
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Warrior.SK_CharM_Warrior'"));
 	if (CharacterMeshRef.Object)
 	{
@@ -41,6 +46,18 @@ ANDCharacterBase::ANDCharacterBase()
 
 	}
 
+}
+
+void ANDCharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
+}
+
+void ANDCharacterBase::Attack()
+{
+	ProcessComboCommand();
 }
 
 void ANDCharacterBase::ProcessComboCommand()
@@ -113,6 +130,4 @@ void ANDCharacterBase::ComboCheck()
 		HasNextComboCommand = false;
 	}
 }
-
-
 

@@ -69,13 +69,14 @@ void ANDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
-
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Move);
-	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Look);
-	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Attack);
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Look);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ANDCharacterPlayer::Attack);
+	}
 }
 
 void ANDCharacterPlayer::Move(const FInputActionValue& Value)
@@ -92,6 +93,15 @@ void ANDCharacterPlayer::Move(const FInputActionValue& Value)
 
 		AddMovementInput(ForwardDirection, MovementVector.X);
 		AddMovementInput(RightDirection, MovementVector.Y);
+
+		//const FRotator Rotation = Controller->GetControlRotation();
+		//const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		//const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		//const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		//AddMovementInput(ForwardDirection, MovementVector.Y);
+		//AddMovementInput(RightDirection, MovementVector.X);
 	}
 }
 
@@ -108,5 +118,5 @@ void ANDCharacterPlayer::Look(const FInputActionValue& Value)
 
 void ANDCharacterPlayer::Attack()
 {
-	ProcessComboCommand();
+	Super::Attack();
 }
