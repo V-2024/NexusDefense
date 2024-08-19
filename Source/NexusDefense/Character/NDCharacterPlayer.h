@@ -13,42 +13,37 @@
 UCLASS()
 class NEXUSDEFENSE_API ANDCharacterPlayer : public ANDCharacterBase
 {
-	GENERATED_BODY()
-	
-public:
-	ANDCharacterPlayer();
-
-protected:
-	virtual void BeginPlay() override;
+    GENERATED_BODY()
 
 public:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    ANDCharacterPlayer();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class USpringArmComponent> CameraBoom;
+    virtual void BeginPlay() override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void Attack() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UCameraComponent> FollowCamera;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class USpringArmComponent> CameraBoom;
 
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UCameraComponent> FollowCamera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> JumpAction;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> MoveAction;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UInputAction> JumpAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> LookAction;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UInputAction> MoveAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> AttackAction;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UInputAction> LookAction;
 
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UInputAction> AttackAction;
 
-	void Attack();
+    void Move(const FInputActionValue& Value);
+    void Look(const FInputActionValue& Value);
 };
