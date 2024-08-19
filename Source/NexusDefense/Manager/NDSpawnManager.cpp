@@ -1,65 +1,45 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Manager/NDSpawnManager.h"
-#include "Manager/NDGameManager.h"
+#include "NDSpawnManager.h"
 #include "Stages/NDStage.h"
 #include "Enemy/NDEnemyBase.h"
-#include "EngineUtils.h"
+#include "NDEventManager.h"
+#include "NDDataManager.h"
+#include "NDObjectPoolManager.h"
 #include "Kismet/GameplayStatics.h"
 
-ANDSpawnManager* ANDSpawnManager::Instance = nullptr;
 
-// Sets default values
 ANDSpawnManager::ANDSpawnManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	EnemiesSpawned = 0;
 	bIsSpawningActive = false;
+
+	EventManager = UNDEventManager::GetInstance();
+	DataManager = UNDDataManager::GetInstance();
 }
 
 void ANDSpawnManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (!Instance)
-	{
-		Instance = this;
-	}
-	else
-	{
-		Destroy();
-	}
+
+	SetupSpawnPoints();
 }
 
-// Called every frame
-void ANDSpawnManager::Tick(float DeltaTime)
+void ANDSpawnManager::Initialize(ANDStage* Stage, ANDObjectPoolManager* PoolManager)
 {
-	Super::Tick(DeltaTime);
-
+	CurrentStage = Stage;
+	ObjectPoolManager = PoolManager;
 }
 
-ANDSpawnManager* ANDSpawnManager::GetInstance()
-{
-	if (Instance == nullptr)
-	{
-		Instance = NewObject<ANDSpawnManager>();
-		Instance->AddToRoot();
-	}
 
-	return Instance;
-}
-
-void ANDSpawnManager::SetSpawnPoint()
+void ANDSpawnManager::SetupSpawnPoints()
 {
 	// Find all spawn points in the level with Tag "SpawnPoint"
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "SpawnPoint", FoundActors);
 
-	SpawnPoints.Empty();
-	for (AActor* Actor : FoundActors)
-	{
-		SpawnPoints.Add(Actor);
-	}
+	SpawnPoints = FoundActors;
 }
 
 void ANDSpawnManager::StartSpawning(ANDStage* Stage, const FWaveInfo& WaveInfo)
@@ -70,7 +50,6 @@ void ANDSpawnManager::StartSpawning(ANDStage* Stage, const FWaveInfo& WaveInfo)
 		return;
 	}
 
-	CurrentStage = Stage;
 	CurrentWaveInfo = WaveInfo;
 	EnemiesSpawned = 0;
 	bIsSpawningActive = true;
@@ -80,12 +59,6 @@ void ANDSpawnManager::StartSpawning(ANDStage* Stage, const FWaveInfo& WaveInfo)
 
 void ANDSpawnManager::StopSpawning()
 {
-	if (!bIsSpawningActive)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Spawning is not active"));
-		return;
-	}
-
 	bIsSpawningActive = false;
 	GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
 }
@@ -98,5 +71,41 @@ void ANDSpawnManager::SpawnEnemy()
 		return;
 	}
 
-	// Spawn enemy
+	// Choose a random spawn point
+	AActor* SpawnPoint = SpawnPoints[FMath::RandRange(0, SpawnPoints.Num() - 1)];
+
+	// Choose an enemy type based on the current wave info
+	TSubclassOf<ANDEnemyBase> EnemyTypeToSpawn = CurrentWaveInfo.SpawnPoints[0].EnemyTypes[FMath::RandRange(0, CurrentWaveInfo.SpawnPoints[0].EnemyTypes.Num() - 1)];
+
+	// Get an enemy from the object pool
+	ANDEnemyBase* SpawnedEnemy = Cast<ANDEnemyBase>(ObjectPoolManager->GetPooledObject(EnemyTypeToSpawn));
+
+	if (SpawnedEnemy)
+	{
+		SpawnedEnemy->SetActorLocation(SpawnPoint->GetActorLocation());
+		SpawnedEnemy->SetActorRotation(SpawnPoint->GetActorRotation());
+		SpawnedEnemy->Activate();
+
+		EnemiesSpawned++;
+		EventManager->OnObjectSpawned.Broadcast(SpawnedEnemy);
+
+		// Set up a delegate to handle enemy death
+		SpawnedEnemy->OnEnemyDestroyed.AddDynamic(this, &ANDSpawnManager::ReturnEnemyToPool);
+	}
+
+
+	if (EnemiesSpawned >= CurrentWaveInfo.EnemyCount)
+	{
+		StopSpawning();
+		EventManager->OnWaveComplete.Broadcast(CurrentStage->GetCurrentWave());
+	}
+}
+
+void ANDSpawnManager::ReturnEnemyToPool(ANDEnemyBase* Enemy)
+{
+	if (Enemy)
+	{
+		Enemy->Deactivate();
+		ObjectPoolManager->ReturnObjectToPool(Enemy);
+	}
 }

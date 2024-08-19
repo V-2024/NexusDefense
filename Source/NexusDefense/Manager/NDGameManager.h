@@ -11,6 +11,9 @@ class ANDSpawnManager;
 class ANDUIManager;
 class ANDObjectPoolManager;
 class ANDEffectManager;
+class ANDObjectPoolManager;
+class UNDDataManager;
+class UNDEventManager;
 
 UENUM(BlueprintType)
 enum class EGameState : uint8
@@ -35,11 +38,14 @@ public:
     virtual void Tick(float DeltaTime) override;
 
     // Other Manager Access Functions
-    ANDStageManager*        GetStageManager()       const { return StageManager; }
-    ANDSpawnManager*        GetSpawnManager()       const { return SpawnManager; }
-    ANDUIManager*           GetUIManager()          const { return UIManager; }
-    ANDObjectPoolManager*   GetObjectManager()      const { return ObjectManager; }
-    ANDEffectManager*       GetEffectManager()      const { return EffectManager; }
+    ANDStageManager*        GetStageManager()       const {     return StageManager;    }
+    ANDSpawnManager*        GetSpawnManager()       const {     return SpawnManager;    }
+    ANDUIManager*           GetUIManager()          const {     return UIManager;       }
+    ANDObjectPoolManager*   GetObjectManager()      const {     return ObjectManager;   }
+    ANDEffectManager*       GetEffectManager()      const {     return EffectManager;   }
+    ANDObjectPoolManager*   GetObjectPoolManager()  const {     return ObjectManager;   }
+    UNDDataManager*         GetDataManager()        const {     return DataManager;     }
+    UNDEventManager*        GetEventManager()       const {	    return EventManager;    }  
 
     EGameState              GetGameState()          const { return CurrentGameState; }
 
@@ -48,6 +54,9 @@ public:
     void PauseGame();
     void ResumeGame();
     void EndGame();
+
+    void SubscribeToEvents();
+    void UnsubscribeFromEvents();
 
 
 private:
@@ -75,5 +84,15 @@ private:
     UPROPERTY()
     ANDEffectManager*       EffectManager;
 
+    UPROPERTY()
+    ANDObjectPoolManager* ObjectPoolManager;
+
+    UPROPERTY()
+    UNDDataManager*         DataManager;
+
+    UPROPERTY()
+    UNDEventManager*        EventManager;
+
+   
     EGameState              CurrentGameState;
 };

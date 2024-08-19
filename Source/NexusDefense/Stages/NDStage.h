@@ -7,6 +7,9 @@
 #include "StageData.h"
 #include "NDStage.generated.h"
 
+class UNDEventManager;
+class UNDDataManager;
+
 UCLASS()
 class NEXUSDEFENSE_API ANDStage : public AActor
 {
@@ -20,6 +23,7 @@ public:
     void StartStage();
     void EndStage();
     bool IsStageCleared() const;
+    void StartNextWave();
 
     int32 GetCurrentWave() const { return CurrentWave; }
     int32 GetTotalWaves() const { return StageData ? StageData->Waves.Num() : 0; }
@@ -30,20 +34,20 @@ public:
 
 
 private:
-    void StartNextWave();
     void CheckWaveCompletion();
 
 
 public:
-    static ANDStage* Instance;
-
     UPROPERTY()
     UStageData* StageData;
-
-    UPROPERTY()
-    TArray<AActor*> SpawnPoints;
 
     int32 CurrentWave;
     int32 RemainingEnemies;
     bool bIsStageActive;
+
+    UPROPERTY()
+    UNDEventManager* EventManager;
+
+    UPROPERTY()
+    UNDDataManager* DataManager;
 };

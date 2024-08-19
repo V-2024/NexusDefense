@@ -2,12 +2,9 @@
 
 
 #include "Stages/NDStage.h"
-#include "Manager/NDGameManager.h"
-#include "Manager/NDSpawnManager.h"
-#include "Stages/StageData.h"
 #include "Kismet/GameplayStatics.h"
-
-ANDStage* ANDStage::Instance = nullptr;
+#include "Manager/NDEventManager.h"
+#include "Manager/NDDataManager.h"
 
 ANDStage::ANDStage()
 {
@@ -15,20 +12,14 @@ ANDStage::ANDStage()
 	CurrentWave = 0;
 	RemainingEnemies = 0;
 	bIsStageActive = false;
+
+	EventManager = UNDEventManager::GetInstance();
+	DataManager = UNDDataManager::GetInstance();
 }
 
 void ANDStage::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (!Instance)
-	{
-		Instance = this;
-	}
-	else
-	{
-		Destroy();
-	}
 }
 
 void ANDStage::Initialize(UStageData* InStageData)
@@ -50,11 +41,15 @@ void ANDStage::StartStage()
 	bIsStageActive = true;
 	CurrentWave = 0;
 	StartNextWave();
+
+	EventManager->OnStageStart.Broadcast();
 }
 
 void ANDStage::EndStage()
 {
 	bIsStageActive = false;
+	EventManager->OnStageEnd.Broadcast();
+	DataManager->SaveGameData();
 
 	// Add end stage rogic
 }
@@ -84,13 +79,7 @@ void ANDStage::StartNextWave()
 	}
 
 	RemainingEnemies = StageData->Waves[CurrentWave].EnemyCount;
-	ANDSpawnManager* SpawnManager = ANDGameManager::GetInstance()->GetSpawnManager();
-
-	if (SpawnManager)
-	{
-		SpawnManager->SetSpawnPoint();
-		SpawnManager->StartSpawning(this, StageData->Waves[CurrentWave]);
-	}
+	EventManager->OnWaveStart.Broadcast(CurrentWave);
 }
 
 void ANDStage::CheckWaveCompletion()

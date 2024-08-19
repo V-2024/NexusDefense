@@ -8,6 +8,8 @@
 
 class UStageData;
 class ANDStage;
+class UNDEventManager;
+class UNDDataManager;
 
 UCLASS()
 class NEXUSDEFENSE_API ANDStageManager : public AActor
@@ -38,6 +40,12 @@ private:
 
 	UPROPERTY()
 	ANDStage* CurrentStage;
+
+	UPROPERTY()
+	UNDEventManager* EventManager;
+
+	UPROPERTY()
+	UNDDataManager* DataManager;
 
 	int32 CurrentStageIndex;
 };
