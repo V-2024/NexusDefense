@@ -17,7 +17,7 @@ ANDCharacterBase::ANDCharacterBase()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
 
-	GetCharacterMovement()->bOrientRotationToMovement = false; //여기 변경함.
+	GetCharacterMovement()->bOrientRotationToMovement = true; //여기 변경함.
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 500.0f;
 	GetCharacterMovement()->AirControl = 0.35f;
@@ -65,7 +65,7 @@ void ANDCharacterBase::ComboActionBegin()
 {
 	CurrentCombo = 1;
 
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
 	const float AttackSpeedRate = 1.0f;
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
