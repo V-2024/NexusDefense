@@ -9,6 +9,9 @@
 
 class ANDEnemyBase;
 class ANDStage;
+class UNDEventManager;
+class UNDDataManager;
+class ANDObjectPoolManager;
 
 UCLASS()
 class NEXUSDEFENSE_API ANDSpawnManager : public AActor
@@ -19,21 +22,17 @@ public:
 	ANDSpawnManager();
 
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
-	static ANDSpawnManager* GetInstance();
-
-	void SetSpawnPoint();
+	void Initialize(ANDStage*, ANDObjectPoolManager*);
 	void StartSpawning(ANDStage*, const FWaveInfo&);
 	void StopSpawning();
 
 private:
 	void SpawnEnemy();
-
+	void SetupSpawnPoints();
+	void ReturnEnemyToPool(ANDEnemyBase*);
 
 private:
-	static ANDSpawnManager* Instance;
-
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	TArray<AActor*> SpawnPoints;
 
@@ -42,6 +41,15 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Spawn")
 	ANDStage* CurrentStage;
+
+	UPROPERTY()
+	UNDEventManager* EventManager;
+
+	UPROPERTY()
+	UNDDataManager* DataManager;
+
+	UPROPERTY()
+	ANDObjectPoolManager* ObjectPoolManager;
 
 	FWaveInfo CurrentWaveInfo;
 	FTimerHandle SpawnTimerHandle;

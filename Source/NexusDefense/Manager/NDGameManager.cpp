@@ -7,6 +7,8 @@
 #include "Manager/NDSpawnManager.h"
 #include "Manager/NDEffectManager.h"
 #include "Manager/NDObjectPoolManager.h"
+#include "Manager/NDEventManager.h"
+#include "Manager/NDDataManager.h"
 
 ANDGameManager* ANDGameManager::Instance = nullptr;
 
@@ -84,8 +86,28 @@ void ANDGameManager::ResumeGame()
 void ANDGameManager::EndGame()
 {
     CurrentGameState = EGameState::GameOver;
+
+    GetDataManager()->SaveGameData();
 	// Add Game Over Logic
 
+}
+
+void ANDGameManager::SubscribeToEvents()
+{
+    /*
+    GetEventManager()->OnObjectDestroyed.AddDynamic(this, &ANDGameManager::OnObjectDestroyed);
+	GetEventManager()->OnStageCompleted.AddDynamic(this, &ANDGameManager::OnStageCompleted);
+	GetEventManager()->OnGameOver.AddDynamic(this, &ANDGameManager::OnGameOver);
+    */
+}
+
+void ANDGameManager::UnsubscribeFromEvents()
+{
+    /*
+    GetEventManager()->OnObjectDestroyed.RemoveDynamic(this, &ANDGameManager::OnObjectDestroyed);
+	GetEventManager()->OnStageCompleted.RemoveDynamic(this, &ANDGameManager::OnStageCompleted);
+	GetEventManager()->OnGameOver.RemoveDynamic(this, &ANDGameManager::OnGameOver);
+    */
 }
 
 void ANDGameManager::InitializeManagers()

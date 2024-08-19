@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "AIController.h"
 #include "NDEnemyBase.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDestroyedSignature, ANDEnemyBase*, DestroyedEnemy);
 
 UCLASS()
 class NEXUSDEFENSE_API ANDEnemyBase : public ACharacter
@@ -15,22 +16,28 @@ class NEXUSDEFENSE_API ANDEnemyBase : public ACharacter
 public:
 	ANDEnemyBase();
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
+    UFUNCTION(BlueprintCallable, Category = "Enemy")
+    virtual void Activate();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy")
+    virtual void Deactivate();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy")
+    virtual void Reset();
+
+    UFUNCTION(BlueprintCallable, Category = "Enemy")
+    int32 GetScoreValue() const { return ExperiencePoints; }
+
     void PlaySpawnEffect();
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
     void PlayDestroyEffect();
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
     void PlaySpawnSound();
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
     void PlayDestroySound();
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
     void PlaySpawnAnimMontage();
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy Actions")
     void PlayDeathAnimMontage();
 
 protected:
@@ -61,4 +68,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
     UAnimMontage* DeathAnimMontage;
+
+    UPROPERTY(BlueprintAssignable, Category = "Enemy")
+    FOnEnemyDestroyedSignature OnEnemyDestroyed;
+
+private:
+    bool bIsActive;
 };

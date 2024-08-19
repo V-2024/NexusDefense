@@ -7,6 +7,8 @@
 #include "HAL/FileManagerGeneric.h"
 #include "Misc/Paths.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "NDEventManager.h"
+#include "NDDataManager.h"
 
 ANDStageManager* ANDStageManager::Instance = nullptr;
 
@@ -14,6 +16,9 @@ ANDStageManager::ANDStageManager()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	CurrentStageIndex = -1;
+
+	EventManager = UNDEventManager::GetInstance();
+	DataManager = UNDDataManager::GetInstance();
 
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
@@ -23,6 +28,7 @@ ANDStageManager::ANDStageManager()
 
 	// Serach Folder Assets
 	TArray<FAssetData> AssetDatas;
+
 	AssetRegistry.GetAssetsByPath(*AssetFolderPath, AssetDatas, true);
 
 	// Load UStageData
@@ -75,7 +81,11 @@ void ANDStageManager::LoadStages(int32 StageNum)
 
 void ANDStageManager::StartNextWave()
 {
-
+	if (CurrentStage)
+	{
+		CurrentStage->StartNextWave();
+		EventManager->OnWaveStart.Broadcast(CurrentStage->GetCurrentWave());
+	}
 }
 
 bool ANDStageManager::IsStageClreared() const
@@ -102,12 +112,16 @@ void ANDStageManager::CreateStage(int32 StageIndex)
 			CurrentStage = World->SpawnActor<ANDStage>(ANDStage::StaticClass(), SpawnParams);
 			CurrentStage->Initialize(LoadedStages[CurrentStageIndex]);
 			CurrentStage->StartStage();
+
+			EventManager->OnStageStart.Broadcast();
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("No more stages to create!"));
 	}
+
+	DataManager->SaveGameData();
 }
 
 
