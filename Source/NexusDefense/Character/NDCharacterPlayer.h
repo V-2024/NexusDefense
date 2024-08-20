@@ -19,9 +19,9 @@ public:
     ANDCharacterPlayer();
 
 protected:
+    virtual void Attack() override;
     virtual void BeginPlay() override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-    virtual void Attack() override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
     TObjectPtr<class USpringArmComponent> CameraBoom;

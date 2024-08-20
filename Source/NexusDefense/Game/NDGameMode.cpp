@@ -7,7 +7,7 @@
 
 ANDGameMode::ANDGameMode()
 {
-	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Script/Engine.Blueprint'/Game/NexusDefense/Blueprint/BP_NDCharacterPlayer.BP_NDCharacterPlayer_C'"));
+	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Script/Engine.Blueprint'/Game/NexusDefense/Blueprint/BP_NDCharacterPlayerMelee.BP_NDCharacterPlayerMelee_C'"));
 	if (DefaultPawnClassRef.Class)
 	{
 		DefaultPawnClass = DefaultPawnClassRef.Class;

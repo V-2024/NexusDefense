@@ -78,56 +78,187 @@ void ANDCharacterBase::ProcessComboCommand()
 	}
 }
 
+//void ANDCharacterBase::ComboActionBegin()
+//{
+//	CurrentCombo = 1;
+//
+//	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+//
+//	const float AttackSpeedRate = 1.0f;
+//	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+//	AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
+//
+//	FOnMontageEnded EndDelegate;
+//	EndDelegate.BindUObject(this, &ANDCharacterBase::ComboActionEnd);
+//	AnimInstance->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
+//
+//	ComboTimerHandle.Invalidate();
+//	SetComboCheckTimer();
+//}
+//
+//void ANDCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
+//{
+//	ensure(CurrentCombo != 0);
+//	CurrentCombo = 0;
+//	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+//}
+//
+//void ANDCharacterBase::SetComboCheckTimer()
+//{
+//	if (GetWorld() == nullptr)
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("SetComboCheckTimer: World is null"));
+//		return;
+//	}
+//	int32 ComboIndex = CurrentCombo - 1;
+//	ensure(ComboActionData->EffectiveFrameCount.IsValidIndex(ComboIndex));
+//
+//	const float AttackSpeedRate = 1.0f;
+//	float ComboEffectiveTime = (ComboActionData->EffectiveFrameCount[ComboIndex] / ComboActionData->FrameRate) / AttackSpeedRate;
+//	if (ComboEffectiveTime > 0.0f)
+//	{
+//		GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &ANDCharacterBase::ComboCheck, ComboEffectiveTime, false);
+//	}
+//}
+//
+//void ANDCharacterBase::ComboCheck()
+//{
+//	ComboTimerHandle.Invalidate();
+//	if (HasNextComboCommand)
+//	{
+//		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+//
+//		CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboActionData->MaxComboCount);
+//		FName NextSection = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, CurrentCombo);
+//		AnimInstance->Montage_JumpToSection(NextSection, ComboActionMontage);
+//		SetComboCheckTimer();
+//		HasNextComboCommand = false;
+//	}
+//}
 void ANDCharacterBase::ComboActionBegin()
 {
-	CurrentCombo = 1;
+    if (!IsValid(GetCharacterMovement()))
+    {
+        UE_LOG(LogTemp, Error, TEXT("ComboActionBegin: CharacterMovement is invalid"));
+        return;
+    }
 
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+    CurrentCombo = 1;
+    GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
-	const float AttackSpeedRate = 1.0f;
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
+    UAnimInstance* AnimInstance = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
+    if (!AnimInstance)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ComboActionBegin: AnimInstance is null"));
+        return;
+    }
 
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &ANDCharacterBase::ComboActionEnd);
-	AnimInstance->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
+    if (!ComboActionMontage)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ComboActionBegin: ComboActionMontage is null"));
+        return;
+    }
 
-	ComboTimerHandle.Invalidate();
-	SetComboCheckTimer();
+    const float AttackSpeedRate = 1.0f;
+    AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
+
+    FOnMontageEnded EndDelegate;
+    EndDelegate.BindUObject(this, &ANDCharacterBase::ComboActionEnd);
+    AnimInstance->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
+
+    ComboTimerHandle.Invalidate();
+    SetComboCheckTimer();
 }
 
 void ANDCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
 {
-	ensure(CurrentCombo != 0);
-	CurrentCombo = 0;
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+    if (CurrentCombo == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ComboActionEnd: CurrentCombo is already 0"));
+    }
+    else
+    {
+        ensure(CurrentCombo != 0);
+    }
+
+    CurrentCombo = 0;
+
+    if (!IsValid(GetCharacterMovement()))
+    {
+        UE_LOG(LogTemp, Error, TEXT("ComboActionEnd: CharacterMovement is invalid"));
+        return;
+    }
+
+    GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
 void ANDCharacterBase::SetComboCheckTimer()
 {
-	int32 ComboIndex = CurrentCombo - 1;
-	ensure(ComboActionData->EffectiveFrameCount.IsValidIndex(ComboIndex));
+    if (!GetWorld())
+    {
+        UE_LOG(LogTemp, Error, TEXT("SetComboCheckTimer: World is null"));
+        return;
+    }
 
-	const float AttackSpeedRate = 1.0f;
-	float ComboEffectiveTime = (ComboActionData->EffectiveFrameCount[ComboIndex] / ComboActionData->FrameRate) / AttackSpeedRate;
-	if (ComboEffectiveTime > 0.0f)
-	{
-		GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &ANDCharacterBase::ComboCheck, ComboEffectiveTime, false);
-	}
+    if (!ComboActionData)
+    {
+        UE_LOG(LogTemp, Error, TEXT("SetComboCheckTimer: ComboActionData is null"));
+        return;
+    }
+
+    int32 ComboIndex = CurrentCombo - 1;
+    if (!ComboActionData->EffectiveFrameCount.IsValidIndex(ComboIndex))
+    {
+        UE_LOG(LogTemp, Error, TEXT("SetComboCheckTimer: Invalid ComboIndex: %d"), ComboIndex);
+        return;
+    }
+
+    const float AttackSpeedRate = 1.0f;
+    float ComboEffectiveTime = (ComboActionData->EffectiveFrameCount[ComboIndex] / ComboActionData->FrameRate) / AttackSpeedRate;
+    if (ComboEffectiveTime <= 0.0f)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("SetComboCheckTimer: ComboEffectiveTime is <= 0"));
+        return;
+    }
+
+    GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &ANDCharacterBase::ComboCheck, ComboEffectiveTime, false);
 }
 
 void ANDCharacterBase::ComboCheck()
 {
-	ComboTimerHandle.Invalidate();
-	if (HasNextComboCommand)
-	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    ComboTimerHandle.Invalidate();
+    if (HasNextComboCommand)
+    {
+        UAnimInstance* AnimInstance = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr;
+        if (!AnimInstance)
+        {
+            UE_LOG(LogTemp, Error, TEXT("ComboCheck: AnimInstance is null"));
+            return;
+        }
 
-		CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboActionData->MaxComboCount);
-		FName NextSection = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, CurrentCombo);
-		AnimInstance->Montage_JumpToSection(NextSection, ComboActionMontage);
-		SetComboCheckTimer();
-		HasNextComboCommand = false;
-	}
+        if (!ComboActionData)
+        {
+            UE_LOG(LogTemp, Error, TEXT("ComboCheck: ComboActionData is null"));
+            return;
+        }
+
+        if (!ComboActionMontage)
+        {
+            UE_LOG(LogTemp, Error, TEXT("ComboCheck: ComboActionMontage is null"));
+            return;
+        }
+
+        CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboActionData->MaxComboCount);
+        FName NextSection = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, CurrentCombo);
+
+        if (!AnimInstance->Montage_IsPlaying(ComboActionMontage))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("ComboCheck: ComboActionMontage is not playing"));
+            return;
+        }
+
+        AnimInstance->Montage_JumpToSection(NextSection, ComboActionMontage);
+        SetComboCheckTimer();
+        HasNextComboCommand = false;
+    }
 }
-
