@@ -18,6 +18,35 @@ class NEXUSDEFENSE_API ANDCharacterPlayer : public ANDCharacterBase
 public:
     ANDCharacterPlayer();
 
+public:
+    UFUNCTION(BlueprintCallable, Category = "Leveling")
+    void GainExperience(int32 Amount);
+
+    UFUNCTION(BlueprintCallable, Category = "Leveling")
+    void LevelUp();
+
+    UFUNCTION(BlueprintPure, Category = "Leveling")
+    int32 GetCurrentLevel() const { return CurrentLevel; }
+
+    UFUNCTION(BlueprintPure, Category = "Leveling")
+    int32 GetCurrentExperience() const { return CurrentExperience; }
+
+    UFUNCTION(BlueprintPure, Category = "Leveling")
+    int32 GetExperienceRequiredForNextLevel() const;
+
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leveling")
+    int32 CurrentLevel;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leveling")
+    int32 CurrentExperience;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leveling")
+    int32 MaxLevel;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leveling")
+    int32 BaseExperienceRequirement;
+
 protected:
     virtual void Attack() override;
     virtual void BeginPlay() override;

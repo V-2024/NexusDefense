@@ -51,6 +51,37 @@ ANDCharacterPlayer::ANDCharacterPlayer()
 
 	// set tag "Player" for player character
 	Tags.Add(FName("Player"));
+
+	CurrentLevel = 1;
+	CurrentExperience = 0;
+	MaxLevel = 25;
+	BaseExperienceRequirement = 10;
+}
+
+void ANDCharacterPlayer::GainExperience(int32 Amount)
+{
+	CurrentExperience += Amount;
+
+	while (CurrentExperience >= GetExperienceRequiredForNextLevel() && CurrentLevel < MaxLevel)
+	{
+		LevelUp();
+	}
+}
+
+void ANDCharacterPlayer::LevelUp()
+{
+	if (CurrentLevel < MaxLevel)
+	{
+		CurrentLevel++;
+		CurrentExperience -= GetExperienceRequiredForNextLevel();
+
+		UE_LOG(LogTemp, Warning, TEXT("Level Up! Current Level: %d"), CurrentLevel);
+	}
+}
+
+int32 ANDCharacterPlayer::GetExperienceRequiredForNextLevel() const
+{
+	return BaseExperienceRequirement * CurrentLevel;;
 }
 
 void ANDCharacterPlayer::BeginPlay()

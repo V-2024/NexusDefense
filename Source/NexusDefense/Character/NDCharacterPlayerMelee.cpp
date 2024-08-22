@@ -15,6 +15,6 @@ void ANDCharacterPlayerMelee::Attack()
 	UE_LOG(LogTemp, Warning, TEXT("ANDCharacterPlayerMelee::Attack() - Start"));
     Super::Attack();
     UE_LOG(LogTemp, Warning, TEXT("ANDCharacterPlayerMelee::Attack() - After Super::Attack()"));
-    
+	LevelUp();
     UE_LOG(LogTemp, Warning, TEXT("Melee character %s is attacking with range %f and damage %f"), *GetName(), AttackRange, AttackDamage);
 }
