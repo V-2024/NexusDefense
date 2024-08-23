@@ -1,26 +1,42 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "NDEffectManager.generated.h"
 
+class ANDObjectPoolManager;
+class UParticleSystemComponent;
+
 UCLASS()
 class NEXUSDEFENSE_API ANDEffectManager : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	ANDEffectManager();
+    GENERATED_BODY()
+
+public:
+    ANDEffectManager();
+    static ANDEffectManager* GetInstance();
+
+    void Initialize(ANDObjectPoolManager* PoolManager);
+
+    UFUNCTION(BlueprintCallable, Category = "Effects")
+    void PlayEffect(UParticleSystem* EffectTemplate, const FVector& Location, const FRotator& Rotation, float Duration = 0.0f);
+
+    UFUNCTION(BlueprintCallable, Category = "Effects")
+    void StopEffect(UParticleSystemComponent* EffectComponent);
+
+    void SetWeatherEffect(UParticleSystem* WeatherEffect);
+    void UpdateDayNightCycle(float TimeOfDay);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+private:
+    UPROPERTY()
+    ANDObjectPoolManager* ObjectPoolManager;
 
+    UPROPERTY()
+    TArray<UParticleSystemComponent*> ActiveEffects;
+
+    void UpdateActiveEffects(float DeltaTime);
 };

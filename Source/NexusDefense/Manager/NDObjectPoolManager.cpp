@@ -1,4 +1,13 @@
 #include "NDObjectPoolManager.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
+
+
+// 현재는 고정된 풀 크기, 동적으로 변경할 수 있도록 수정 필요
+// 풀에서 가져온 오브젝트 유효성 검사 필요
+// 게임 종료 시 풀의 모든 오브젝트 제거 필요
+// ReturnObjectPool 함수에서 오브젝트 초기화 필요
+// 풀 정책 추가 필요 (LRU, MRU, FIFO, LIFO 등), 현재는 단순히 비활성화 오브젝트 찾아 반환
 
 ANDObjectPoolManager::ANDObjectPoolManager()
 {
@@ -72,6 +81,26 @@ void ANDObjectPoolManager::ReturnObjectToPool(AActor* ActorToReturn)
         ActorToReturn->SetActorEnableCollision(false);
         ActorToReturn->SetActorLocation(FVector(0, 0, -10000)); // Move it out of sight
     }
+}
+
+void ANDObjectPoolManager::ReturnParticleToPool(UParticleSystemComponent* ReturnParticle)
+{
+    if (ReturnParticle)
+	{
+		ReturnParticle->Deactivate();
+		ReturnParticle->SetVisibility(false);
+		ReturnParticle->SetEnableGravity(false);
+		ReturnParticle->SetWorldLocation(FVector(0, 0, -10000)); // Move it out of sight
+	}
+}
+
+void ANDObjectPoolManager::ReturnSoundToPool(UAudioComponent* ReturnSound)
+{
+    if (ReturnSound)
+	{
+		ReturnSound->Stop();
+		ReturnSound->SetWorldLocation(FVector(0, 0, -10000)); // Move it out of sight
+	}
 }
 
 AActor* ANDObjectPoolManager::CreateNewObject(TSubclassOf<AActor> ActorClass)

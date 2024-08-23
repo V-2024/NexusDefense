@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "NDObjectPoolManager.generated.h"
 
+class ANDObjectPoolManager;
+class UAudioComponent;
+class UParticleSystemComponent;
+
 USTRUCT()
 struct FObjectPool
 {
@@ -29,13 +33,19 @@ public:
     AActor* GetPooledObject(TSubclassOf<AActor> ActorClass);
 
     UFUNCTION(BlueprintCallable, Category = "Object Pool")
-    void ReturnObjectToPool(AActor* ActorToReturn);
+    void ReturnObjectToPool(AActor* ReturnObject);
+
+    UFUNCTION(BlueprintCallable, Category = "Object Pool")
+    void ReturnParticleToPool(UParticleSystemComponent* ReturnParticle);
+
+    UFUNCTION(BlueprintCallable, Category = "Object Pool")
+    void ReturnSoundToPool(UAudioComponent* ReturnSound);
 
     UFUNCTION(BlueprintCallable, Category = "Object Pool")
     void InitializePool(TSubclassOf<AActor> ActorClass, int32 PoolSize);
 
 private:
-    AActor* CreateNewObject(TSubclassOf<AActor> ActorClass);
+    AActor* CreateNewObject(TSubclassOf<AActor>);
 
     UPROPERTY()
     TMap<TSubclassOf<AActor>, FObjectPool> ObjectPools;

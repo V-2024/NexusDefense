@@ -8,6 +8,12 @@
 #include "NDObjectPoolManager.h"
 #include "Kismet/GameplayStatics.h"
 
+// 기존 랜덤 스폰 로직 수정
+// 스폰간격 조절 필요
+// 멀티스레딩 고려
+// 스폰 실패 예외 처리
+// 현재는 CurrentWaveInfo.SpawnPoints[0]만 사용하도록 되어있음
+
 
 ANDSpawnManager::ANDSpawnManager()
 {
