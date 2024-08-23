@@ -10,6 +10,9 @@
 #include "NDEventManager.h"
 #include "NDDataManager.h"
 
+// 메모리 관리: 현재 스테이지 파괴 시 관련 리소스들이 정리되는지 확인
+// 현재는 새 스테이지 생성 시 이전 스테이지를 파괴, 스테이지 상태를 저장하거나 캐싱 필요
+
 ANDStageManager* ANDStageManager::Instance = nullptr;
 
 ANDStageManager::ANDStageManager()

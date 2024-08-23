@@ -7,7 +7,10 @@
 
 class ANDEnemyBase;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStageStart);
+// 스테이지 번호 추가 등의 추가정보 파라미터 추가)
+// 실제 이벤트를 발생시키는 메서드 필요 (TriggerStageStart, TriggerStageEnd 등)
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStageStart); 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStageEnd);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStageCompleted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOver);
