@@ -93,7 +93,7 @@ void ANDSpawnManager::SpawnEnemy()
 		SpawnedEnemy->Activate();
 
 		EnemiesSpawned++;
-		EventManager->OnObjectSpawned.Broadcast(SpawnedEnemy);
+		//EventManager->OnObjectSpawned.Broadcast(SpawnedEnemy);
 
 		// Set up a delegate to handle enemy death
 		SpawnedEnemy->OnEnemyDestroyed.AddDynamic(this, &ANDSpawnManager::ReturnEnemyToPool);
@@ -103,7 +103,7 @@ void ANDSpawnManager::SpawnEnemy()
 	if (EnemiesSpawned >= CurrentWaveInfo.EnemyCount)
 	{
 		StopSpawning();
-		EventManager->OnWaveComplete.Broadcast(CurrentStage->GetCurrentWave());
+		//EventManager->OnWaveComplete.Broadcast(CurrentStage->GetCurrentWave());
 	}
 }
 

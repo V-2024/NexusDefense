@@ -14,6 +14,9 @@ class ANDEffectManager;
 class ANDObjectPoolManager;
 class UNDDataManager;
 class UNDEventManager;
+class UNDScoreManager;
+class UNDSoundManager;
+class ANDItemManager;
 
 UENUM(BlueprintType)
 enum class EGameState : uint8
@@ -46,6 +49,9 @@ public:
     ANDObjectPoolManager*   GetObjectPoolManager()  const {     return ObjectManager;   }
     UNDDataManager*         GetDataManager()        const {     return DataManager;     }
     UNDEventManager*        GetEventManager()       const {	    return EventManager;    }  
+    UNDScoreManager*        GetScoreManager()       const {     return ScoreManager;    }
+    UNDSoundManager*        GetSoundManager()       const {     return SoundManager;    }
+    ANDItemManager*         GetItemManager()        const {     return ItemManager;     }
 
     EGameState              GetGameState()          const { return CurrentGameState; }
 
@@ -92,6 +98,15 @@ private:
 
     UPROPERTY()
     UNDEventManager*        EventManager;
+
+    UPROPERTY()
+    UNDScoreManager*        ScoreManager;
+
+    UPROPERTY()
+    UNDSoundManager*        SoundManager;
+
+    UPROPERTY()
+    ANDItemManager*         ItemManager;
 
    
     EGameState              CurrentGameState;

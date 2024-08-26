@@ -2,6 +2,8 @@
 
 
 #include "Manager/NDItemManager.h"
+#include "Item/NDItemBase.h"
+#include "Manager/NDObjectPoolManager.h"
 
 // Sets default values
 ANDItemManager::ANDItemManager()
@@ -9,6 +11,14 @@ ANDItemManager::ANDItemManager()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+}
+
+void ANDItemManager::Initialize(ANDObjectPoolManager* ObjectManager)
+{
+	if (ObjectManager)
+	{
+		ObjectPoolManager = ObjectManager;
+	}
 }
 
 void ANDItemManager::RegisterItem(ANDItemBase* Item)
