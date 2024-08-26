@@ -7,8 +7,9 @@
 #include "ND_S_DamageInfo.h"
 #include "ND_C_DamageSystem.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDamageResponseSignature);
+DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
+DECLARE_MULTICAST_DELEGATE(FOnDamageResponseSignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSignature, FS_DamageInfo);
 
 enum class EDamageResult
 {
@@ -18,38 +19,34 @@ enum class EDamageResult
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class NEXUSDEFENSE_API UC_Damageable : public UActorComponent
+class NEXUSDEFENSE_API UND_C_DamageSystem : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UC_Damageable();
+	UND_C_DamageSystem();
+
+	FORCEINLINE float GetMaxHealth() const { return CurrentHealth; }
+	FORCEINLINE float GetCurrentHealth() const { return CurrentHealth; }
+
 	bool TakeDamage(FS_DamageInfo);
-	EDamageResult CalculateDamageResult(bool, bool) const;
+
 	float Heal(float);
 
-	// OnDeath 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnDeathSignature OnDeathEvent;
+	void SetHealth(FS_DamageInfo);
 
-	// OnDamageResponse 이벤트 디스패처
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnDamageResponseSignature OnDamageResponseEvent;
-
-	// Death 함수 선언
-	UFUNCTION(BlueprintCallable, Category = "Damage")
 	void OnDeath() const;
 
-	// DamageResponse 함수 선언
-	UFUNCTION(BlueprintCallable, Category = "Damage")
 	void OnDamageResponse() const;
 
-public:	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-	float Health;
+	EDamageResult CalculateDamageResult(bool, bool) const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+public:	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "HP")
 	float MaxHealth;
+
+	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadWrite, Category = "HP")
+	float CurrentHealth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	bool IsInvincible;
@@ -65,4 +62,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	int32 AttackTokenCount;
+
+	// OnDeath 이벤트 디스패처
+	FOnDeathSignature OnDeathEvent;
+
+	// OnDamageResponse 이벤트 디스패처
+	FOnDamageResponseSignature OnDamageResponseEvent;
+
+	// OnDamage 이벤트 디스패처
+	FOnDamageSignature OnDamageSignature;
 };

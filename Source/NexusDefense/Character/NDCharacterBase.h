@@ -14,6 +14,8 @@ class NEXUSDEFENSE_API ANDCharacterBase : public ACharacter
 public:
     ANDCharacterBase();
 
+    void SetComponents();
+
 protected:
     virtual void BeginPlay() override;
 
@@ -35,6 +37,17 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
     float MovementSpeed;
+
+// Stat
+protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UND_C_DamageSystem> DamageableComponent;
+
+// UI Widget
+protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UWidgetComponent> HPBarWidget;
+
 
 private:
     int32 CurrentCombo = 0;

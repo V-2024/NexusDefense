@@ -4,13 +4,13 @@
 #include "ND_C_DamageSystem.h"
 
 // Sets default values for this component's properties
-UC_Damageable::UC_Damageable()
+UND_C_DamageSystem::UND_C_DamageSystem()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
+	CurrentHealth = MaxHealth;
 }
 
-bool UC_Damageable::TakeDamage(FS_DamageInfo Damage_Info)
+bool UND_C_DamageSystem::TakeDamage(FS_DamageInfo Damage_Info)
 {
 	if (!IsDead)
 	{
@@ -18,9 +18,10 @@ bool UC_Damageable::TakeDamage(FS_DamageInfo Damage_Info)
 
 		if (DamageResult == EDamageResult::DoDamage)
 		{
-			Health -= Damage_Info.Amount;
+			// To avoid being 0 or negative
+			CurrentHealth -= FMath::Clamp<float>(Damage_Info.Amount, 0, Damage_Info.Amount);
 
-			if (Health <= 0.0f)
+			if (CurrentHealth <= 0.0f)
 			{
 				IsDead = true;
 				OnDeath();
@@ -49,7 +50,7 @@ bool UC_Damageable::TakeDamage(FS_DamageInfo Damage_Info)
 	return false;
 }
 
-EDamageResult UC_Damageable::CalculateDamageResult(bool ShouldDamageInvincible, bool CanBeBlocked) const
+EDamageResult UND_C_DamageSystem::CalculateDamageResult(bool ShouldDamageInvincible, bool CanBeBlocked) const
 {
 	if (!IsDead && (!IsInvincible || ShouldDamageInvincible))
 	{
@@ -68,24 +69,29 @@ EDamageResult UC_Damageable::CalculateDamageResult(bool ShouldDamageInvincible, 
 	}
 }
 
-float UC_Damageable::Heal(float Amount)
+float UND_C_DamageSystem::Heal(float Amount)
 {
 	if (!IsDead)
 	{
-		Health += Amount;
+		CurrentHealth += Amount;
 
-		if (Health > MaxHealth)
+		if (CurrentHealth > MaxHealth)
 		{
-			Health = MaxHealth;
+			CurrentHealth = MaxHealth;
 		}
 
-		return Health;
+		return CurrentHealth;
 	}
 
 	return 0.0f;
 }
 
-void UC_Damageable::OnDeath() const
+void UND_C_DamageSystem::SetHealth(FS_DamageInfo)
+{
+
+}
+
+void UND_C_DamageSystem::OnDeath() const
 {
 	if (IsDead)
 	{
@@ -93,7 +99,7 @@ void UC_Damageable::OnDeath() const
 	}
 }
 
-void UC_Damageable::OnDamageResponse() const
+void UND_C_DamageSystem::OnDamageResponse() const
 {
 	OnDamageResponseEvent.Broadcast();
 }

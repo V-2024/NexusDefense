@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 #include "NDComboActionData.h"
+#include "DamageSystem/ND_C_DamageSystem.h"
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 ANDCharacterBase::ANDCharacterBase()
@@ -46,6 +48,29 @@ ANDCharacterBase::ANDCharacterBase()
 
 	}
 
+    SetComponents();
+}
+
+
+void ANDCharacterBase::SetComponents()
+{
+    // Damage Component
+    DamageableComponent = CreateDefaultSubobject<UND_C_DamageSystem>(TEXT("DamageableComponent"));
+
+    // HP Bar Widget
+    HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+    HPBarWidget->SetupAttachment(GetMesh());
+    HPBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
+
+    static ConstructorHelpers::FClassFinder<UUserWidget> HPBarWidgetClassRef(TEXT("/Game/NexusDefense/UI/Combat/WBP_HPBar.WBP_HPBar_C"));
+
+    if (HPBarWidgetClassRef.Class)
+    {
+        HPBarWidget->SetWidgetClass(HPBarWidgetClassRef.Class);
+        HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+        HPBarWidget->SetDrawSize(FVector2D(200.0f, 15.0f));
+        HPBarWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
 }
 
 void ANDCharacterBase::BeginPlay()
