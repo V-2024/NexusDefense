@@ -9,6 +9,9 @@
 #include "Manager/NDObjectPoolManager.h"
 #include "Manager/NDEventManager.h"
 #include "Manager/NDDataManager.h"
+#include "Manager/NDScoreManager.h"
+#include "Manager/NDSoundManager.h"
+#include "Manager/NDItemManager.h"
 
 ANDGameManager* ANDGameManager::Instance = nullptr;
 
@@ -117,6 +120,16 @@ void ANDGameManager::InitializeManagers()
     CreateManager<ANDUIManager>(UIManager, ANDUIManager::StaticClass());
     CreateManager<ANDObjectPoolManager>(ObjectManager, ANDObjectPoolManager::StaticClass());
     CreateManager<ANDEffectManager>(EffectManager, ANDEffectManager::StaticClass());
+    CreateManager<UNDDataManager>(DataManager, UNDDataManager::StaticClass());
+    CreateManager<UNDEventManager>(EventManager, UNDEventManager::StaticClass());
+    CreateManager<UNDScoreManager>(ScoreManager, UNDScoreManager::StaticClass());
+    CreateManager<UNDSoundManager>(SoundManager, UNDSoundManager::StaticClass());
+    CreateManager<ANDItemManager>(ItemManager, ANDItemManager::StaticClass());
+
+    DataManager->Initialize();
+    EffectManager->Initialize(ObjectManager);
+    SoundManager->Initialize(ObjectManager);
+    ItemManager->Initialize(ObjectManager);
 }
 
 template<typename T>

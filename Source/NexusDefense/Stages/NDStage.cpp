@@ -55,13 +55,13 @@ void ANDStage::StartStage()
 	CurrentWave = 0;
 	StartNextWave();
 
-	EventManager->OnStageStart.Broadcast();
+	//EventManager->OnStageStart.Broadcast();
 }
 
 void ANDStage::EndStage()
 {
 	bIsStageActive = false;
-	EventManager->OnStageEnd.Broadcast();
+	//EventManager->OnStageEnd.Broadcast();
 	DataManager->SaveGameData();
 
 	// Add end stage rogic
@@ -92,7 +92,7 @@ void ANDStage::StartNextWave()
 	}
 
 	RemainingEnemies = StageData->Waves[CurrentWave].EnemyCount;
-	EventManager->OnWaveStart.Broadcast(CurrentWave);
+	//EventManager->OnWaveStart.Broadcast(CurrentWave);
 }
 
 void ANDStage::CheckWaveCompletion()

@@ -8,6 +8,7 @@
 
 class ANDItemBase;
 class ANDCharacterBase;
+class ANDObjectPoolManager;
 
 UCLASS()
 class NEXUSDEFENSE_API ANDItemManager : public AActor
@@ -18,6 +19,7 @@ public:
 	// Sets default values for this actor's properties
 	ANDItemManager();
 
+	void Initialize(ANDObjectPoolManager* ObjectManager);
 	void RegisterItem(ANDItemBase* Item);
 	void UnregisterItem(ANDItemBase* Item);
 	void ProcessItemEffect(ANDItemBase* Item, ANDCharacterBase* Character);
@@ -25,6 +27,9 @@ public:
 private:
 	UPROPERTY()
 	TArray<ANDItemBase*> ActiveItems;
+
+	UPROPERTY()
+	ANDObjectPoolManager* ObjectPoolManager;
 
 protected:
 	// Called when the game starts or when spawned

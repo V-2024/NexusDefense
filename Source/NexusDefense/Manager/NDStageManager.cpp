@@ -87,7 +87,7 @@ void ANDStageManager::StartNextWave()
 	if (CurrentStage)
 	{
 		CurrentStage->StartNextWave();
-		EventManager->OnWaveStart.Broadcast(CurrentStage->GetCurrentWave());
+		//EventManager->OnWaveStart.Broadcast(CurrentStage->GetCurrentWave());
 	}
 }
 
@@ -116,7 +116,7 @@ void ANDStageManager::CreateStage(int32 StageIndex)
 			CurrentStage->Initialize(LoadedStages[CurrentStageIndex]);
 			CurrentStage->StartStage();
 
-			EventManager->OnStageStart.Broadcast();
+			//EventManager->OnStageStart.Broadcast();
 		}
 	}
 	else
