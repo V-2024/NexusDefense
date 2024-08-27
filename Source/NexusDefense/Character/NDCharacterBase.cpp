@@ -7,7 +7,10 @@
 #include "Animation/AnimMontage.h"
 #include "NDComboActionData.h"
 #include "DamageSystem/ND_C_DamageSystem.h"
-#include "Components/WidgetComponent.h"
+#include "UI/UIBase/NDWidgetComponent.h"
+
+
+
 
 // Sets default values
 ANDCharacterBase::ANDCharacterBase()
@@ -58,7 +61,7 @@ void ANDCharacterBase::SetComponents()
     DamageableComponent = CreateDefaultSubobject<UND_C_DamageSystem>(TEXT("DamageableComponent"));
 
     // HP Bar Widget
-    HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+    HPBarWidget = CreateDefaultSubobject<UNDWidgetComponent>(TEXT("Widget"));
     HPBarWidget->SetupAttachment(GetMesh());
     HPBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
 

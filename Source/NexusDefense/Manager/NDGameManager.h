@@ -41,19 +41,19 @@ public:
     virtual void Tick(float DeltaTime) override;
 
     // Other Manager Access Functions
-    ANDStageManager*        GetStageManager()       const {     return StageManager;    }
-    ANDSpawnManager*        GetSpawnManager()       const {     return SpawnManager;    }
-    ANDUIManager*           GetUIManager()          const {     return UIManager;       }
-    ANDObjectPoolManager*   GetObjectManager()      const {     return ObjectManager;   }
-    ANDEffectManager*       GetEffectManager()      const {     return EffectManager;   }
-    ANDObjectPoolManager*   GetObjectPoolManager()  const {     return ObjectManager;   }
-    UNDDataManager*         GetDataManager()        const {     return DataManager;     }
-    UNDEventManager*        GetEventManager()       const {	    return EventManager;    }  
-    UNDScoreManager*        GetScoreManager()       const {     return ScoreManager;    }
-    UNDSoundManager*        GetSoundManager()       const {     return SoundManager;    }
-    ANDItemManager*         GetItemManager()        const {     return ItemManager;     }
+    FORCEINLINE ANDStageManager*        GetStageManager()       const {     return StageManager;    }
+    FORCEINLINE ANDSpawnManager*        GetSpawnManager()       const {     return SpawnManager;    }
+    FORCEINLINE ANDUIManager*           GetUIManager()          const {     return UIManager;       }
+    FORCEINLINE ANDObjectPoolManager*   GetObjectManager()      const {     return ObjectManager;   }
+    FORCEINLINE ANDEffectManager*       GetEffectManager()      const {     return EffectManager;   }
+    FORCEINLINE ANDObjectPoolManager*   GetObjectPoolManager()  const {     return ObjectManager;   }
+    FORCEINLINE UNDDataManager*         GetDataManager()        const {     return DataManager;     }
+    FORCEINLINE UNDEventManager*        GetEventManager()       const {	    return EventManager;    }
+    FORCEINLINE UNDScoreManager*        GetScoreManager()       const {     return ScoreManager;    }
+    FORCEINLINE UNDSoundManager*        GetSoundManager()       const {     return SoundManager;    }
+    FORCEINLINE ANDItemManager*         GetItemManager()        const {     return ItemManager;     }
 
-    EGameState              GetGameState()          const { return CurrentGameState; }
+    FORCEINLINE EGameState              GetGameState()          const { return CurrentGameState; }
 
     // Manage Game State Functions
     void StartGame();

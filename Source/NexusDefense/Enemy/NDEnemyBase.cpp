@@ -1,11 +1,17 @@
 #include "Enemy/NDEnemyBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "DamageSystem/ND_C_DamageSystem.h"
+#include "UI/UIBase/NDWidgetComponent.h"
+#include "UI/Combat/NDHPBarWidget.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 // Sets default values
 ANDEnemyBase::ANDEnemyBase()
 {
     PrimaryActorTick.bCanEverTick = false;
     bIsActive = false;
+    SetComponents();
 }
 
 void ANDEnemyBase::BeginPlay()
@@ -15,11 +21,31 @@ void ANDEnemyBase::BeginPlay()
 	PlaySpawnEffect();
     PlaySpawnSound();
     PlaySpawnAnimMontage();
-
+    */
     FVector NewLocation = GetMesh()->GetRelativeLocation();
     NewLocation.Z -= 90.0f;  // Z축으로 -100 이동
     GetMesh()->SetRelativeLocation(NewLocation);
-    */
+}
+
+void ANDEnemyBase::SetComponents()
+{
+    // Damage Component
+    DamageableComponent = CreateDefaultSubobject<UND_C_DamageSystem>(TEXT("DamageableComponent"));
+
+    // HP Bar Widget
+    HPBar = CreateDefaultSubobject<UNDWidgetComponent>(TEXT("Widget"));
+    HPBar->SetupAttachment(GetMesh());
+    HPBar->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
+
+    static ConstructorHelpers::FClassFinder<UUserWidget> HPBarWidgetClassRef(TEXT("/Game/NexusDefense/UI/Combat/WBP_HPBar.WBP_HPBar_C"));
+
+    if (HPBarWidgetClassRef.Class)
+    {
+        HPBar->SetWidgetClass(HPBarWidgetClassRef.Class);
+        HPBar->SetWidgetSpace(EWidgetSpace::Screen);
+        HPBar->SetDrawSize(FVector2D(200.0f, 15.0f));
+        HPBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
 }
 
 void ANDEnemyBase::Destroyed()
@@ -31,6 +57,18 @@ void ANDEnemyBase::Destroyed()
     PlayDestroySound();
     PlayDeathAnimMontage();
     */
+}
+
+void ANDEnemyBase::SetUpEnemyWidget(UNDUserWidget* Widget)
+{
+    UNDHPBarWidget* HPBarWidget = Cast<UNDHPBarWidget>(Widget);
+
+    if (HPBarWidget)
+	{
+		HPBarWidget->SetMaxHP(DamageableComponent->GetMaxHealth());
+        HPBarWidget->UpdateHPBar(DamageableComponent->GetCurrentHealth());
+        DamageableComponent->OnDamageResponseEvent.AddUObject(HPBarWidget, &UNDHPBarWidget::UpdateHPBar);
+	}
 }
 
 void ANDEnemyBase::Activate()
@@ -58,6 +96,8 @@ void ANDEnemyBase::Deactivate()
 {
     if (bIsActive)
     {
+        GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
         bIsActive = false;
         SetActorHiddenInGame(true);
         SetActorEnableCollision(false);
@@ -66,6 +106,8 @@ void ANDEnemyBase::Deactivate()
         PlayDestroyEffect();
         PlayDestroySound();
         PlayDeathAnimMontage();
+
+        HPBar->SetHiddenInGame(true);
 
         OnEnemyDestroyed.Broadcast(this);
     }
