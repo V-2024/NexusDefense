@@ -30,7 +30,7 @@ bool UND_C_DamageSystem::TakeDamage(FS_DamageInfo Damage_Info)
 			}
 			else
 			{
-				OnDamageResponse();
+				OnDamageResponse(Damage_Info.Amount);
 
 				return true;
 			}
@@ -99,7 +99,7 @@ void UND_C_DamageSystem::OnDeath() const
 	}
 }
 
-void UND_C_DamageSystem::OnDamageResponse() const
+void UND_C_DamageSystem::OnDamageResponse(float Amount) const
 {
-	OnDamageResponseEvent.Broadcast();
+	OnDamageResponseEvent.Broadcast(Amount);
 }

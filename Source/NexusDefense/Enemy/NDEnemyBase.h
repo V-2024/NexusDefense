@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "UI/UIBase/NDEnemyWidgetInterface.h"
 #include "NDEnemyBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDestroyedSignature, ANDEnemyBase*, DestroyedEnemy);
 
 UCLASS()
-class NEXUSDEFENSE_API ANDEnemyBase : public ACharacter
+class NEXUSDEFENSE_API ANDEnemyBase : public ACharacter, public INDEnemyWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -27,6 +28,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Enemy")
     int32 GetScoreValue() const { return ExperiencePoints; }
+
+    void SetComponents();
 
     void PlaySpawnEffect();
 
@@ -72,6 +75,16 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Enemy")
     FOnEnemyDestroyedSignature OnEnemyDestroyed;
 
+protected:
+    virtual void SetUpEnemyWidget(class UNDUserWidget* Widget) override;
+
 private:
     bool bIsActive;
+
+protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UND_C_DamageSystem> DamageableComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<class UNDWidgetComponent> HPBar;
 };

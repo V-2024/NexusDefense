@@ -3,6 +3,7 @@
 
 #include "UI/Combat/NDHPBarWidget.h"
 #include "Components/ProgressBar.h"
+#include "UI/UIBase/NDEnemyWidgetInterface.h"
 
 UNDHPBarWidget::UNDHPBarWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -26,4 +27,13 @@ void UNDHPBarWidget::NativeConstruct()
 	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("PB_HpBar")));
 
 	ensure(HPProgressBar);
+
+	INDEnemyWidgetInterface* EnemyWidget = Cast<INDEnemyWidgetInterface>(GetOwningActor());
+
+	if (EnemyWidget)
+	{
+		EnemyWidget->SetUpEnemyWidget(this);
+	}
+
+	//OwningActor->OnTakeAnyDamage.AddDynamic(this, &UNDHPBarWidget::OnTakeAnyDamage);
 }

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/UIBase/NDUserWidget.h"
 #include "NDHPBarWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class NEXUSDEFENSE_API UNDHPBarWidget : public UUserWidget
+class NEXUSDEFENSE_API UNDHPBarWidget : public UNDUserWidget
 {
 	GENERATED_BODY()
 	

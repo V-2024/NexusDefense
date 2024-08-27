@@ -8,7 +8,7 @@
 #include "ND_C_DamageSystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
-DECLARE_MULTICAST_DELEGATE(FOnDamageResponseSignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageResponseSignature, float);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSignature, FS_DamageInfo);
 
 enum class EDamageResult
@@ -37,7 +37,7 @@ public:
 
 	void OnDeath() const;
 
-	void OnDamageResponse() const;
+	void OnDamageResponse(float Amount) const;
 
 	EDamageResult CalculateDamageResult(bool, bool) const;
 

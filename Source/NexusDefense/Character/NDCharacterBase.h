@@ -46,7 +46,7 @@ protected:
 // UI Widget
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UWidgetComponent> HPBarWidget;
+    TObjectPtr<class UNDWidgetComponent> HPBarWidget;
 
 
 private:
