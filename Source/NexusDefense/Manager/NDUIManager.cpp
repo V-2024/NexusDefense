@@ -2,26 +2,75 @@
 
 
 #include "Manager/NDUIManager.h"
+#include "Manager/NDEventManager.h"
 
-// Sets default values
+
 ANDUIManager::ANDUIManager()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 
+}
+
+void ANDUIManager::UpdateUI(EGameState NewState)
+{
+	switch (NewState)
+	{
+		case EGameState::Ready:
+			ShowMainMenu();
+			break;
+		case EGameState::Playing:
+			ShowGameUI();
+			break;
+		case EGameState::Paused:
+			ShowPauseMenu();
+			break;
+		case EGameState::GameOver:
+			ShowGameOverUI();
+			break;
+	default:
+		break;
+	}
 }
 
 // Called when the game starts or when spawned
 void ANDUIManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	//CreateWidgets();
+	UNDEventManager::GetInstance()->TriggerUIInitialized();
 }
 
 // Called every frame
 void ANDUIManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ANDUIManager::CreateWidgets()
+{
 
 }
 
+void ANDUIManager::ShowMainMenu()
+{
+
+}
+
+void ANDUIManager::ShowPauseMenu()
+{
+
+}
+
+void ANDUIManager::ShowGameUI()
+{
+
+}
+
+void ANDUIManager::ShowGameOverUI()
+{
+
+}
+
+void ANDUIManager::ShowStageSelectUI()
+{
+
+}

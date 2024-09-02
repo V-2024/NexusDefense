@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Types/NDGameTypes.h"
 #include "NDGameManager.generated.h"
 
 class ANDStageManager;
@@ -18,14 +19,6 @@ class UNDScoreManager;
 class UNDSoundManager;
 class ANDItemManager;
 
-UENUM(BlueprintType)
-enum class EGameState : uint8
-{
-    Ready,
-    Playing,
-    Paused,
-    GameOver
-};
 
 UCLASS()
 class NEXUSDEFENSE_API ANDGameManager : public AActor
@@ -53,7 +46,9 @@ public:
     FORCEINLINE UNDSoundManager*        GetSoundManager()       const {     return SoundManager;    }
     FORCEINLINE ANDItemManager*         GetItemManager()        const {     return ItemManager;     }
 
-    FORCEINLINE EGameState              GetGameState()          const { return CurrentGameState; }
+    FORCEINLINE EGameState              GetGameState()          const {     return CurrentGameState;}
+    
+    
 
     // Manage Game State Functions
     void StartGame();
@@ -61,6 +56,7 @@ public:
     void ResumeGame();
     void EndGame();
 
+    void SetGameState(EGameState NewState);
     void SubscribeToEvents();
     void UnsubscribeFromEvents();
 
@@ -70,6 +66,12 @@ private:
 
     template<typename T>
     void CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass);
+
+    void HandleGameStarted();
+    void HandleGamePaused();
+    void HandleGameResumed();
+    void HandleGameOver();
+    void HandleStageStarted();
 
 
 private:

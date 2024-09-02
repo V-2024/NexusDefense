@@ -53,6 +53,12 @@ void ANDGameManager::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
+void ANDGameManager::SetGameState(EGameState NewState)
+{
+    CurrentGameState = NewState;
+	UIManager->UpdateUI(NewState);
+}
+
 void ANDGameManager::StartGame()
 {
     CurrentGameState = EGameState::Playing;
@@ -97,20 +103,20 @@ void ANDGameManager::EndGame()
 
 void ANDGameManager::SubscribeToEvents()
 {
-    /*
-    GetEventManager()->OnObjectDestroyed.AddDynamic(this, &ANDGameManager::OnObjectDestroyed);
-	GetEventManager()->OnStageCompleted.AddDynamic(this, &ANDGameManager::OnStageCompleted);
-	GetEventManager()->OnGameOver.AddDynamic(this, &ANDGameManager::OnGameOver);
-    */
+    EventManager->OnGameStarted.AddUObject(this, &ANDGameManager::HandleGameStarted);
+    EventManager->OnGamePaused.AddUObject(this, &ANDGameManager::HandleGamePaused);
+    EventManager->OnGameResumed.AddUObject(this, &ANDGameManager::HandleGameResumed);
+    EventManager->OnGameOver.AddUObject(this, &ANDGameManager::HandleGameOver);
+    //EventManager->OnStageStarted.AddUObject(this, &ANDGameManager::HandleStageStarted);
 }
 
 void ANDGameManager::UnsubscribeFromEvents()
 {
-    /*
-    GetEventManager()->OnObjectDestroyed.RemoveDynamic(this, &ANDGameManager::OnObjectDestroyed);
-	GetEventManager()->OnStageCompleted.RemoveDynamic(this, &ANDGameManager::OnStageCompleted);
-	GetEventManager()->OnGameOver.RemoveDynamic(this, &ANDGameManager::OnGameOver);
-    */
+	EventManager->OnGameStarted.RemoveAll(this);
+	EventManager->OnGamePaused.RemoveAll(this);
+	EventManager->OnGameResumed.RemoveAll(this);
+	EventManager->OnGameOver.RemoveAll(this);
+	//EventManager->OnStageStarted.RemoveAll(this);
 }
 
 void ANDGameManager::InitializeManagers()
@@ -130,6 +136,38 @@ void ANDGameManager::InitializeManagers()
     EffectManager->Initialize(ObjectManager);
     SoundManager->Initialize(ObjectManager);
     ItemManager->Initialize(ObjectManager);
+}
+
+void ANDGameManager::HandleGameStarted()
+{
+    CurrentGameState = EGameState::Playing;
+
+    // Add Game Start Logic
+}
+
+void ANDGameManager::HandleGamePaused()
+{
+    CurrentGameState = EGameState::Paused;
+
+}
+
+void ANDGameManager::HandleGameResumed()
+{
+    CurrentGameState = EGameState::Playing;
+
+}
+
+void ANDGameManager::HandleGameOver()
+{
+    CurrentGameState = EGameState::GameOver;
+
+	GetDataManager()->SaveGameData();
+}
+
+void ANDGameManager::HandleStageStarted()
+{
+    // Add Stage Start Logic
+
 }
 
 template<typename T>
