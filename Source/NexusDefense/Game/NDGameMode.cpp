@@ -26,8 +26,8 @@ ANDGameMode::ANDGameMode()
 void ANDGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
 	InitializeManagers();
+
 }
 
 void ANDGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -39,14 +39,19 @@ void ANDGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ANDGameMode::InitializeManagers()
 {
-	if (GameManagerClass)
-	{
-		GameManager = GetWorld()->SpawnActor<ANDGameManager>(GameManagerClass);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("GameManagerClass is not set!"));
-	}
+	GameManager = ANDGameManager::GetInstance();
+
+	FTimerHandle InitTimer;
+	GetWorldTimerManager().SetTimer(InitTimer, [this]() {
+		if (GetWorld())
+		{
+			GameManager->InitializeManagers(GetWorld());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("GameManagerClass is not set!"));
+		}
+	}, 0.1f, false);
 }
 
 void ANDGameMode::SubscribeToEvents()

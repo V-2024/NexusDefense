@@ -55,29 +55,29 @@ void UNDDataManager::SaveGameData()
 
 void UNDDataManager::LoadGameData()
 {
-    if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, UserIndex))
-    {
-        CurrentSaveGame = Cast<UNDSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, UserIndex));
-        if (CurrentSaveGame)
-        {
-            // Load game state from CurrentSaveGame
-            PlayerScore = CurrentSaveGame->PlayerScore;
-            CurrentLevel = CurrentSaveGame->CurrentLevel;
-            UnlockedStages = CurrentSaveGame->UnlockedStages;
-            // Load more data fields as needed
+    //if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, UserIndex))
+    //{
+    //    CurrentSaveGame = Cast<UNDSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, UserIndex));
+    //    if (CurrentSaveGame)
+    //    {
+    //        // Load game state from CurrentSaveGame
+    //        PlayerScore = CurrentSaveGame->PlayerScore;
+    //        CurrentLevel = CurrentSaveGame->CurrentLevel;
+    //        UnlockedStages = CurrentSaveGame->UnlockedStages;
+    //        // Load more data fields as needed
 
-            UE_LOG(LogTemp, Log, TEXT("Game loaded successfully."));
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("Failed to load game."));
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Log, TEXT("No save game found. Starting new game."));
-        StartNewGame();
-    }
+    //        UE_LOG(LogTemp, Log, TEXT("Game loaded successfully."));
+    //    }
+    //    else
+    //    {
+    //        UE_LOG(LogTemp, Error, TEXT("Failed to load game."));
+    //    }
+    //}
+    //else
+    //{
+    //    UE_LOG(LogTemp, Log, TEXT("No save game found. Starting new game."));
+    //    StartNewGame();
+    //}
 }
 
 void UNDDataManager::StartNewGame()

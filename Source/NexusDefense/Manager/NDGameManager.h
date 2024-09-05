@@ -59,10 +59,10 @@ public:
     void SetGameState(EGameState NewState);
     void SubscribeToEvents();
     void UnsubscribeFromEvents();
-
+    void InitializeManagers(UWorld* World);
 
 private:
-    void InitializeManagers();
+    
 
     template<typename T>
     void CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass);
@@ -110,6 +110,8 @@ private:
     UPROPERTY()
     ANDItemManager*         ItemManager;
 
+    UPROPERTY()
+    UWorld*                 GameWorld;
    
     EGameState              CurrentGameState;
 };

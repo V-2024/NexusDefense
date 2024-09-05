@@ -40,7 +40,6 @@ void ANDGameManager::BeginPlay()
     if (!Instance)
     {
         Instance = this;
-        InitializeManagers();
     }
     else
     {
@@ -119,8 +118,10 @@ void ANDGameManager::UnsubscribeFromEvents()
 	//EventManager->OnStageStarted.RemoveAll(this);
 }
 
-void ANDGameManager::InitializeManagers()
+void ANDGameManager::InitializeManagers(UWorld* World)
 {
+    GameWorld = World;
+
     CreateManager<ANDStageManager>(StageManager, ANDStageManager::StaticClass());
     CreateManager<ANDSpawnManager>(SpawnManager, ANDSpawnManager::StaticClass());
     CreateManager<ANDUIManager>(UIManager, ANDUIManager::StaticClass());
@@ -132,10 +133,11 @@ void ANDGameManager::InitializeManagers()
     CreateManager<UNDSoundManager>(SoundManager, UNDSoundManager::StaticClass());
     CreateManager<ANDItemManager>(ItemManager, ANDItemManager::StaticClass());
 
-    DataManager->Initialize();
-    EffectManager->Initialize(ObjectManager);
-    SoundManager->Initialize(ObjectManager);
-    ItemManager->Initialize(ObjectManager);
+    
+    //DataManager->Initialize();
+    //EffectManager->Initialize(ObjectManager);
+    //SoundManager->Initialize(ObjectManager);
+    //ItemManager->Initialize(ObjectManager);
 }
 
 void ANDGameManager::HandleGameStarted()
@@ -173,11 +175,39 @@ void ANDGameManager::HandleStageStarted()
 template<typename T>
 void ANDGameManager::CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass)
 {
+    // 유효성 검사 추가
+    if (!GameWorld)
+    {
+        UE_LOG(LogTemp, Error, TEXT("CreateManager: World is null"));
+        return;
+    }
+
+    if (!ManagerClass)
+    {
+        UE_LOG(LogTemp, Error, TEXT("CreateManager: ManagerClass is null"));
+        return;
+    }
+
     if (!ManagerPtr)
     {
         FActorSpawnParameters SpawnParams;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-        ManagerPtr = GetWorld()->SpawnActor<T>(ManagerClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+        // 스폰 시도 및 결과 확인
+        ManagerPtr = GameWorld->SpawnActor<T>(ManagerClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+        if (ManagerPtr)
+        {
+            UE_LOG(LogTemp, Log, TEXT("CreateManager: Successfully spawned manager of class %s"), *ManagerClass->GetName());
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("CreateManager: Failed to spawn manager of class %s"), *ManagerClass->GetName());
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("CreateManager: Manager already exists"));
     }
 }
 

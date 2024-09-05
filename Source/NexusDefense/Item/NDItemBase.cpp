@@ -2,6 +2,7 @@
 
 
 #include "Item/NDItemBase.h"
+#include "Manager/NDItemManager.h"
 
 // Sets default values
 ANDItemBase::ANDItemBase()
