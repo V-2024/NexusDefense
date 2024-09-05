@@ -7,6 +7,11 @@
 #include "Types/NDGameTypes.h"
 #include "NDUIManager.generated.h"
 
+class UNDMainMenuWidget;
+class UNDPauseMenuWidget;
+class UNDGameUIWidget;
+class UNDGameOverUIWidget;
+class UNDStageSelectWidget;
 
 UCLASS()
 class NEXUSDEFENSE_API ANDUIManager : public AActor
@@ -17,7 +22,23 @@ public:
 	// Sets default values for this actor's properties
 	ANDUIManager();
 
+	// get instance
+	FORCEINLINE static ANDUIManager* GetInstance() { return Instance; }
+
 	void UpdateUI(EGameState NewState);
+
+	void ShowMainMenu();
+	void ShowPauseMenu();
+	void ShowGameUI();
+	void ShowGameOverUI();
+	void ShowStageSelectUI();
+
+	void CloseMainMenu();
+	void ClosePauseMenu();
+	void CloseGameUI();
+	void CloseGameOverUI();
+	void CloseStageSelectUI();
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,10 +47,34 @@ protected:
 
 private:
 	void CreateWidgets();
-	void ShowMainMenu();
-	void ShowPauseMenu();
-	void ShowGameUI();
-	void ShowGameOverUI();
-	void ShowStageSelectUI();
+	
 
+private:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UNDMainMenuWidget>		MainMenuWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UNDPauseMenuWidget>		PauseMenuWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UNDGameUIWidget>			GameUIWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UNDGameOverUIWidget>		GameOverUIWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UNDStageSelectWidget>		StageSelectUIWidgetClass;
+
+
+	UNDMainMenuWidget*							MainMenuWidget;
+
+	UNDPauseMenuWidget*							PauseMenuWidget;
+
+	UNDGameUIWidget*							GameUIWidget;
+
+	UNDGameOverUIWidget*						GameOverUIWidget;
+
+	UNDStageSelectWidget*						StageSelectWidget;
+
+	static ANDUIManager*						Instance;
 };

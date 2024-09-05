@@ -26,32 +26,39 @@ ANDGameMode::ANDGameMode()
 void ANDGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// spawn actor for the game manager
+	GameManager = GetWorld()->SpawnActor<ANDGameManager>(ANDGameManager::StaticClass());
+
 	InitializeManagers();
 
+	GameManager->StartGame();
 }
 
 void ANDGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UnsubscribeFromEvents();
 
+	GameManager->EndPlay(EndPlayReason);
+
 	Super::EndPlay(EndPlayReason);
 }
 
 void ANDGameMode::InitializeManagers()
 {
-	GameManager = ANDGameManager::GetInstance();
+	GameManager->InitializeManagers(GetWorld());
 
-	FTimerHandle InitTimer;
-	GetWorldTimerManager().SetTimer(InitTimer, [this]() {
-		if (GetWorld())
-		{
-			GameManager->InitializeManagers(GetWorld());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("GameManagerClass is not set!"));
-		}
-	}, 0.1f, false);
+	//FTimerHandle InitTimer;
+	//GetWorldTimerManager().SetTimer(InitTimer, [this]() {
+	//	if (GetWorld())
+	//	{
+	//		//GameManager->InitializeManagers(GetWorld());
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Error, TEXT("GameManagerClass is not set!"));
+	//	}
+	//}, 0.1f, false);
 }
 
 void ANDGameMode::SubscribeToEvents()

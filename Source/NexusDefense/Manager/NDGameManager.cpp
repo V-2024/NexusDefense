@@ -2,18 +2,11 @@
 
 
 #include "Manager/NDGameManager.h"
-#include "Manager/NDStageManager.h"
-#include "Manager/NDUIManager.h"
-#include "Manager/NDSpawnManager.h"
-#include "Manager/NDEffectManager.h"
-#include "Manager/NDObjectPoolManager.h"
-#include "Manager/NDEventManager.h"
-#include "Manager/NDDataManager.h"
-#include "Manager/NDScoreManager.h"
-#include "Manager/NDSoundManager.h"
-#include "Manager/NDItemManager.h"
+
 
 ANDGameManager* ANDGameManager::Instance = nullptr;
+
+
 
 // Sets default values
 ANDGameManager::ANDGameManager()
@@ -52,6 +45,23 @@ void ANDGameManager::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
+
+void ANDGameManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    CleanupManagers();
+
+    if (Instance)
+	{
+		Instance->RemoveFromRoot();
+		Instance = nullptr;
+	}
+
+    Super::EndPlay(EndPlayReason);
+}
+
+
 void ANDGameManager::SetGameState(EGameState NewState)
 {
     CurrentGameState = NewState;
@@ -60,8 +70,17 @@ void ANDGameManager::SetGameState(EGameState NewState)
 
 void ANDGameManager::StartGame()
 {
-    CurrentGameState = EGameState::Playing;
-    // Add Game Start Logic
+    CurrentGameState = EGameState::Ready;
+
+    if (UIManager)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UIManager is set"));
+        UIManager->UpdateUI(CurrentGameState);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("UIManager is null"));
+    }
 }
 
 void ANDGameManager::PauseGame()
@@ -172,45 +191,118 @@ void ANDGameManager::HandleStageStarted()
 
 }
 
+
+void ANDGameManager::CleanupManagers()
+{
+    if (StageManager)
+	{
+		StageManager->Destroy();
+		StageManager = nullptr;
+	}
+
+	if (SpawnManager)
+	{
+		SpawnManager->Destroy();
+		SpawnManager = nullptr;
+	}
+
+	if (UIManager)
+	{
+		UIManager->Destroy();
+		UIManager = nullptr;
+	}
+
+	if (ObjectManager)
+	{
+		ObjectManager->Destroy();
+		ObjectManager = nullptr;
+	}
+
+	if (EffectManager)
+	{
+		EffectManager->Destroy();
+		EffectManager = nullptr;
+	}
+
+	if (DataManager)
+	{
+		DataManager = nullptr;
+	}
+
+	if (EventManager)
+	{
+		EventManager = nullptr;
+	}
+
+	if (ScoreManager)
+	{
+		ScoreManager = nullptr;
+	}
+
+	if (SoundManager)
+	{
+		SoundManager = nullptr;
+	}
+
+	if (ItemManager)
+	{
+		ItemManager->Destroy();
+		ItemManager = nullptr;
+	}
+
+    UE_LOG(LogTemp, Log, TEXT("CleanupManagers: Successfully cleaned up all managers"));
+
+}
+
+
 template<typename T>
 void ANDGameManager::CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass)
 {
-    // 유효성 검사 추가
-    if (!GameWorld)
-    {
-        UE_LOG(LogTemp, Error, TEXT("CreateManager: World is null"));
-        return;
-    }
-
     if (!ManagerClass)
     {
-        UE_LOG(LogTemp, Error, TEXT("CreateManager: ManagerClass is null"));
+        UE_LOG(LogTemp, Error, TEXT("CreateManager: ManagerClass is null for %s"), *T::StaticClass()->GetName());
         return;
     }
 
-    if (!ManagerPtr)
+    if (ManagerPtr)
     {
-        FActorSpawnParameters SpawnParams;
-        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        UE_LOG(LogTemp, Warning, TEXT("CreateManager: Manager already exists for %s"), *T::StaticClass()->GetName());
+        return;
+    }
 
-        // 스폰 시도 및 결과 확인
-        ManagerPtr = GameWorld->SpawnActor<T>(ManagerClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+    ManagerPtr = CreateManagerInternal<T>(ManagerClass);
 
-        if (ManagerPtr)
-        {
-            UE_LOG(LogTemp, Log, TEXT("CreateManager: Successfully spawned manager of class %s"), *ManagerClass->GetName());
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("CreateManager: Failed to spawn manager of class %s"), *ManagerClass->GetName());
-        }
+    if (ManagerPtr)
+    {
+        UE_LOG(LogTemp, Log, TEXT("CreateManager: Successfully created manager of class %s"), *ManagerClass->GetName());
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("CreateManager: Manager already exists"));
+        UE_LOG(LogTemp, Error, TEXT("CreateManager: Failed to create manager of class %s"), *ManagerClass->GetName());
     }
 }
 
 
+template<typename T>
+typename std::enable_if<std::is_base_of<AActor, T>::value, T*>::type
+ANDGameManager::CreateManagerInternal(TSubclassOf<T> ManagerClass)
+{
+    if (!GameWorld)
+    {
+        UE_LOG(LogTemp, Error, TEXT("CreateManagerInternal: World is null"));
+        return nullptr;
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    return GameWorld->SpawnActor<T>(ManagerClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+}
 
 
+template<typename T>
+typename std::enable_if<!std::is_base_of<AActor, T>::value, T*>::type
+ANDGameManager::CreateManagerInternal(TSubclassOf<T> ManagerClass)
+{
+    return NewObject<T>(this, ManagerClass);
+}

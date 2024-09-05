@@ -5,6 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Types/NDGameTypes.h"
+#include "Manager/NDStageManager.h"
+#include "Manager/NDUIManager.h"
+#include "Manager/NDSpawnManager.h"
+#include "Manager/NDEffectManager.h"
+#include "Manager/NDObjectPoolManager.h"
+#include "Manager/NDEventManager.h"
+#include "Manager/NDDataManager.h"
+#include "Manager/NDScoreManager.h"
+#include "Manager/NDSoundManager.h"
+#include "Manager/NDItemManager.h"
 #include "NDGameManager.generated.h"
 
 class ANDStageManager;
@@ -30,9 +40,6 @@ public:
 
     static ANDGameManager* GetInstance();
 
-    virtual void BeginPlay() override;
-    virtual void Tick(float DeltaTime) override;
-
     // Other Manager Access Functions
     FORCEINLINE ANDStageManager*        GetStageManager()       const {     return StageManager;    }
     FORCEINLINE ANDSpawnManager*        GetSpawnManager()       const {     return SpawnManager;    }
@@ -48,7 +55,6 @@ public:
 
     FORCEINLINE EGameState              GetGameState()          const {     return CurrentGameState;}
     
-    
 
     // Manage Game State Functions
     void StartGame();
@@ -61,17 +67,36 @@ public:
     void UnsubscribeFromEvents();
     void InitializeManagers(UWorld* World);
 
-private:
-    
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+private:
     template<typename T>
     void CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass);
+
+    // Helper Function for CreateManager
+    template<typename T>
+    typename std::enable_if<std::is_base_of<AActor, T>::value, T*>::type
+        CreateManagerInternal(TSubclassOf<T> ManagerClass);
+
+    // Helper Function for CreateManager
+    template<typename T>
+    typename std::enable_if<!std::is_base_of<AActor, T>::value, T*>::type
+        CreateManagerInternal(TSubclassOf<T> ManagerClass);
+
 
     void HandleGameStarted();
     void HandleGamePaused();
     void HandleGameResumed();
     void HandleGameOver();
     void HandleStageStarted();
+
+    void CleanupManagers();
+
+
+protected:
+    virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
+    
 
 
 private:

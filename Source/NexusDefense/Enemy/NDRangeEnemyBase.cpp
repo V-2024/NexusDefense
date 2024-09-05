@@ -38,7 +38,7 @@ void ANDRangeEnemyBase::PerformAttack()
 void ANDRangeEnemyBase::LoadEnemyData()
 {
 	DataAssetPath = TEXT("'/Game/NexusDefense/Enemy/NDC_RangeEnemyData.NDC_RangeEnemyData'");
-	UE_LOG(LogTemp, Warning, TEXT("DataAssetPath: %s"), *DataAssetPath);
+	
 	UNDRangeEnemyData* EnemyData = LoadObject<UNDRangeEnemyData>(nullptr, *DataAssetPath);
 
 	if (EnemyData)
@@ -77,12 +77,6 @@ void ANDRangeEnemyBase::LoadEnemyData()
 			AIC->PursuitRadius = EnemyData->PursuitRadius;
 			AIC->AttackRadius = EnemyData->AttackRadius;
 		}
-		
-
-		// print EnemyDataAsset.Object->Mesh Path
-		UE_LOG(LogTemp, Warning, TEXT("Mesh Path: %s"), *EnemyData->Mesh->GetPathName());
-
-		UE_LOG(LogTemp, Warning, TEXT("Data Asset found"));
 	}
 	else
 	{

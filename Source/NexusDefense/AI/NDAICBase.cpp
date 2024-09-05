@@ -53,17 +53,17 @@ void ANDAICBase::UpdateEnemyState()
 	}
 
 	float Distance = GetPawn()->GetDistanceTo(TargetCharacter);
-	UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), Distance);
+	//UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), Distance);
 
 	if (Distance < AttackRadius)
 	{
 		CurrentState = EEnemyState::Attack;
-		UE_LOG(LogTemp, Warning, TEXT("Attack State!!!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Attack State!!!"));
 	}
 	else
 	{
 		CurrentState = EEnemyState::Pursuit;
-		UE_LOG(LogTemp, Warning, TEXT("Pursuit State!!!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Pursuit State!!!"));
 	}
 }
 

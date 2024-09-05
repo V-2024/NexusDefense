@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "NDMainMenuWidget.generated.h"
 
+class ANDUIManager;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDMainMenuWidget : public UUserWidget
@@ -34,6 +35,11 @@ public:
 	UFUNCTION()
 	void OnSettingsButtonClicked();
 
+
+private:
+	void CleanupAndOpenLevel(const FName& LevelName);
+
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -47,7 +53,6 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* SettingsButton;
 
-
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;
 
@@ -56,4 +61,7 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* SettingsMenu;
+
+	UPROPERTY()
+	ANDUIManager* UIManager;
 };
