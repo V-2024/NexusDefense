@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameModeBase.h"
 #include "Manager/NDUIManager.h"
+#include "Manager/NDEventManager.h"
 
 void UNDMainMenuWidget::StartGame()
 {
@@ -16,7 +17,8 @@ void UNDMainMenuWidget::StartGame()
     }
 
     // 레벨 전환
-    UGameplayStatics::OpenLevel(this, FName("EnemyTestMap"));
+    // Game Start Event
+    UNDEventManager::GetInstance()->TriggerGameLevelChanged("EnemyTestLevel");
 }
 
 void UNDMainMenuWidget::ExitGame()

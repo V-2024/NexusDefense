@@ -2,12 +2,13 @@
 
 
 #include "Manager/NDUIManager.h"
-#include "Manager/NDGameManager.h"
 #include "UI/MainUI/NDMainMenuWidget.h"
 #include "UI/MainUI/NDGameUIWidget.h"
 #include "UI/MainUI/NDPauseMenuWidget.h"
 #include "UI/MainUI/NDGameOverUIWidget.h"
 #include "UI/MainUI/NDStageSelectWidget.h"
+#include "Manager/NDEventManager.h"
+
 
 ANDUIManager* ANDUIManager::Instance = nullptr;
 
@@ -38,11 +39,18 @@ ANDUIManager::ANDUIManager()
 		UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass is not found!"));
 	}
 
+	UNDEventManager::GetInstance()->OnGameStarted.AddUObject(this, &ANDUIManager::StartUI);
 	// Find Other Widget Classes..
+}
+
+void ANDUIManager::StartUI()
+{
+	UpdateUI(EGameState::Ready);
 }
 
 void ANDUIManager::UpdateUI(EGameState NewState)
 {
+
 	switch (NewState)
 	{
 		case EGameState::Ready:
@@ -75,7 +83,7 @@ void ANDUIManager::BeginPlay()
 	{
 		Destroy();
 	}
-	
+
 	CreateWidgets();
 }
 
