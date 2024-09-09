@@ -12,6 +12,8 @@ class ANDEnemyBase;
 class ANDItemBase;
 class ANDCharacterBase;
 
+// Game Level Change Events Delegates
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameLevelChanged, FName);
 
 // Game Events Delegates
 DECLARE_MULTICAST_DELEGATE(FOnGameStarted);
@@ -78,6 +80,9 @@ class NEXUSDEFENSE_API UNDEventManager : public UObject
 public:
     static UNDEventManager* GetInstance();
 
+    // Game Level Change Events
+    FOnGameLevelChanged     OnGameLevelChanged;
+
     // Game Events
     FOnGameStarted          OnGameStarted;
     FOnGamePaused           OnGamePaused;
@@ -135,7 +140,13 @@ public:
     FOnUIButtonClicked      OnUIButtonClicked;
 
 public:
+    void SubscribeToEvents();
+
+    void UnsubscribeFromEvents();
+
     // Event Trigger Methods
+    void TriggerGameLevelChanged(FName NewLevel);
+
     void TriggerGameStarted();
 
     void TriggerGamePaused();

@@ -18,6 +18,22 @@ UNDEventManager* UNDEventManager::GetInstance()
     return Instance;
 }
 
+void UNDEventManager::SubscribeToEvents()
+{
+
+
+}
+
+void UNDEventManager::UnsubscribeFromEvents()
+{
+
+}
+
+void UNDEventManager::TriggerGameLevelChanged(FName NewLevel)
+{
+	OnGameLevelChanged.Broadcast(NewLevel);
+}
+
 void UNDEventManager::TriggerGameStarted()
 {
 	OnGameStarted.Broadcast();

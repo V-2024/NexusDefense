@@ -30,22 +30,22 @@ public:
     int32 GetScoreValue() const { return ExperiencePoints; }
 
     void SetComponents();
-
     void PlaySpawnEffect();
-
     void PlayDestroyEffect();
-
     void PlaySpawnSound();
-
     void PlayDestroySound();
-
     void PlaySpawnAnimMontage();
-
     void PlayDeathAnimMontage();
+
+    FORCEINLINE void    SetActive(bool IsActive)       {   bIsActive = IsActive;       }
+    FORCEINLINE bool    IsActive() const               {   return bIsActive;           }
+    FORCEINLINE float   GetScore() const              {   return ExperiencePoints;    }
+
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
+
 
 public:	
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
