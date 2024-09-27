@@ -16,17 +16,16 @@ ANDUIManager::ANDUIManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	MainMenuWidgetClass = nullptr;
-	GameUIWidgetClass = nullptr;
-	PauseMenuWidgetClass = nullptr;
-	GameOverUIWidgetClass = nullptr;
-	StageSelectUIWidgetClass = nullptr;
-
-	MainMenuWidget = nullptr;
-	GameUIWidget = nullptr;
-	PauseMenuWidget = nullptr;
-	GameOverUIWidget = nullptr;
-	StageSelectWidget = nullptr;
+	MainMenuWidgetClass			= nullptr;
+	GameUIWidgetClass			= nullptr;
+	PauseMenuWidgetClass		= nullptr;
+	GameOverUIWidgetClass		= nullptr;
+	StageSelectUIWidgetClass	= nullptr;
+	MainMenuWidget				= nullptr;
+	GameUIWidget				= nullptr;
+	PauseMenuWidget				= nullptr;
+	GameOverUIWidget			= nullptr;
+	StageSelectWidget			= nullptr;
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_MainmenuWidget.WBP_MainmenuWidget_C"));
 
@@ -38,9 +37,6 @@ ANDUIManager::ANDUIManager()
 	{
 		UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass is not found!"));
 	}
-
-	UNDEventManager::GetInstance()->OnGameStarted.AddUObject(this, &ANDUIManager::StartUI);
-	// Find Other Widget Classes..
 }
 
 void ANDUIManager::StartUI()
@@ -74,6 +70,8 @@ void ANDUIManager::UpdateUI(EGameState NewState)
 void ANDUIManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UNDEventManager::GetInstance()->OnGameStarted.AddUObject(this, &ANDUIManager::StartUI);
 
 	if (!Instance)
 	{
@@ -129,9 +127,9 @@ void ANDUIManager::ShowMainMenu()
 		MainMenuWidget->AddToViewport();
 
 		// 전체 화면 모드 설정
-		MainMenuWidget->SetDesiredSizeInViewport(FVector2D(1920, 1080));  // 원하는 해상도
-		MainMenuWidget->SetAnchorsInViewport(FAnchors(0, 0, 1, 1));
-		MainMenuWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+		//MainMenuWidget->SetDesiredSizeInViewport(FVector2D(1920, 1080));  // 원하는 해상도
+		//MainMenuWidget->SetAnchorsInViewport(FAnchors(0, 0, 1, 1));
+		//MainMenuWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 
 		// 입력 모드 설정
 		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();

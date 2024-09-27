@@ -17,73 +17,69 @@
 
 UNDGameInstance::UNDGameInstance()
 {
-	CurrentGameState = EGameState::Ready;
-
-    // 에디터 키자마자 팅김
-    //InitializeManagers();
-    // 에디터 키자마자 팅김
-    //ChangeGameModeForLevel("StartLevel");
+    StageManager        = nullptr;
+    SpawnManager        = nullptr;
+    UIManager           = nullptr;
+    ObjectManager       = nullptr;
+    EffectManager       = nullptr;
+    DataManager         = nullptr;
+    EventManager        = nullptr;
+    ScoreManager        = nullptr;
+    SoundManager        = nullptr;
+    ItemManager         = nullptr;
 }
 
 void UNDGameInstance::Init()
 {
 	Super::Init();
 
-	// Add all the game modes for the levels
+    // Add all the game modes for the levels
     LevelGameModes.Add("StartLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDGameMode")));
     LevelGameModes.Add("EnemyTestLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDInStageGameMode")));
 
-    // Store the Managers in the GameInstance
-    /*if (!StageManager)
-	{
-		StageManager = NewObject<ANDStageManager>(this, ANDStageManager::StaticClass());
-	}
+    InitializeManagers();
 
-    if (!SpawnManager)
-	{
-		SpawnManager = NewObject<ANDSpawnManager>(this, ANDSpawnManager::StaticClass());
-	}
+    // 주기적으로 초기화 상태를 확인하는 타이머 설정
+    GetTimerManager().SetTimer(InitializationTimerHandle, this, &UNDGameInstance::CheckInitialization, InitializationCheckInterval, true);
 
-    if (!UIManager)
-	{
-		UIManager = NewObject<ANDUIManager>(this, ANDUIManager::StaticClass());
-	}
-
-    if (!ObjectManager)
-	{
-		ObjectManager = NewObject<ANDObjectPoolManager>(this, ANDObjectPoolManager::StaticClass());
-	}
-
-    if (!EffectManager)
-	{
-		EffectManager = NewObject<ANDEffectManager>(this, ANDEffectManager::StaticClass());
-	}
-
-    if (!DataManager)
-	{
-		DataManager = NewObject<UNDDataManager>(this, UNDDataManager::StaticClass());
-	}
-
-    if (!EventManager)
-	{
-		EventManager = NewObject<UNDEventManager>(this, UNDEventManager::StaticClass());
-	}
-
-    if (!ScoreManager)
-	{
-		ScoreManager = NewObject<UNDScoreManager>(this, UNDScoreManager::StaticClass());
-	}
-
-	if (!SoundManager)
-	{
-		SoundManager = NewObject<UNDSoundManager>(this, UNDSoundManager::StaticClass());
-	}
-
-	if (!ItemManager)
-	{
-		ItemManager = NewObject<ANDItemManager>(this, ANDItemManager::StaticClass());
-	}*/
+    //ChangeGameModeForLevel("StartLevel");
 }
+
+void UNDGameInstance::CheckInitialization()
+{
+    InitializationTimer += InitializationCheckInterval;
+
+    if (AreAllManagersInitialized() && GetWorld() && GetWorld()->bIsWorldInitialized)
+    {
+        GetTimerManager().ClearTimer(InitializationTimerHandle);
+        StartGame();
+    }
+    else if (InitializationTimer >= MaxInitializationTime)
+    {
+        GetTimerManager().ClearTimer(InitializationTimerHandle);
+        UE_LOG(LogTemp, Warning, TEXT("Initialization timed out. Starting game anyway."));
+        StartGame();
+    }
+}
+
+bool UNDGameInstance::AreAllManagersInitialized()
+{
+    // Check if all managers are initialized
+    return StageManager && SpawnManager && UIManager && ObjectManager &&
+        EffectManager && DataManager && EventManager && ScoreManager &&
+        SoundManager && ItemManager;
+}
+
+void UNDGameInstance::StartGame()
+{
+    CurrentGameState = EGameState::Ready;
+
+    if (UIManager)
+	{
+		UIManager->StartUI();
+	}
+}
+
 
 void UNDGameInstance::ChangeGameModeForLevel(const FName& LevelName)
 {
@@ -121,16 +117,16 @@ void UNDGameInstance::UnsubscribeFromEvents()
 
 void UNDGameInstance::InitializeManagers()
 {
-    CreateManager<ANDStageManager>(StageManager, ANDStageManager::StaticClass());
-    CreateManager<ANDSpawnManager>(SpawnManager, ANDSpawnManager::StaticClass());
-    CreateManager<ANDUIManager>(UIManager, ANDUIManager::StaticClass());
-    CreateManager<ANDObjectPoolManager>(ObjectManager, ANDObjectPoolManager::StaticClass());
-    CreateManager<ANDEffectManager>(EffectManager, ANDEffectManager::StaticClass());
-    CreateManager<UNDDataManager>(DataManager, UNDDataManager::StaticClass());
-    CreateManager<UNDEventManager>(EventManager, UNDEventManager::StaticClass());
-    CreateManager<UNDScoreManager>(ScoreManager, UNDScoreManager::StaticClass());
-    CreateManager<UNDSoundManager>(SoundManager, UNDSoundManager::StaticClass());
-    CreateManager<ANDItemManager>(ItemManager, ANDItemManager::StaticClass());
+    CreateManager<ANDStageManager>(StageManager, ANDStageManager::StaticClass(), "StageManager");
+    CreateManager<ANDSpawnManager>(SpawnManager, ANDSpawnManager::StaticClass(), "SpawnManager");
+    CreateManager<ANDUIManager>(UIManager, ANDUIManager::StaticClass(), "UIManager");
+    CreateManager<ANDObjectPoolManager>(ObjectManager, ANDObjectPoolManager::StaticClass(), "ObjectManager");
+    CreateManager<ANDEffectManager>(EffectManager, ANDEffectManager::StaticClass(), "EffectManager");
+    CreateManager<UNDDataManager>(DataManager, UNDDataManager::StaticClass(), "DataManager");
+    CreateManager<UNDEventManager>(EventManager, UNDEventManager::StaticClass(), "EventManager");
+    CreateManager<UNDScoreManager>(ScoreManager, UNDScoreManager::StaticClass(), "ScoreManager");
+    CreateManager<UNDSoundManager>(SoundManager, UNDSoundManager::StaticClass(), "SoundManager");
+    CreateManager<ANDItemManager>(ItemManager, ANDItemManager::StaticClass(), "ItemManager");
 }
 
 void UNDGameInstance::OnLevelChanged(const FName& LevelName)
@@ -140,7 +136,7 @@ void UNDGameInstance::OnLevelChanged(const FName& LevelName)
 }
 
 template<typename T>
-void UNDGameInstance::CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass)
+void UNDGameInstance::CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass, FName ManagerName)
 {
     if (!ManagerClass)
     {
@@ -154,7 +150,7 @@ void UNDGameInstance::CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass)
         return;
     }
 
-    ManagerPtr = CreateManagerInternal<T>(ManagerClass);
+    ManagerPtr = CreateManagerInternal<T>(ManagerClass, ManagerName);
 
     if (ManagerPtr)
     {
@@ -166,13 +162,11 @@ void UNDGameInstance::CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass)
     }
 }
 
-
 template<typename T>
 typename std::enable_if<std::is_base_of<AActor, T>::value, T*>::type
-UNDGameInstance::CreateManagerInternal(TSubclassOf<T> ManagerClass)
+UNDGameInstance::CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName)
 {
     UWorld* GameWorld = GetWorld();
-
     if (!GameWorld)
     {
         UE_LOG(LogTemp, Error, TEXT("CreateManagerInternal: World is null"));
@@ -181,14 +175,17 @@ UNDGameInstance::CreateManagerInternal(TSubclassOf<T> ManagerClass)
 
     FActorSpawnParameters SpawnParams;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    if (ManagerName != NAME_None)
+    {
+        SpawnParams.Name = ManagerName;
+    }
 
     return GameWorld->SpawnActor<T>(ManagerClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 }
 
-
 template<typename T>
 typename std::enable_if<!std::is_base_of<AActor, T>::value, T*>::type
-UNDGameInstance::CreateManagerInternal(TSubclassOf<T> ManagerClass)
+UNDGameInstance::CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName)
 {
-    return NewObject<T>(this, ManagerClass);
+    return NewObject<T>(this, ManagerClass, ManagerName);
 }
