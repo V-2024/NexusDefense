@@ -28,10 +28,7 @@ public:
 	void StartUI();
 	void UpdateUI(EGameState NewState);
 
-	void ShowMainMenu();
-	void ShowPauseMenu();
-	void ShowGameUI();
-	void ShowGameOverUI();
+	
 	void ShowStageSelectUI();
 
 	void CloseMainMenu();
@@ -48,7 +45,10 @@ protected:
 
 private:
 	void CreateWidgets();
-	
+	void ShowMainMenu();
+	void ShowPauseMenu();
+	void ShowGameUI();
+	void ShowGameOverUI();
 
 private:
 	UPROPERTY(EditAnywhere)

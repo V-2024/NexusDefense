@@ -28,7 +28,6 @@ public:
     UNDGameInstance();
 	virtual void Init() override;
 
-
     // Other Manager Access Functions
     FORCEINLINE ANDStageManager* GetStageManager()       const { return StageManager; }
     FORCEINLINE ANDSpawnManager* GetSpawnManager()       const { return SpawnManager; }
@@ -46,7 +45,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Game")
     void ChangeGameModeForLevel(const FName& LevelName);
    
-
     void SetGameState(EGameState NewState);
     void SubscribeToEvents();
     void UnsubscribeFromEvents();
@@ -57,18 +55,21 @@ public:
 
 private:
     template<typename T>
-    void CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass);
+    void CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass, FName ManagerName);
 
     // Helper Function for CreateManager
     template<typename T>
     typename std::enable_if<std::is_base_of<AActor, T>::value, T*>::type
-        CreateManagerInternal(TSubclassOf<T> ManagerClass);
+        CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName);
 
     // Helper Function for CreateManager
     template<typename T>
     typename std::enable_if<!std::is_base_of<AActor, T>::value, T*>::type
-        CreateManagerInternal(TSubclassOf<T> ManagerClass);
+        CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName);
 
+    void StartGame();
+    void CheckInitialization();
+    bool AreAllManagersInitialized();
 
 private:
 	UPROPERTY()
@@ -108,4 +109,15 @@ private:
     ANDItemManager* ItemManager;
 
     EGameState              CurrentGameState;
+
+
+    FTimerHandle InitializationTimerHandle;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    float InitializationCheckInterval = 0.5f; // 초기화 상태 확인 간격 (초)
+
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    float MaxInitializationTime = 10.0f; // 최대 초기화 대기 시간 (초)
+
+    float InitializationTimer = 0.0f;
 };
