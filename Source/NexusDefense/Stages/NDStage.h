@@ -1,53 +1,78 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "StageData.h"
+#include "Stages/StageData.h"
 #include "NDStage.generated.h"
 
 class UNDEventManager;
 class UNDDataManager;
+class ANDSpawnManager;
+class ANDObjectPoolManager;
+class UNDScoreManager;
 
 UCLASS()
 class NEXUSDEFENSE_API ANDStage : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	ANDStage();
+    GENERATED_BODY()
+
+public:
+    ANDStage();
 
     virtual void BeginPlay() override;
-    void Initialize(UStageData* InStageData);
+    virtual void Tick(float DeltaTime) override;
+
+    void Initialize(UStageData* InStageData, ANDSpawnManager* InSpawnManager, ANDObjectPoolManager* InObjectPoolManager);
     void StartStage();
     void EndStage();
-    bool IsStageCleared() const;
+    void PauseStage();
+    void ResumeStage();
+
+    UFUNCTION(BlueprintCallable, Category = "Stage")
     void StartNextWave();
 
-    int32 GetCurrentWave() const { return CurrentWave; }
-    int32 GetTotalWaves() const { return StageData ? StageData->Waves.Num() : 0; }
-    int32 GetClearScore() const { return StageData ? StageData->ClearScore : 0; }
-
     UFUNCTION()
-    void OnEnemyDefeated();
+    void OnEnemyDefeated(AActor* DefeatedEnemy);
 
+    UFUNCTION(BlueprintCallable, Category = "Stage")
+    int32 GetCurrentWave() const { return CurrentWave; }
+
+    UFUNCTION(BlueprintCallable, Category = "Stage")
+    int32 GetTotalWaves() const { return StageData ? StageData->Waves.Num() : 0; }
+
+    UFUNCTION(BlueprintCallable, Category = "Stage")
+    int32 GetRemainingEnemies() const { return RemainingEnemies; }
+
+    UFUNCTION(BlueprintCallable, Category = "Stage")
+    bool IsStageActive() const { return bIsStageActive; }
+
+    UFUNCTION(BlueprintCallable, Category = "Stage")
+    UStageData* GetStageData() const { return StageData; }
 
 private:
     void CheckWaveCompletion();
+    void CheckStageCompletion();
 
-
-public:
     UPROPERTY()
     UStageData* StageData;
-
-    int32 CurrentWave;
-    int32 RemainingEnemies;
-    bool bIsStageActive;
 
     UPROPERTY()
     UNDEventManager* EventManager;
 
     UPROPERTY()
     UNDDataManager* DataManager;
+
+    UPROPERTY()
+    ANDSpawnManager* SpawnManager;
+
+    UPROPERTY()
+    ANDObjectPoolManager* ObjectPoolManager;
+
+    UPROPERTY()
+    UNDScoreManager* ScoreManager;
+
+    int32 CurrentWave;
+    int32 RemainingEnemies;
+    bool bIsStageActive;
+    float StageTimer;
 };

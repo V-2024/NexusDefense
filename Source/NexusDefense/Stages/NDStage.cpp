@@ -1,112 +1,132 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Stages/NDStage.h"
-#include "Kismet/GameplayStatics.h"
+#include "NDStage.h"
 #include "Manager/NDEventManager.h"
 #include "Manager/NDDataManager.h"
-
-
-// 비동기 레벨 로딩 고려 가능
-// 적 스폰 로직 추가
-// 스테이지 클리어 로직 추가
-// 스테이지 종료 로직 추가
-// 스테이지 시작 로직 추가
-// 스테이지 데이터 로딩 로직 추가
-// 스테이지 데이터 저장 로직 추가
-// 스테이지 데이터 초기화 로직 추가
-// bIsStageActive 상태 체크 추가
-// 메모리관리: 스테이지데이터가 언제 해제되는지 명확하지 않음. 스테이지 종료 시 정리작업 수행
-// 중간 저장 기능 추가
+#include "Manager/NDSpawnManager.h"
+#include "Manager/NDObjectPoolManager.h"
+#include "Manager/NDScoreManager.h"
+#include "Kismet/GameplayStatics.h"
 
 ANDStage::ANDStage()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	CurrentWave = 0;
-	RemainingEnemies = 0;
-	bIsStageActive = false;
-
-	EventManager = UNDEventManager::GetInstance();
-	DataManager = UNDDataManager::GetInstance();
+    PrimaryActorTick.bCanEverTick = true;
+    CurrentWave = 0;
+    RemainingEnemies = 0;
+    bIsStageActive = false;
+    StageTimer = 0.0f;
 }
 
 void ANDStage::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
+
+    EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
+    DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
+    ScoreManager = UNDScoreManager::GetInstance();
 }
 
-void ANDStage::Initialize(UStageData* InStageData)
+void ANDStage::Tick(float DeltaTime)
 {
-	StageData = InStageData;
+    Super::Tick(DeltaTime);
+
+    if (bIsStageActive)
+    {
+        StageTimer += DeltaTime;
+    }
+}
+
+void ANDStage::Initialize(UStageData* InStageData, ANDSpawnManager* InSpawnManager, ANDObjectPoolManager* InObjectPoolManager)
+{
+    StageData = InStageData;
+    SpawnManager = InSpawnManager;
+    ObjectPoolManager = InObjectPoolManager;
+    CurrentWave = 0;
+    RemainingEnemies = 0;
+    StageTimer = 0.0f;
+
+    SpawnManager->Initialize(this, ObjectPoolManager);
 }
 
 void ANDStage::StartStage()
 {
-	if (!StageData)
-	{
-		UE_LOG(LogTemp, Error, TEXT("StageData is not set!"));
-		return;
-	}
-
-	// open Stage Level
-	UGameplayStatics::OpenLevel(GetWorld(), *StageData->LevelFath);
-
-	bIsStageActive = true;
-	CurrentWave = 0;
-	StartNextWave();
-
-	//EventManager->OnStageStart.Broadcast();
+    bIsStageActive = true;
+    StartNextWave();
+    if (EventManager)
+    {
+        EventManager->OnStageStarted.Broadcast(StageData->StageIndex);
+    }
 }
 
 void ANDStage::EndStage()
 {
-	bIsStageActive = false;
-	//EventManager->OnStageEnd.Broadcast();
-	DataManager->SaveGameData();
-
-	// Add end stage rogic
+    bIsStageActive = false;
+    SpawnManager->StopSpawning();
+    if (EventManager)
+    {
+        EventManager->OnStageEnd.Broadcast(StageData->StageIndex);
+    }
+    ScoreManager->FinalizeStageScore(StageData->StageIndex);
 }
 
-bool ANDStage::IsStageCleared() const
+void ANDStage::PauseStage()
 {
-	return CurrentWave >= StageData->Waves.Num() && RemainingEnemies == 0;
+    bIsStageActive = false;
+    SpawnManager->StopSpawning();
 }
 
-
-void ANDStage::OnEnemyDefeated()
+void ANDStage::ResumeStage()
 {
-	RemainingEnemies--;
-
-	if (RemainingEnemies <= 0)
-	{
-		CheckWaveCompletion();
-	}
+    bIsStageActive = true;
+    SpawnManager->StartSpawning(this, StageData->Waves[CurrentWave - 1]);
 }
 
 void ANDStage::StartNextWave()
 {
-	if (CurrentWave >= StageData->Waves.Num())
-	{
-		UE_LOG(LogTemp, Error, TEXT("No more waves to start!"));
-		return;
-	}
+    if (CurrentWave < GetTotalWaves())
+    {
+        CurrentWave++;
+        SpawnManager->StartSpawning(this, StageData->Waves[CurrentWave - 1]);
+        if (EventManager)
+        {
+            EventManager->OnWaveStarted.Broadcast(StageData->StageIndex, CurrentWave);
+        }
+    }
+    else
+    {
+        CheckStageCompletion();
+    }
+}
 
-	RemainingEnemies = StageData->Waves[CurrentWave].EnemyCount;
-	//EventManager->OnWaveStart.Broadcast(CurrentWave);
+void ANDStage::OnEnemyDefeated(AActor* DefeatedEnemy)
+{
+    RemainingEnemies--;
+    ScoreManager->AddScore(100); // 예시 점수, 실제로는 적 유형에 따라 다르게 설정
+    if (EventManager)
+    {
+        EventManager->OnEnemyDefeated.Broadcast(DefeatedEnemy);
+    }
+    CheckWaveCompletion();
 }
 
 void ANDStage::CheckWaveCompletion()
 {
-	CurrentWave++;
-
-	if (CurrentWave < StageData->Waves.Num())
-	{
-		StartNextWave();
-	}
-	else
-	{
-		EndStage();
-	}
+    if (RemainingEnemies <= 0)
+    {
+        if (EventManager)
+        {
+            EventManager->OnWaveCompleted.Broadcast(StageData->StageIndex, CurrentWave);
+        }
+        StartNextWave();
+    }
 }
 
-
+void ANDStage::CheckStageCompletion()
+{
+    if (CurrentWave >= GetTotalWaves() && RemainingEnemies <= 0)
+    {
+        if (EventManager)
+        {
+            EventManager->OnStageCompleted.Broadcast(StageData->StageIndex);
+        }
+        EndStage();
+    }
+}

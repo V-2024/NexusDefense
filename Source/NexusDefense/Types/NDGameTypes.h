@@ -10,5 +10,6 @@ enum class EGameState : uint8
     Ready UMETA(DisplayName = "Ready"),
     Playing UMETA(DisplayName = "Playing"),
     Paused UMETA(DisplayName = "Paused"),
+    StageSelect UMETA(DisplayName = "StageSelect"),
     GameOver UMETA(DisplayName = "GameOver")
 };

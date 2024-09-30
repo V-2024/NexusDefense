@@ -21,7 +21,6 @@ UNDEventManager* UNDEventManager::GetInstance()
 void UNDEventManager::SubscribeToEvents()
 {
 
-
 }
 
 void UNDEventManager::UnsubscribeFromEvents()
@@ -29,7 +28,7 @@ void UNDEventManager::UnsubscribeFromEvents()
 
 }
 
-void UNDEventManager::TriggerGameLevelChanged(FName NewLevel)
+void UNDEventManager::TriggerGameLevelChanged(const FName& NewLevel)
 {
 	OnGameLevelChanged.Broadcast(NewLevel);
 }
@@ -84,12 +83,12 @@ void UNDEventManager::TriggerBossSpawned(ANDEnemyBase* Boss)
 	OnBossSpawned.Broadcast(Boss);
 }
 
-void UNDEventManager::TriggerEnemyDefeated(ANDEnemyBase* Enemy)
+void UNDEventManager::TriggerEnemyDefeated(AActor* Enemy)
 {
 	OnEnemyDefeated.Broadcast(Enemy);
 }
 
-void UNDEventManager::TriggerBossDefeated(ANDEnemyBase* Boss)
+void UNDEventManager::TriggerBossDefeated(AActor* Boss)
 {
 	OnBossDefeated.Broadcast(Boss);
 }

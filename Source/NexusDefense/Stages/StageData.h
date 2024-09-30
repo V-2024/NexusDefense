@@ -47,7 +47,7 @@ public:
     FString StageName;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
-    int32 StageNumber;
+    int32 StageIndex;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stage")
     int32 ClearScore;
