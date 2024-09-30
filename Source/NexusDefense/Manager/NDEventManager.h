@@ -13,7 +13,7 @@ class ANDItemBase;
 class ANDCharacterBase;
 
 // Game Level Change Events Delegates
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameLevelChanged, FName);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameLevelChanged, const FName&);
 
 // Game Events Delegates
 DECLARE_MULTICAST_DELEGATE(FOnGameStarted);
@@ -35,8 +35,8 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnBossSpawned, ANDEnemyBase*);
 
 
 // Enemy Dead Events Delegates
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemyDefeated, ANDEnemyBase*);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnBossDefeated, ANDEnemyBase*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemyDefeated, AActor*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnBossDefeated, AActor*);
 
 
 // Score Events Delegates
@@ -145,7 +145,7 @@ public:
     void UnsubscribeFromEvents();
 
     // Event Trigger Methods
-    void TriggerGameLevelChanged(FName NewLevel);
+    void TriggerGameLevelChanged(const FName& NewLevel);
 
     void TriggerGameStarted();
 
@@ -167,9 +167,9 @@ public:
 
     void TriggerBossSpawned(ANDEnemyBase* SpawnedBoss);
 
-    void TriggerEnemyDefeated(ANDEnemyBase* DefeatedEnemy);
+    void TriggerEnemyDefeated(AActor* DefeatedEnemy);
 
-    void TriggerBossDefeated(ANDEnemyBase* DestroyedBoss);
+    void TriggerBossDefeated(AActor* DestroyedBoss);
 
     void TriggerScoreUpdated(int32 NewScore);
 

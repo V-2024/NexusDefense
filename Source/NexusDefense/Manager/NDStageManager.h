@@ -10,6 +10,8 @@ class UStageData;
 class ANDStage;
 class UNDEventManager;
 class UNDDataManager;
+class ANDObjectPoolManager;
+class ANDSpawnManager;
 
 UCLASS()
 class NEXUSDEFENSE_API ANDStageManager : public AActor
@@ -20,18 +22,33 @@ public:
 	ANDStageManager();
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	static ANDStageManager* GetInstance();
+	UFUNCTION(BlueprintCallable, Category = "Stage")
+	void StartStage(int32 StageIndex);
 
-	void LoadStages(int32);
-	void StartNextWave();
+	UFUNCTION(BlueprintCallable, Category = "Stage")
+	void EndCurrentStage();
+
+	UFUNCTION()
+	void OnStageCleared(int32 StageIndex);
+
+	UFUNCTION()
+	void OnStageFailed(int32 StageIndex);
+
+	void CreateStage(int32 StageIndex);
+
+	void LoadStageData();
+
 	bool IsStageClreared() const;
+
 	ANDStage* GetCurrentStage() const { return CurrentStage; }
-	void CreateStage(int32);
 
 private:
-	static ANDStageManager* Instance;
+	void CleanupCurrentStage();
+	void SetupNextStage();
 
+private:
 	UPROPERTY(EditAnywhere, Category = "Stage")
 	TArray<TSoftObjectPtr<UStageData>> StageDataList;
 
@@ -46,6 +63,12 @@ private:
 
 	UPROPERTY()
 	UNDDataManager* DataManager;
+
+	UPROPERTY()
+	ANDObjectPoolManager* ObjectPoolManager;
+
+	UPROPERTY()
+	ANDSpawnManager* SpawnManager;
 
 	int32 CurrentStageIndex;
 };

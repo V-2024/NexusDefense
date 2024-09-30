@@ -4,21 +4,15 @@
 #include "UI/MainUI/NDMainMenuWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameModeBase.h"
-#include "Manager/NDUIManager.h"
 #include "Manager/NDEventManager.h"
+#include "GameInstance/NDGameInstance.h"
 
 void UNDMainMenuWidget::StartGame()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartGame"));
 
-    if (UIManager)
-    {
-        UIManager->CloseMainMenu();
-    }
-
     // 레벨 전환
-    // Game Start Event
-    UNDEventManager::GetInstance()->TriggerGameLevelChanged("EnemyTestLevel");
+    GameInstance->ChangeGameModeForLevel("StageSelectLevel");
 }
 
 void UNDMainMenuWidget::ExitGame()
@@ -67,9 +61,7 @@ void UNDMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// UIManager 초기화
-	if (UIManager)
-	{
-		UIManager = ANDUIManager::GetInstance();
-	}
+    // get game instance
+    GameInstance = Cast<UNDGameInstance>(GetWorld()->GetGameInstance());
+
 }

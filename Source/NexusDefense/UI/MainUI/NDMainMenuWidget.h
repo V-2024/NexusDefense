@@ -7,6 +7,7 @@
 #include "NDMainMenuWidget.generated.h"
 
 class ANDUIManager;
+class UNDGameInstance;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDMainMenuWidget : public UUserWidget
@@ -64,4 +65,7 @@ private:
 
 	UPROPERTY()
 	ANDUIManager* UIManager;
+
+	UPROPERTY()
+	UNDGameInstance* GameInstance;
 };

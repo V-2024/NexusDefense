@@ -1,131 +1,153 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Manager/NDStageManager.h"
-#include "Stages/NDStage.h"
-#include "Stages/StageData.h"
-#include "HAL/FileManagerGeneric.h"
-#include "Misc/Paths.h"
-#include "AssetRegistry/AssetRegistryModule.h"
+#include "NDStageManager.h"
 #include "NDEventManager.h"
 #include "NDDataManager.h"
+#include "NDSpawnManager.h"
+#include "NDObjectPoolManager.h"
+#include "Stages/NDStage.h"
+#include "Stages/StageData.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Kismet/GameplayStatics.h"
 
-// 메모리 관리: 현재 스테이지 파괴 시 관련 리소스들이 정리되는지 확인
-// 현재는 새 스테이지 생성 시 이전 스테이지를 파괴, 스테이지 상태를 저장하거나 캐싱 필요
-
-ANDStageManager* ANDStageManager::Instance = nullptr;
 
 ANDStageManager::ANDStageManager()
 {
-	PrimaryActorTick.bCanEverTick = false;
-	CurrentStageIndex = -1;
-
-	EventManager = UNDEventManager::GetInstance();
-	DataManager = UNDDataManager::GetInstance();
-
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-
-	// Folder Path
-	FString AssetFolderPath = FPaths::ProjectContentDir() + "/NexusDefense/Stages/";
-
-	// Serach Folder Assets
-	TArray<FAssetData> AssetDatas;
-
-	AssetRegistry.GetAssetsByPath(*AssetFolderPath, AssetDatas, true);
-
-	// Load UStageData
-	for (const FAssetData& AssetData : AssetDatas)
-	{
-		// UStageData Check
-		if (AssetData.GetClass()->IsChildOf(UStageData::StaticClass()))
-		{
-			UStageData* StageData = Cast<UStageData>(AssetData.GetAsset());
-			if (StageData)
-			{
-				LoadedStages.Add(StageData);
-			}
-		}
-	}
+    PrimaryActorTick.bCanEverTick = false;
+    CurrentStageIndex = -1;
 }
-
 
 void ANDStageManager::BeginPlay()
 {
-	Super::BeginPlay();
-	
-	if(!Instance)
-	{
-		Instance = this;
-	}
-	else
-	{
-		Destroy();
-	}
+    Super::BeginPlay();
+
+    EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
+    DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
+
+    SpawnManager = Cast<ANDSpawnManager>(GetGameInstance()->GetSubsystem<ANDSpawnManager>());
+    ObjectPoolManager = Cast<ANDObjectPoolManager>(GetGameInstance()->GetSubsystem<ANDObjectPoolManager>());
+
+    if (EventManager)
+    {
+        EventManager->OnStageCompleted.AddUObject(this, &ANDStageManager::OnStageCleared);
+        EventManager->OnStageEnd.AddUObject(this, &ANDStageManager::OnStageFailed);
+    }
+
+    LoadStageData();
 }
 
-
-ANDStageManager* ANDStageManager::GetInstance()
+void ANDStageManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (Instance == nullptr)
-	{
-		Instance = NewObject<ANDStageManager>();
-		Instance->AddToRoot();
-	}
-
-	return Instance;
+    Super::EndPlay(EndPlayReason);
+    CleanupCurrentStage();
 }
 
-
-void ANDStageManager::LoadStages(int32 StageNum)
+void ANDStageManager::LoadStageData()
 {
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
+    FString AssetFolderPath = FPaths::ProjectContentDir() + "/NexusDefense/Stages/";
+    TArray<FAssetData> AssetDatas;
+    AssetRegistry.GetAssetsByPath(*AssetFolderPath, AssetDatas, true);
+
+    for (const FAssetData& AssetData : AssetDatas)
+    {
+        if (AssetData.GetClass()->IsChildOf(UStageData::StaticClass()))
+        {
+            if (UStageData* StageData = Cast<UStageData>(AssetData.GetAsset()))
+            {
+                LoadedStages.Add(StageData);
+            }
+        }
+    }
 }
 
-void ANDStageManager::StartNextWave()
+void ANDStageManager::StartStage(int32 StageIndex)
 {
-	if (CurrentStage)
-	{
-		CurrentStage->StartNextWave();
-		//EventManager->OnWaveStart.Broadcast(CurrentStage->GetCurrentWave());
-	}
+    if (!LoadedStages.IsValidIndex(StageIndex))
+    {
+        UE_LOG(LogTemp, Error, TEXT("Invalid stage index: %d"), StageIndex);
+        return;
+    }
+
+    CleanupCurrentStage();
+    CurrentStageIndex = StageIndex;
+
+    UWorld* World = GetWorld();
+    if (World)
+    {
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.Owner = this;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+        CurrentStage = World->SpawnActor<ANDStage>(ANDStage::StaticClass(), SpawnParams);
+        if (CurrentStage)
+        {
+            CurrentStage->Initialize(LoadedStages[CurrentStageIndex], SpawnManager, ObjectPoolManager);
+            CurrentStage->StartStage();
+
+            if (EventManager)
+            {
+                EventManager->OnStageStarted.Broadcast(CurrentStageIndex);
+            }
+        }
+    }
 }
 
-bool ANDStageManager::IsStageClreared() const
+void ANDStageManager::EndCurrentStage()
 {
-	return CurrentStage ? CurrentStage->IsStageCleared() : false;
+    if (CurrentStage)
+    {
+        CurrentStage->EndStage();
+        CleanupCurrentStage();
+    }
 }
 
-void ANDStageManager::CreateStage(int32 StageIndex)
+void ANDStageManager::OnStageCleared(int32 StageIndex)
 {
-	if (CurrentStage)
-	{
-		CurrentStage->Destroy();
-	}
+    UE_LOG(LogTemp, Log, TEXT("Stage %d cleared!"), StageIndex);
 
-	if (CurrentStageIndex < LoadedStages.Num())
-	{
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    if (DataManager)
+    {
+        //DataManager->UpdateStageProgress(StageIndex, true);
+        DataManager->SaveGameData();
+    }
 
-			CurrentStage = World->SpawnActor<ANDStage>(ANDStage::StaticClass(), SpawnParams);
-			CurrentStage->Initialize(LoadedStages[CurrentStageIndex]);
-			CurrentStage->StartStage();
-
-			//EventManager->OnStageStart.Broadcast();
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("No more stages to create!"));
-	}
-
-	DataManager->SaveGameData();
+    SetupNextStage();
 }
 
+void ANDStageManager::OnStageFailed(int32 StageIndex)
+{
+    UE_LOG(LogTemp, Log, TEXT("Stage %d failed!"), StageIndex);
 
+    if (EventManager)
+    {
+        EventManager->OnGameOver.Broadcast();
+    }
+}
 
+void ANDStageManager::CleanupCurrentStage()
+{
+    if (CurrentStage)
+    {
+        CurrentStage->EndStage();
+        CurrentStage->Destroy();
+        CurrentStage = nullptr;
+    }
+}
+
+void ANDStageManager::SetupNextStage()
+{
+    CurrentStageIndex++;
+    if (LoadedStages.IsValidIndex(CurrentStageIndex))
+    {
+        StartStage(CurrentStageIndex);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("All stages completed!"));
+        if (EventManager)
+        {
+            //EventManager->OnAllStagesCompleted.Broadcast();
+        }
+    }
+}

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Types/NDGameTypes.h"
+#include "Stages/FPlanetInfo.h"
 #include "NDGameInstance.generated.h"
 
 class ANDStageManager;
@@ -29,17 +30,17 @@ public:
 	virtual void Init() override;
 
     // Other Manager Access Functions
-    FORCEINLINE ANDStageManager* GetStageManager()       const { return StageManager; }
-    FORCEINLINE ANDSpawnManager* GetSpawnManager()       const { return SpawnManager; }
-    FORCEINLINE ANDUIManager* GetUIManager()          const { return UIManager; }
-    FORCEINLINE ANDObjectPoolManager* GetObjectManager()      const { return ObjectManager; }
-    FORCEINLINE ANDEffectManager* GetEffectManager()      const { return EffectManager; }
-    FORCEINLINE ANDObjectPoolManager* GetObjectPoolManager()  const { return ObjectManager; }
-    FORCEINLINE UNDDataManager* GetDataManager()        const { return DataManager; }
-    FORCEINLINE UNDEventManager* GetEventManager()       const { return EventManager; }
-    FORCEINLINE UNDScoreManager* GetScoreManager()       const { return ScoreManager; }
-    FORCEINLINE UNDSoundManager* GetSoundManager()       const { return SoundManager; }
-    FORCEINLINE ANDItemManager* GetItemManager()        const { return ItemManager; }
+    FORCEINLINE ANDStageManager*        GetStageManager()       const { return StageManager; }
+    FORCEINLINE ANDSpawnManager*        GetSpawnManager()       const { return SpawnManager; }
+    FORCEINLINE ANDUIManager*           GetUIManager()          const { return UIManager; }
+    FORCEINLINE ANDObjectPoolManager*   GetObjectManager()      const { return ObjectManager; }
+    FORCEINLINE ANDEffectManager*       GetEffectManager()      const { return EffectManager; }
+    FORCEINLINE ANDObjectPoolManager*   GetObjectPoolManager()  const { return ObjectManager; }
+    FORCEINLINE UNDDataManager*         GetDataManager()        const { return DataManager; }
+    FORCEINLINE UNDEventManager*        GetEventManager()       const { return EventManager; }
+    FORCEINLINE UNDScoreManager*        GetScoreManager()       const { return ScoreManager; }
+    FORCEINLINE UNDSoundManager*        GetSoundManager()       const { return SoundManager; }
+    FORCEINLINE ANDItemManager*         GetItemManager()        const { return ItemManager; }
     FORCEINLINE EGameState              GetGameState()          const { return CurrentGameState; }
 
     UFUNCTION(BlueprintCallable, Category = "Game")
@@ -52,6 +53,12 @@ public:
 
     // event handeling level changed
     void OnLevelChanged(const FName& LevelName);
+
+    UFUNCTION(BlueprintCallable, Category = "Planet")
+    TArray<FPlanetInfo> GetPlanetInfos() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Planet")
+    bool IsPlanetUnlocked(int32 PlanetIndex) const;
 
 private:
     template<typename T>
@@ -67,49 +74,43 @@ private:
     typename std::enable_if<!std::is_base_of<AActor, T>::value, T*>::type
         CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName);
 
+    void SetLevelGameModes();
     void StartGame();
     void CheckInitialization();
     bool AreAllManagersInitialized();
+    void InitializePlanetInfos();
 
 private:
 	UPROPERTY()
 	TMap<FName, TSoftClassPtr<AGameModeBase>> LevelGameModes;
 
     UPROPERTY()
-    ANDStageManager* StageManager;
-
+    ANDStageManager*        StageManager;
     UPROPERTY()
-    ANDSpawnManager* SpawnManager;
-
+    ANDSpawnManager*        SpawnManager;
     UPROPERTY()
-    ANDUIManager* UIManager;
-
+    ANDUIManager*           UIManager;
     UPROPERTY()
-    ANDObjectPoolManager* ObjectManager;
-
+    ANDObjectPoolManager*   ObjectManager;
     UPROPERTY()
-    ANDEffectManager* EffectManager;
-
+    ANDEffectManager*       EffectManager;
     UPROPERTY()
-    ANDObjectPoolManager* ObjectPoolManager;
-
+    ANDObjectPoolManager*   ObjectPoolManager;
     UPROPERTY()
-    UNDDataManager* DataManager;
-
+    UNDDataManager*         DataManager;
     UPROPERTY()
-    UNDEventManager* EventManager;
-
+    UNDEventManager*        EventManager;
     UPROPERTY()
-    UNDScoreManager* ScoreManager;
-
+    UNDScoreManager*        ScoreManager;
     UPROPERTY()
-    UNDSoundManager* SoundManager;
-
+    UNDSoundManager*        SoundManager;
     UPROPERTY()
-    ANDItemManager* ItemManager;
+    ANDItemManager*         ItemManager;
 
     EGameState              CurrentGameState;
 
+    UPROPERTY()
+    TArray<FPlanetInfo>     PlanetInfos;
 
     FTimerHandle InitializationTimerHandle;
 

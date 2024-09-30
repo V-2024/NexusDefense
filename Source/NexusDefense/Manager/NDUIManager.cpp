@@ -27,15 +27,17 @@ ANDUIManager::ANDUIManager()
 	GameOverUIWidget			= nullptr;
 	StageSelectWidget			= nullptr;
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_MainmenuWidget.WBP_MainmenuWidget_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_MainmenuWidget.WBP_MainmenuWidget_C"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> StageSelectWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_StageSelectWidget.WBP_StageSelectWidget_C"));
 
-	if (MainMenuWidgetClassFinder.Class)
+	if (MainMenuWidgetClassFinder.Class && StageSelectWidgetClassFinder.Class)
 	{
 		MainMenuWidgetClass = MainMenuWidgetClassFinder.Class;
+		StageSelectUIWidgetClass = StageSelectWidgetClassFinder.Class;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass is not found!"));
+		UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass or StageSelectWidgetClass is not found!"));
 	}
 }
 
@@ -58,6 +60,9 @@ void ANDUIManager::UpdateUI(EGameState NewState)
 		case EGameState::Paused:
 			ShowPauseMenu();
 			break;
+		case EGameState::StageSelect:
+			ShowStageSelectUI();
+			break;
 		case EGameState::GameOver:
 			ShowGameOverUI();
 			break;
@@ -71,7 +76,8 @@ void ANDUIManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UNDEventManager::GetInstance()->OnGameStarted.AddUObject(this, &ANDUIManager::StartUI);
+	//UNDEventManager::GetInstance()->OnGameStarted.AddUObject(this, &ANDUIManager::StartUI);
+	
 
 	if (!Instance)
 	{
