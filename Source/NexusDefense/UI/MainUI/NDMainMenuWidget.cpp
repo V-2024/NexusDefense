@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Manager/NDEventManager.h"
 #include "GameInstance/NDGameInstance.h"
+#include "Manager/NDEventManager.h"
 
 void UNDMainMenuWidget::StartGame()
 {
@@ -13,6 +14,12 @@ void UNDMainMenuWidget::StartGame()
 
     // 레벨 전환
     GameInstance->ChangeGameModeForLevel("StageSelectLevel");
+
+    // GameInstance에서 변경해야할 필요 있음
+    GameInstance->SetGameState(EGameState::StageSelect);
+
+
+    GameInstance->GetEventManager()->TriggerStageSelected(GameInstance->GetGameState());
 }
 
 void UNDMainMenuWidget::ExitGame()
@@ -63,5 +70,4 @@ void UNDMainMenuWidget::NativeConstruct()
 
     // get game instance
     GameInstance = Cast<UNDGameInstance>(GetWorld()->GetGameInstance());
-
 }

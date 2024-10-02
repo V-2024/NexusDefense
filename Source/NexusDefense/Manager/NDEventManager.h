@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Types/NDGametypes.h"
 #include "NDEventManager.generated.h"
 
 // 스테이지 번호 추가 등의 추가정보 파라미터 추가)
@@ -22,6 +23,7 @@ DECLARE_MULTICAST_DELEGATE(FOnGameResumed);
 DECLARE_MULTICAST_DELEGATE(FOnGameOver);
 
 // Stage Events Delegates
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageStageSelected, EGameState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageStarted, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageCompleted, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageEnd, int32);
@@ -78,8 +80,6 @@ class NEXUSDEFENSE_API UNDEventManager : public UObject
     GENERATED_BODY()
 
 public:
-    static UNDEventManager* GetInstance();
-
     // Game Level Change Events
     FOnGameLevelChanged     OnGameLevelChanged;
 
@@ -91,6 +91,7 @@ public:
 
 
     // Stage Events
+    FOnStageStageSelected   OnStageSelected;
     FOnStageStarted         OnStageStarted;
     FOnStageCompleted       OnStageCompleted;
     FOnStageEnd             OnStageEnd;
@@ -155,6 +156,8 @@ public:
 
     void TriggerGameOver();
 
+    void TriggerStageSelected(EGameState GameState);
+
     void TriggerStageStarted(int32 StageNumber);
 
     void TriggerStageCompleted(int32 StageNumber);
@@ -198,8 +201,4 @@ public:
     void TriggerUIInitialized();
 
     void TriggerUIButtonClicked(FName ButtonName);
-
-
-private:
-    static UNDEventManager* Instance;
 };

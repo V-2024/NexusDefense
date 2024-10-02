@@ -7,7 +7,6 @@
 #include "UI/MainUI/NDPauseMenuWidget.h"
 #include "UI/MainUI/NDGameOverUIWidget.h"
 #include "UI/MainUI/NDStageSelectWidget.h"
-#include "Manager/NDEventManager.h"
 
 
 ANDUIManager* ANDUIManager::Instance = nullptr;
@@ -48,7 +47,7 @@ void ANDUIManager::StartUI()
 
 void ANDUIManager::UpdateUI(EGameState NewState)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("UpdateUI"));
 	switch (NewState)
 	{
 		case EGameState::Ready:
@@ -153,6 +152,19 @@ void ANDUIManager::ShowMainMenu()
 	}
 }
 
+void ANDUIManager::ShowStageSelectUI()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ShowStageSelectUI"));
+	if(StageSelectWidget)
+	{
+		StageSelectWidget->AddToViewport();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("StageSelectWidget is not set!"));
+	}
+}
+
 void ANDUIManager::ShowPauseMenu()
 {
 
@@ -168,10 +180,6 @@ void ANDUIManager::ShowGameOverUI()
 
 }
 
-void ANDUIManager::ShowStageSelectUI()
-{
-
-}
 
 void ANDUIManager::CloseMainMenu()
 {

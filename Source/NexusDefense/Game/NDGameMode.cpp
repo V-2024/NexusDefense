@@ -27,5 +27,5 @@ void ANDGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ANDGameMode::StartGame()
 {
-	UNDEventManager::GetInstance()->TriggerGameStarted();
+
 }

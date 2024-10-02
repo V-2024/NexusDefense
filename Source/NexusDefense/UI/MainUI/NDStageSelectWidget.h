@@ -24,20 +24,15 @@ public:
 	void SelectPlanet(int32 PlanetIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "StageSelect")
-	void BackToMainMenu();
-
-	UFUNCTION(BlueprintCallable, Category = "StageSelect")
-	void ZoomToPlanet(int32 PlanetIndex);
-
-	UFUNCTION(BlueprintCallable, Category = "StageSelect")
-	void ZoomOutToPlanets();
+	void OnBackButtonClicked();
 
 private:
 	void InitializePlanets();
 	void UpdatePlanetStates();
 
-	UFUNCTION()
-	void OnBackButtonClicked();
+	void ZoomToPlanet(int32 PlanetIndex);
+	void ZoomOutToPlanets();
+	void BackToMainMenu();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -50,10 +45,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UCanvasPanel* StarSystemCanvas;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Planet", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UNDPlanetWidget> PlanetWidgetClass;
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly)
 	TArray<class UNDPlanetWidget*> PlanetWidgets;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))

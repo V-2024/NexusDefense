@@ -6,17 +6,6 @@
 #include "Item/NDItemBase.h"
 #include "Character/NDCharacterBase.h"
 
-UNDEventManager* UNDEventManager::Instance = nullptr;
-
-UNDEventManager* UNDEventManager::GetInstance()
-{
-    if (!Instance)
-    {
-        Instance = NewObject<UNDEventManager>();
-        Instance->AddToRoot();
-    }
-    return Instance;
-}
 
 void UNDEventManager::SubscribeToEvents()
 {
@@ -51,6 +40,13 @@ void UNDEventManager::TriggerGameResumed()
 void UNDEventManager::TriggerGameOver()
 {
 	OnGameOver.Broadcast();
+}
+
+void UNDEventManager::TriggerStageSelected(EGameState GameState)
+{
+	UE_LOG(LogTemp, Warning, TEXT("TriggerStageSelected"));
+
+	OnStageSelected.Broadcast(GameState);
 }
 
 void UNDEventManager::TriggerStageStarted(int32 StageNumber)

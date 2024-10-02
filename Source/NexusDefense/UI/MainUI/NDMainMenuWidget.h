@@ -8,6 +8,7 @@
 
 class ANDUIManager;
 class UNDGameInstance;
+class UNDEventManager;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDMainMenuWidget : public UUserWidget
@@ -68,4 +69,7 @@ private:
 
 	UPROPERTY()
 	UNDGameInstance* GameInstance;
+
+	UPROPERTY()
+	UNDEventManager* EventManager;
 };

@@ -21,7 +21,6 @@ ANDSpawnManager::ANDSpawnManager()
 	EnemiesSpawned = 0;
 	bIsSpawningActive = false;
 
-	EventManager = UNDEventManager::GetInstance();
 	DataManager = UNDDataManager::GetInstance();
 }
 

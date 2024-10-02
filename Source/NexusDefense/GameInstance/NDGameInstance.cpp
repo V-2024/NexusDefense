@@ -39,21 +39,11 @@ void UNDGameInstance::Init()
 
     InitializeManagers();
 
-    // Subscribe to events
-    if(EventManager)
-	{
-		SubscribeToEvents();
-	}
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("EventManager is null"));
-    }
+    // 주기적으로 초기화 상태를 확인하는 타이머 설정
+    GetTimerManager().SetTimer(InitializationTimerHandle, this, &UNDGameInstance::CheckInitialization, InitializationCheckInterval, true);
 
     SetLevelGameModes();
     InitializePlanetInfos();
-    
-    // 주기적으로 초기화 상태를 확인하는 타이머 설정
-    GetTimerManager().SetTimer(InitializationTimerHandle, this, &UNDGameInstance::CheckInitialization, InitializationCheckInterval, true);
 }
 
 void UNDGameInstance::CheckInitialization()
@@ -118,6 +108,16 @@ void UNDGameInstance::StartGame()
 	{
 		UIManager->UpdateUI(CurrentGameState);
 	}
+
+    // Subscribe to events
+    if (EventManager)
+    {
+        SubscribeToEvents();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("EventManager is null"));
+    }
 }
 
 
@@ -151,7 +151,25 @@ void UNDGameInstance::SetGameState(EGameState NewState)
 
 void UNDGameInstance::SubscribeToEvents()
 {
-    
+    if (EventManager && UIManager)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Subscribing to events"));
+        EventManager->OnStageSelected.AddUObject(UIManager, &ANDUIManager::UpdateUI);
+
+        // 바인딩 확인
+        if (EventManager->OnStageSelected.IsBound())
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Successfully bound to OnStageSelected"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Failed to bind to OnStageSelected"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("EventManager or UIManager is null in SubscribeToEvents"));
+    }
 }
 
 void UNDGameInstance::UnsubscribeFromEvents()
