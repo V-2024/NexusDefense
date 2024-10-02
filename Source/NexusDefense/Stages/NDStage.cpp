@@ -19,8 +19,8 @@ void ANDStage::BeginPlay()
 {
     Super::BeginPlay();
 
-    EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
-    DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
+    //EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
+    //DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
     ScoreManager = UNDScoreManager::GetInstance();
 }
 

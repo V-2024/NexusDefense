@@ -19,11 +19,11 @@ void ANDStageManager::BeginPlay()
 {
     Super::BeginPlay();
 
-    EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
-    DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
+    //EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
+    //DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
 
-    SpawnManager = Cast<ANDSpawnManager>(GetGameInstance()->GetSubsystem<ANDSpawnManager>());
-    ObjectPoolManager = Cast<ANDObjectPoolManager>(GetGameInstance()->GetSubsystem<ANDObjectPoolManager>());
+    //SpawnManager = Cast<ANDSpawnManager>(GetGameInstance()->GetSubsystem<ANDSpawnManager>());
+    //ObjectPoolManager = Cast<ANDObjectPoolManager>(GetGameInstance()->GetSubsystem<ANDObjectPoolManager>());
 
     if (EventManager)
     {
