@@ -17,6 +17,13 @@ void UNDEventManager::UnsubscribeFromEvents()
 
 }
 
+void UNDEventManager::TriggerStartLevel()
+{
+	UE_LOG(LogTemp, Warning, TEXT("TriggerStartLevel"));
+
+	OnStartLevel.Broadcast();
+}
+
 void UNDEventManager::TriggerGameLevelChanged(const FName& NewLevel)
 {
 	OnGameLevelChanged.Broadcast(NewLevel);

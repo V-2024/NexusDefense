@@ -29,6 +29,8 @@ public:
     UNDGameInstance();
 	virtual void Init() override;
 
+    virtual void Shutdown() override;
+
     // Other Manager Access Functions
     FORCEINLINE ANDStageManager*        GetStageManager()       const { return StageManager; }
     FORCEINLINE ANDSpawnManager*        GetSpawnManager()       const { return SpawnManager; }
@@ -50,6 +52,8 @@ public:
     void SubscribeToEvents();
     void UnsubscribeFromEvents();
     void InitializeManagers();
+    void CleanupManagers();
+    void CleanupOnGameEnd();
 
     // event handeling level changed
     void OnLevelChanged(const FName& LevelName);
@@ -59,6 +63,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Planet")
     bool IsPlanetUnlocked(int32 PlanetIndex) const;
+
+    void TriggerGameStartedEvent();
+    void TriggerSelectStageEvent();
 
 private:
     template<typename T>
@@ -113,6 +120,8 @@ private:
     TArray<FPlanetInfo>     PlanetInfos;
 
     FTimerHandle InitializationTimerHandle;
+
+    FName CurrentLevelName;
 
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     float InitializationCheckInterval = 0.5f; // 초기화 상태 확인 간격 (초)

@@ -25,7 +25,9 @@ public:
 	// get instance
 	FORCEINLINE static ANDUIManager* GetInstance() { return Instance; }
 
+	UFUNCTION()
 	void StartUI();
+	UFUNCTION()
 	void UpdateUI(EGameState NewState);
 
 	

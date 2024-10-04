@@ -17,34 +17,39 @@
 
 UNDGameInstance::UNDGameInstance()
 {
-    StageManager        = nullptr;
-    SpawnManager        = nullptr;
-    UIManager           = nullptr;
-    ObjectManager       = nullptr;
-    EffectManager       = nullptr;
-    DataManager         = nullptr;
-    EventManager        = nullptr;
-    ScoreManager        = nullptr;
-    SoundManager        = nullptr;
-    ItemManager         = nullptr;
+    
 }
 
 void UNDGameInstance::Init()
 {
 	Super::Init();
 
-    // Add all the game modes for the levels
-    LevelGameModes.Add("StartLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDGameMode")));
-    LevelGameModes.Add("EnemyTestLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDInStageGameMode")));
+    StageManager = nullptr;
+    SpawnManager = nullptr;
+    UIManager = nullptr;
+    ObjectManager = nullptr;
+    EffectManager = nullptr;
+    DataManager = nullptr;
+    EventManager = nullptr;
+    ScoreManager = nullptr;
+    SoundManager = nullptr;
+    ItemManager = nullptr;
+
+    PlanetInfos.Empty();
+    LevelGameModes.Empty();
+    CurrentGameState = EGameState::Ready;
+    CurrentLevelName = NAME_None;
+    InitializationTimer = 0.0f;
 
     InitializeManagers();
+    SetLevelGameModes();
+    InitializePlanetInfos();
 
     // 주기적으로 초기화 상태를 확인하는 타이머 설정
     GetTimerManager().SetTimer(InitializationTimerHandle, this, &UNDGameInstance::CheckInitialization, InitializationCheckInterval, true);
-
-    SetLevelGameModes();
-    InitializePlanetInfos();
 }
+
+
 
 void UNDGameInstance::CheckInitialization()
 {
@@ -53,6 +58,7 @@ void UNDGameInstance::CheckInitialization()
     if (AreAllManagersInitialized() && GetWorld() && GetWorld()->bIsWorldInitialized)
     {
         GetTimerManager().ClearTimer(InitializationTimerHandle);
+        SubscribeToEvents();
         StartGame();
     }
     else if (InitializationTimer >= MaxInitializationTime)
@@ -96,7 +102,7 @@ void UNDGameInstance::InitializePlanetInfos()
 
 void UNDGameInstance::SetLevelGameModes()
 {
-    LevelGameModes.Add("StartLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDGameMode")));
+    LevelGameModes.Add("StartLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDStartLevelGameMode")));
 	LevelGameModes.Add("StageSelectLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDInStageGameMode")));
 }
 
@@ -104,19 +110,27 @@ void UNDGameInstance::StartGame()
 {
     CurrentGameState = EGameState::Ready;
 
-    if (UIManager)
-	{
-		UIManager->UpdateUI(CurrentGameState);
-	}
-
-    // Subscribe to events
-    if (EventManager)
+    // 현재 레벨 이름 가져오기
+    UWorld* World = GetWorld();
+    if (World)
     {
-        SubscribeToEvents();
+        CurrentLevelName = World->GetCurrentLevel()->GetOutermost()->GetFName();
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("EventManager is null"));
+        UE_LOG(LogTemp, Error, TEXT("StartGame: World is null"));
+    }
+
+    // "StartLevel"에서만 타이틀 UI 표시
+    if (CurrentLevelName == "/Game/NexusDefense/Maps/UEDPIE_0_StartLevel" && UIManager)
+    {
+        UE_LOG(LogTemp, Log, TEXT("StartGame: Showing main menu"));
+
+        TriggerGameStartedEvent();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("StartGame: Starting game"));
     }
 }
 
@@ -155,6 +169,7 @@ void UNDGameInstance::SubscribeToEvents()
     {
         UE_LOG(LogTemp, Warning, TEXT("Subscribing to events"));
         EventManager->OnStageSelected.AddUObject(UIManager, &ANDUIManager::UpdateUI);
+        EventManager->OnStartLevel.AddUObject(UIManager, &ANDUIManager::StartUI);
 
         // 바인딩 확인
         if (EventManager->OnStageSelected.IsBound())
@@ -165,6 +180,15 @@ void UNDGameInstance::SubscribeToEvents()
         {
             UE_LOG(LogTemp, Error, TEXT("Failed to bind to OnStageSelected"));
         }
+
+        if(EventManager->OnStartLevel.IsBound())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Successfully bound to OnStartLevel"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to bind to OnStartLevel"));
+		}
     }
     else
     {
@@ -176,12 +200,28 @@ void UNDGameInstance::UnsubscribeFromEvents()
 {
 	if (EventManager)
 	{
-		EventManager->UnsubscribeFromEvents();
+        EventManager->OnStageSelected.Clear();
+        EventManager->OnStartLevel.Clear();
 	}
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("EventManager is null in UnsubscribeFromEvents"));
+    }
 }
 
 void UNDGameInstance::InitializeManagers()
 {
+    if (EventManager) EventManager->ConditionalBeginDestroy();
+    if (UIManager) UIManager->ConditionalBeginDestroy();
+    if (StageManager) StageManager->ConditionalBeginDestroy();
+    if (SpawnManager) SpawnManager->ConditionalBeginDestroy();
+    if (ObjectManager) ObjectManager->ConditionalBeginDestroy();
+    if (EffectManager) EffectManager->ConditionalBeginDestroy();
+    if (DataManager) DataManager->ConditionalBeginDestroy();
+    if (ScoreManager) ScoreManager->ConditionalBeginDestroy();
+    if (SoundManager) SoundManager->ConditionalBeginDestroy();
+    if (ItemManager) ItemManager->ConditionalBeginDestroy();
+
     CreateManager<ANDStageManager>(StageManager, ANDStageManager::StaticClass(), "StageManager");
     CreateManager<ANDSpawnManager>(SpawnManager, ANDSpawnManager::StaticClass(), "SpawnManager");
     CreateManager<ANDUIManager>(UIManager, ANDUIManager::StaticClass(), "UIManager");
@@ -192,6 +232,52 @@ void UNDGameInstance::InitializeManagers()
     CreateManager<UNDScoreManager>(ScoreManager, UNDScoreManager::StaticClass(), "ScoreManager");
     CreateManager<UNDSoundManager>(SoundManager, UNDSoundManager::StaticClass(), "SoundManager");
     CreateManager<ANDItemManager>(ItemManager, ANDItemManager::StaticClass(), "ItemManager");
+}
+
+void UNDGameInstance::CleanupManagers()
+{
+    if (EventManager)
+	{
+		UnsubscribeFromEvents();
+	}
+
+	if (StageManager) StageManager->ConditionalBeginDestroy();
+	if (SpawnManager) SpawnManager->ConditionalBeginDestroy();
+	if (UIManager) UIManager->ConditionalBeginDestroy();
+	if (ObjectManager) ObjectManager->ConditionalBeginDestroy();
+	if (EffectManager) EffectManager->ConditionalBeginDestroy();
+	if (DataManager) DataManager->ConditionalBeginDestroy();
+	if (EventManager) EventManager->ConditionalBeginDestroy();
+	if (ScoreManager) ScoreManager->ConditionalBeginDestroy();
+	if (SoundManager) SoundManager->ConditionalBeginDestroy();
+	if (ItemManager) ItemManager->ConditionalBeginDestroy();
+}
+
+void UNDGameInstance::CleanupOnGameEnd()
+{
+    CleanupManagers();
+
+    // 타이머 해제
+    GetTimerManager().ClearAllTimersForObject(this);
+
+    // 모든 매니저 해제
+    StageManager = nullptr;
+    SpawnManager = nullptr;
+    UIManager = nullptr;
+    ObjectManager = nullptr;
+    EffectManager = nullptr;
+    DataManager = nullptr;
+    EventManager = nullptr;
+    ScoreManager = nullptr;
+    SoundManager = nullptr;
+    ItemManager = nullptr;
+
+    // 기타 정리 작업
+    PlanetInfos.Empty();
+    LevelGameModes.Empty();
+    CurrentGameState = EGameState::Ready;
+    CurrentLevelName = NAME_None;
+    InitializationTimer = 0.0f;
 }
 
 void UNDGameInstance::OnLevelChanged(const FName& LevelName)
@@ -213,6 +299,32 @@ bool UNDGameInstance::IsPlanetUnlocked(int32 PlanetIndex) const
     }
 
     return false;
+}
+
+void UNDGameInstance::TriggerGameStartedEvent()
+{
+    if (EventManager)
+	{
+		EventManager->TriggerStartLevel();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TriggerGameStartedEvent: EventManager is null"));
+	}
+}
+
+void UNDGameInstance::TriggerSelectStageEvent()
+{
+    SetGameState(EGameState::StageSelect);
+
+    if (EventManager)
+	{
+		EventManager->TriggerStageSelected(CurrentGameState);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TriggerSelectStageEvent: EventManager is null"));
+	}
 }
 
 template<typename T>
@@ -268,4 +380,31 @@ typename std::enable_if<!std::is_base_of<AActor, T>::value, T*>::type
 UNDGameInstance::CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName)
 {
     return NewObject<T>(this, ManagerClass, ManagerName);
+}
+
+void UNDGameInstance::Shutdown()
+{
+    Super::Shutdown();
+
+    // 타이머 해제
+    GetTimerManager().ClearAllTimersForObject(this);
+
+    // 모든 매니저 해제
+    StageManager = nullptr;
+    SpawnManager = nullptr;
+    UIManager = nullptr;
+    ObjectManager = nullptr;
+    EffectManager = nullptr;
+    DataManager = nullptr;
+    EventManager = nullptr;
+    ScoreManager = nullptr;
+    SoundManager = nullptr;
+    ItemManager = nullptr;
+
+    // 기타 정리 작업
+    PlanetInfos.Empty();
+    LevelGameModes.Empty();
+    CurrentGameState = EGameState::Ready;
+    CurrentLevelName = NAME_None;
+    InitializationTimer = 0.0f;
 }

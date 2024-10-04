@@ -13,6 +13,8 @@ class ANDEnemyBase;
 class ANDItemBase;
 class ANDCharacterBase;
 
+DECLARE_MULTICAST_DELEGATE(FOnStartLevel);
+
 // Game Level Change Events Delegates
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnGameLevelChanged, const FName&);
 
@@ -23,7 +25,7 @@ DECLARE_MULTICAST_DELEGATE(FOnGameResumed);
 DECLARE_MULTICAST_DELEGATE(FOnGameOver);
 
 // Stage Events Delegates
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageStageSelected, EGameState);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageSelected, EGameState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageStarted, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageCompleted, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageEnd, int32);
@@ -80,6 +82,8 @@ class NEXUSDEFENSE_API UNDEventManager : public UObject
     GENERATED_BODY()
 
 public:
+    FOnStartLevel		    OnStartLevel;
+
     // Game Level Change Events
     FOnGameLevelChanged     OnGameLevelChanged;
 
@@ -91,7 +95,7 @@ public:
 
 
     // Stage Events
-    FOnStageStageSelected   OnStageSelected;
+    FOnStageSelected        OnStageSelected;
     FOnStageStarted         OnStageStarted;
     FOnStageCompleted       OnStageCompleted;
     FOnStageEnd             OnStageEnd;
@@ -144,6 +148,8 @@ public:
     void SubscribeToEvents();
 
     void UnsubscribeFromEvents();
+
+    void TriggerStartLevel();
 
     // Event Trigger Methods
     void TriggerGameLevelChanged(const FName& NewLevel);
