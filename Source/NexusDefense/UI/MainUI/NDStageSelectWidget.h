@@ -6,12 +6,14 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
+#include "Stages/FPlanetinfo.h"
 #include "NDStageSelectWidget.generated.h"
 
 
 class UNDPlanetWidget;
 class UNDPlanetDetailWidget;
 class UNDGameInstance;
+class UNDStageManager;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDStageSelectWidget : public UUserWidget
@@ -25,6 +27,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "StageSelect")
 	void OnBackButtonClicked();
+
+	void OnPlanetClicked(int32 PlanetIndex);
 
 private:
 	void InitializePlanets();
@@ -58,8 +62,14 @@ protected:
 	class UTextBlock* TotalScoreText;
 
 private:
+	//UPROPERTY()
+	//class UNDGameInstance* GameInstance;
+
 	UPROPERTY()
-	class UNDGameInstance* GameInstance;
+	class UNDStageManager* StageManager;
+
+	UPROPERTY()
+	TArray<FPlanetInfo>     PlanetInfos;
 
 	int32 CurrentSelectedPlanetIndex;
 	bool bIsZoomedIn = false;

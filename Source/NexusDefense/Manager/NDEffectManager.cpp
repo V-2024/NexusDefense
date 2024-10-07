@@ -2,28 +2,18 @@
 #include "NDObjectPoolManager.h"
 #include "Particles/ParticleSystemComponent.h"
 
-ANDEffectManager::ANDEffectManager()
+UNDEffectManager::UNDEffectManager()
 {
-    PrimaryActorTick.bCanEverTick = true;
+
 }
 
-void ANDEffectManager::Initialize(ANDObjectPoolManager* PoolManager)
+void UNDEffectManager::Initialize(UNDObjectPoolManager* PoolManager)
 {
     ObjectPoolManager = PoolManager;
 }
 
-void ANDEffectManager::BeginPlay()
-{
-    Super::BeginPlay();
-}
 
-void ANDEffectManager::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-    UpdateActiveEffects(DeltaTime);
-}
-
-void ANDEffectManager::PlayEffect(UParticleSystem* EffectTemplate, const FVector& Location, const FRotator& Rotation, float Duration)
+void UNDEffectManager::PlayEffect(UParticleSystem* EffectTemplate, const FVector& Location, const FRotator& Rotation, float Duration)
 {
     if (EffectTemplate && ObjectPoolManager)
     {
@@ -47,7 +37,7 @@ void ANDEffectManager::PlayEffect(UParticleSystem* EffectTemplate, const FVector
     }
 }
 
-void ANDEffectManager::StopEffect(UParticleSystemComponent* EffectComponent)
+void UNDEffectManager::StopEffect(UParticleSystemComponent* EffectComponent)
 {
     if (EffectComponent)
     {
@@ -57,17 +47,17 @@ void ANDEffectManager::StopEffect(UParticleSystemComponent* EffectComponent)
     }
 }
 
-void ANDEffectManager::UpdateActiveEffects(float DeltaTime)
+void UNDEffectManager::UpdateActiveEffects(float DeltaTime)
 {
     // 필요한 경우 여기에 활성 효과 업데이트 로직을 추가합니다.
 }
 
-void ANDEffectManager::SetWeatherEffect(UParticleSystem* WeatherEffect)
+void UNDEffectManager::SetWeatherEffect(UParticleSystem* WeatherEffect)
 {
     // 날씨 효과 구현
 }
 
-void ANDEffectManager::UpdateDayNightCycle(float TimeOfDay)
+void UNDEffectManager::UpdateDayNightCycle(float TimeOfDay)
 {
     // 주야 사이클 업데이트 구현
 }

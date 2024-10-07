@@ -7,8 +7,8 @@
 
 class UNDEventManager;
 class UNDDataManager;
-class ANDSpawnManager;
-class ANDObjectPoolManager;
+class UNDSpawnManager;
+class UNDObjectPoolManager;
 class UNDScoreManager;
 
 UCLASS()
@@ -22,7 +22,7 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
-    void Initialize(UStageData* InStageData, ANDSpawnManager* InSpawnManager, ANDObjectPoolManager* InObjectPoolManager);
+    void Initialize(UStageData* InStageData, UNDSpawnManager* InSpawnManager, UNDObjectPoolManager* InObjectPoolManager);
     void StartStage();
     void EndStage();
     void PauseStage();
@@ -63,10 +63,10 @@ private:
     UNDDataManager* DataManager;
 
     UPROPERTY()
-    ANDSpawnManager* SpawnManager;
+    UNDSpawnManager* SpawnManager;
 
     UPROPERTY()
-    ANDObjectPoolManager* ObjectPoolManager;
+    UNDObjectPoolManager* ObjectPoolManager;
 
     UPROPERTY()
     UNDScoreManager* ScoreManager;

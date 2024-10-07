@@ -6,7 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "NDSoundManager.generated.h"
 
-class ANDObjectPoolManager;
+class UNDObjectPoolManager;
 class UAudioComponent;
 
 UCLASS()
@@ -17,7 +17,7 @@ class NEXUSDEFENSE_API UNDSoundManager : public UObject
 public:
     UNDSoundManager();
 
-    void Initialize(ANDObjectPoolManager* PoolManager);
+    void Initialize(UNDObjectPoolManager* PoolManager);
 
     UFUNCTION(BlueprintCallable, Category = "Sound")
     void PlaySound(USoundBase* Sound, const FVector& Location, float VolumeMultiplier = 1.0f, float PitchMultiplier = 1.0f);
@@ -33,7 +33,7 @@ public:
 
 private:
     UPROPERTY()
-    ANDObjectPoolManager* ObjectPoolManager;
+    UNDObjectPoolManager* ObjectPoolManager;
 
     UPROPERTY()
     TArray<UAudioComponent*> ActiveSounds;

@@ -1,22 +1,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UObject/NoExportTypes.h"
 #include "NDEffectManager.generated.h"
 
-class ANDObjectPoolManager;
+class UNDObjectPoolManager;
 class UParticleSystemComponent;
 
 UCLASS()
-class NEXUSDEFENSE_API ANDEffectManager : public AActor
+class NEXUSDEFENSE_API UNDEffectManager : public UObject
 {
     GENERATED_BODY()
 
 public:
-    ANDEffectManager();
-    static ANDEffectManager* GetInstance();
+    UNDEffectManager();
 
-    void Initialize(ANDObjectPoolManager* PoolManager);
+    void Initialize(UNDObjectPoolManager* PoolManager);
 
     UFUNCTION(BlueprintCallable, Category = "Effects")
     void PlayEffect(UParticleSystem* EffectTemplate, const FVector& Location, const FRotator& Rotation, float Duration = 0.0f);
@@ -27,13 +26,10 @@ public:
     void SetWeatherEffect(UParticleSystem* WeatherEffect);
     void UpdateDayNightCycle(float TimeOfDay);
 
-protected:
-    virtual void BeginPlay() override;
-    virtual void Tick(float DeltaTime) override;
 
 private:
     UPROPERTY()
-    ANDObjectPoolManager* ObjectPoolManager;
+    UNDObjectPoolManager* ObjectPoolManager;
 
     UPROPERTY()
     TArray<UParticleSystemComponent*> ActiveEffects;

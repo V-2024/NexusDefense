@@ -9,38 +9,37 @@
 #include "Kismet/GameplayStatics.h"
 
 
-ANDStageManager::ANDStageManager()
+UNDStageManager::UNDStageManager()
 {
-    PrimaryActorTick.bCanEverTick = false;
     CurrentStageIndex = -1;
 }
 
-void ANDStageManager::BeginPlay()
-{
-    Super::BeginPlay();
+//void ANDStageManager::BeginPlay()
+//{
+//    Super::BeginPlay();
+//
+//    //EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
+//    //DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
+//
+//    //SpawnManager = Cast<ANDSpawnManager>(GetGameInstance()->GetSubsystem<ANDSpawnManager>());
+//    //ObjectPoolManager = Cast<ANDObjectPoolManager>(GetGameInstance()->GetSubsystem<ANDObjectPoolManager>());
+//
+//    if (EventManager)
+//    {
+//        EventManager->OnStageCompleted.AddUObject(this, &ANDStageManager::OnStageCleared);
+//        EventManager->OnStageEnd.AddUObject(this, &ANDStageManager::OnStageFailed);
+//    }
+//
+//    LoadStageData();
+//}
 
-    //EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
-    //DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
+//void ANDStageManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+//{
+//    Super::EndPlay(EndPlayReason);
+//    CleanupCurrentStage();
+//}
 
-    //SpawnManager = Cast<ANDSpawnManager>(GetGameInstance()->GetSubsystem<ANDSpawnManager>());
-    //ObjectPoolManager = Cast<ANDObjectPoolManager>(GetGameInstance()->GetSubsystem<ANDObjectPoolManager>());
-
-    if (EventManager)
-    {
-        EventManager->OnStageCompleted.AddUObject(this, &ANDStageManager::OnStageCleared);
-        EventManager->OnStageEnd.AddUObject(this, &ANDStageManager::OnStageFailed);
-    }
-
-    LoadStageData();
-}
-
-void ANDStageManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-    Super::EndPlay(EndPlayReason);
-    CleanupCurrentStage();
-}
-
-void ANDStageManager::LoadStageData()
+void UNDStageManager::LoadStageData()
 {
     FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
     IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
@@ -61,7 +60,7 @@ void ANDStageManager::LoadStageData()
     }
 }
 
-void ANDStageManager::StartStage(int32 StageIndex)
+void UNDStageManager::StartStage(int32 StageIndex)
 {
     if (!LoadedStages.IsValidIndex(StageIndex))
     {
@@ -76,7 +75,7 @@ void ANDStageManager::StartStage(int32 StageIndex)
     if (World)
     {
         FActorSpawnParameters SpawnParams;
-        SpawnParams.Owner = this;
+        //SpawnParams.Owner = this;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
         CurrentStage = World->SpawnActor<ANDStage>(ANDStage::StaticClass(), SpawnParams);
@@ -93,7 +92,7 @@ void ANDStageManager::StartStage(int32 StageIndex)
     }
 }
 
-void ANDStageManager::EndCurrentStage()
+void UNDStageManager::EndCurrentStage()
 {
     if (CurrentStage)
     {
@@ -102,7 +101,7 @@ void ANDStageManager::EndCurrentStage()
     }
 }
 
-void ANDStageManager::OnStageCleared(int32 StageIndex)
+void UNDStageManager::OnStageCleared(int32 StageIndex)
 {
     UE_LOG(LogTemp, Log, TEXT("Stage %d cleared!"), StageIndex);
 
@@ -115,7 +114,7 @@ void ANDStageManager::OnStageCleared(int32 StageIndex)
     SetupNextStage();
 }
 
-void ANDStageManager::OnStageFailed(int32 StageIndex)
+void UNDStageManager::OnStageFailed(int32 StageIndex)
 {
     UE_LOG(LogTemp, Log, TEXT("Stage %d failed!"), StageIndex);
 
@@ -125,7 +124,33 @@ void ANDStageManager::OnStageFailed(int32 StageIndex)
     }
 }
 
-void ANDStageManager::CleanupCurrentStage()
+TArray<FPlanetInfo> UNDStageManager::GetPlanetInfos() const
+{
+    return PlanetInfos;
+}
+
+bool UNDStageManager::IsPlanetUnlocked(int32 PlanetIndex) const
+{
+    if (PlanetInfos.IsValidIndex(PlanetIndex))
+    {
+        return PlanetInfos[PlanetIndex].bIsUnlocked;
+    }
+
+    return false;
+}
+
+//void UNDStageManager::OnPlanetClicked(int32 PlanetIndex)
+//{
+//    if (PlanetInfos.IsValidIndex(PlanetIndex))
+//	{
+//		if (PlanetInfos[PlanetIndex].bIsUnlocked)
+//		{
+//			//EventManager->OnPlanetClicked.Broadcast(PlanetIndex);
+//		}
+//	}
+//}
+
+void UNDStageManager::CleanupCurrentStage()
 {
     if (CurrentStage)
     {
@@ -135,7 +160,30 @@ void ANDStageManager::CleanupCurrentStage()
     }
 }
 
-void ANDStageManager::SetupNextStage()
+void UNDStageManager::InitializePlanetInfos()
+{
+    // Initialized the planet information
+    // In practice, we need to load from a datatable or external file
+    FPlanetInfo Planet1;
+    Planet1.PlanetName = TEXT("Terra Prime");
+    Planet1.Description = TEXT("A lush, Earth-like planet teeming with life.");
+    Planet1.bIsUnlocked = true;
+    Planet1.Position = FVector2D(100, 100);
+    Planet1.StageIDs = { 1, 2, 3 };
+    PlanetInfos.Add(Planet1);
+
+    FPlanetInfo Planet2;
+    Planet2.PlanetName = TEXT("Frozen Helios");
+    Planet2.Description = TEXT("An icy world with hidden resources beneath its surface.");
+    Planet2.bIsUnlocked = false;
+    Planet2.Position = FVector2D(300, 200);
+    Planet2.StageIDs = { 4, 5, 6 };
+    PlanetInfos.Add(Planet2);
+
+    // more planets...
+}
+
+void UNDStageManager::SetupNextStage()
 {
     CurrentStageIndex++;
     if (LoadedStages.IsValidIndex(CurrentStageIndex))

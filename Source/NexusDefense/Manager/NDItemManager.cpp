@@ -6,14 +6,13 @@
 #include "Manager/NDObjectPoolManager.h"
 
 // Sets default values
-ANDItemManager::ANDItemManager()
+UNDItemManager::UNDItemManager()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+
 
 }
 
-void ANDItemManager::Initialize(ANDObjectPoolManager* ObjectManager)
+void UNDItemManager::Initialize(UNDObjectPoolManager* ObjectManager)
 {
 	if (ObjectManager)
 	{
@@ -21,7 +20,7 @@ void ANDItemManager::Initialize(ANDObjectPoolManager* ObjectManager)
 	}
 }
 
-void ANDItemManager::RegisterItem(ANDItemBase* Item)
+void UNDItemManager::RegisterItem(ANDItemBase* Item)
 {
 	if (Item)
 	{
@@ -29,7 +28,7 @@ void ANDItemManager::RegisterItem(ANDItemBase* Item)
 	}
 }
 
-void ANDItemManager::UnregisterItem(ANDItemBase* Item)
+void UNDItemManager::UnregisterItem(ANDItemBase* Item)
 {
 	if (Item)
 	{
@@ -37,7 +36,7 @@ void ANDItemManager::UnregisterItem(ANDItemBase* Item)
 	}
 }
 
-void ANDItemManager::ProcessItemEffect(ANDItemBase* Item, ANDCharacterBase* Character)
+void UNDItemManager::ProcessItemEffect(ANDItemBase* Item, ANDCharacterBase* Character)
 {
 	if (Item && Character)
 	{
@@ -46,19 +45,5 @@ void ANDItemManager::ProcessItemEffect(ANDItemBase* Item, ANDCharacterBase* Char
 		Item->Destroy();
 		UE_LOG(LogTemp, Log, TEXT("Hit with %s"), *GetName());
 	}
-}
-
-// Called when the game starts or when spawned
-void ANDItemManager::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ANDItemManager::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 

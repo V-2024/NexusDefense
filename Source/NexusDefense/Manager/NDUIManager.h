@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UObject/NoExportTypes.h"
 #include "Types/NDGameTypes.h"
 #include "NDUIManager.generated.h"
 
@@ -14,16 +14,13 @@ class UNDGameOverUIWidget;
 class UNDStageSelectWidget;
 
 UCLASS()
-class NEXUSDEFENSE_API ANDUIManager : public AActor
+class NEXUSDEFENSE_API UNDUIManager : public UObject
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ANDUIManager();
-
-	// get instance
-	FORCEINLINE static ANDUIManager* GetInstance() { return Instance; }
+	UNDUIManager();
 
 	UFUNCTION()
 	void StartUI();
@@ -38,12 +35,13 @@ public:
 	void CloseGameUI();
 	void CloseGameOverUI();
 	void CloseStageSelectUI();
+	void OnPlanetClicked(int32 PlanetIndex);
 
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	FORCEINLINE UNDMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidget; }
+	FORCEINLINE UNDPauseMenuWidget* GetPauseMenuWidget() const { return PauseMenuWidget; }
+	FORCEINLINE UNDGameUIWidget* GetGameUIWidget() const { return GameUIWidget; }
+	FORCEINLINE UNDGameOverUIWidget* GetGameOverUIWidget() const { return GameOverUIWidget; }
+	FORCEINLINE UNDStageSelectWidget* GetStageSelectWidget() const { return StageSelectWidget; }
 
 private:
 	void CreateWidgets();
@@ -78,6 +76,4 @@ private:
 	UNDGameOverUIWidget*						GameOverUIWidget;
 
 	UNDStageSelectWidget*						StageSelectWidget;
-
-	static ANDUIManager*						Instance;
 };

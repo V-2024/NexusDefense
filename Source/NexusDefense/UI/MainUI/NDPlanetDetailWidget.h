@@ -18,8 +18,6 @@ class NEXUSDEFENSE_API UNDPlanetDetailWidget : public UUserWidget
 public:
 	void SetPlanetInfo(const FPlanetInfo& InPlanetInfo);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Planet")
-	void OnPlanetInfoUpdated();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -42,7 +40,7 @@ protected:
 	class UTextBlock* PlanetDescriptionText;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UVerticalBox* StageButtonContainer;
+	class UScrollBox* StageButtonContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Planet")
 	TSubclassOf<class UNDStageButtonWidget> StageButtonWidgetClass;

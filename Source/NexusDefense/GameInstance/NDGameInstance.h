@@ -5,20 +5,20 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Types/NDGameTypes.h"
-#include "Stages/FPlanetInfo.h"
 #include "NDGameInstance.generated.h"
 
-class ANDStageManager;
-class ANDSpawnManager;
-class ANDUIManager;
-class ANDObjectPoolManager;
-class ANDEffectManager;
-class ANDObjectPoolManager;
+class UNDStageManager;
+class UNDSpawnManager;
+class UNDUIManager;
+class UNDObjectPoolManager;
+class UNDEffectManager;
+class UNDObjectPoolManager;
 class UNDDataManager;
 class UNDEventManager;
 class UNDScoreManager;
 class UNDSoundManager;
-class ANDItemManager;
+class UNDItemManager;
+struct FPlanetInfo;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDGameInstance : public UGameInstance
@@ -28,21 +28,21 @@ class NEXUSDEFENSE_API UNDGameInstance : public UGameInstance
 public:
     UNDGameInstance();
 	virtual void Init() override;
-
+    virtual void OnStart() override;
     virtual void Shutdown() override;
 
     // Other Manager Access Functions
-    FORCEINLINE ANDStageManager*        GetStageManager()       const { return StageManager; }
-    FORCEINLINE ANDSpawnManager*        GetSpawnManager()       const { return SpawnManager; }
-    FORCEINLINE ANDUIManager*           GetUIManager()          const { return UIManager; }
-    FORCEINLINE ANDObjectPoolManager*   GetObjectManager()      const { return ObjectManager; }
-    FORCEINLINE ANDEffectManager*       GetEffectManager()      const { return EffectManager; }
-    FORCEINLINE ANDObjectPoolManager*   GetObjectPoolManager()  const { return ObjectManager; }
+    FORCEINLINE UNDStageManager*        GetStageManager()       const { return StageManager; }
+    FORCEINLINE UNDSpawnManager*        GetSpawnManager()       const { return SpawnManager; }
+    FORCEINLINE UNDUIManager*           GetUIManager()          const { return UIManager; }
+    FORCEINLINE UNDObjectPoolManager*   GetObjectManager()      const { return ObjectManager; }
+    FORCEINLINE UNDEffectManager*       GetEffectManager()      const { return EffectManager; }
+    FORCEINLINE UNDObjectPoolManager*   GetObjectPoolManager()  const { return ObjectManager; }
     FORCEINLINE UNDDataManager*         GetDataManager()        const { return DataManager; }
     FORCEINLINE UNDEventManager*        GetEventManager()       const { return EventManager; }
     FORCEINLINE UNDScoreManager*        GetScoreManager()       const { return ScoreManager; }
     FORCEINLINE UNDSoundManager*        GetSoundManager()       const { return SoundManager; }
-    FORCEINLINE ANDItemManager*         GetItemManager()        const { return ItemManager; }
+    FORCEINLINE UNDItemManager*         GetItemManager()        const { return ItemManager; }
     FORCEINLINE EGameState              GetGameState()          const { return CurrentGameState; }
 
     UFUNCTION(BlueprintCallable, Category = "Game")
@@ -53,56 +53,40 @@ public:
     void UnsubscribeFromEvents();
     void InitializeManagers();
     void CleanupManagers();
-    void CleanupOnGameEnd();
 
     // event handeling level changed
     void OnLevelChanged(const FName& LevelName);
 
-    UFUNCTION(BlueprintCallable, Category = "Planet")
-    TArray<FPlanetInfo> GetPlanetInfos() const;
-
-    UFUNCTION(BlueprintCallable, Category = "Planet")
-    bool IsPlanetUnlocked(int32 PlanetIndex) const;
-
     void TriggerGameStartedEvent();
     void TriggerSelectStageEvent();
+    TArray<FPlanetInfo> TriggerGetPlanetInfosEvent() const;
+    void TriggerPlanetClickedEvent(int32 PlanetIndex);
 
 private:
     template<typename T>
     void CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass, FName ManagerName);
 
-    // Helper Function for CreateManager
-    template<typename T>
-    typename std::enable_if<std::is_base_of<AActor, T>::value, T*>::type
-        CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName);
-
-    // Helper Function for CreateManager
-    template<typename T>
-    typename std::enable_if<!std::is_base_of<AActor, T>::value, T*>::type
-        CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName);
-
     void SetLevelGameModes();
     void StartGame();
     void CheckInitialization();
     bool AreAllManagersInitialized();
-    void InitializePlanetInfos();
 
 private:
 	UPROPERTY()
 	TMap<FName, TSoftClassPtr<AGameModeBase>> LevelGameModes;
 
     UPROPERTY()
-    ANDStageManager*        StageManager;
+    UNDStageManager*        StageManager;
     UPROPERTY()
-    ANDSpawnManager*        SpawnManager;
+    UNDSpawnManager*        SpawnManager;
     UPROPERTY()
-    ANDUIManager*           UIManager;
+    UNDUIManager*           UIManager;
     UPROPERTY()
-    ANDObjectPoolManager*   ObjectManager;
+    UNDObjectPoolManager*   ObjectManager;
     UPROPERTY()
-    ANDEffectManager*       EffectManager;
+    UNDEffectManager*       EffectManager;
     UPROPERTY()
-    ANDObjectPoolManager*   ObjectPoolManager;
+    UNDObjectPoolManager*   ObjectPoolManager;
     UPROPERTY()
     UNDDataManager*         DataManager;
     UPROPERTY()
@@ -112,12 +96,9 @@ private:
     UPROPERTY()
     UNDSoundManager*        SoundManager;
     UPROPERTY()
-    ANDItemManager*         ItemManager;
+    UNDItemManager*         ItemManager;
 
     EGameState              CurrentGameState;
-
-    UPROPERTY()
-    TArray<FPlanetInfo>     PlanetInfos;
 
     FTimerHandle InitializationTimerHandle;
 
@@ -131,3 +112,13 @@ private:
 
     float InitializationTimer = 0.0f;
 };
+
+template<typename T>
+inline void UNDGameInstance::CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass, FName ManagerName)
+{
+    if (!ManagerPtr)
+	{
+		ManagerPtr = NewObject<T>(this, ManagerClass, ManagerName);
+		//ManagerPtr->Initialize();
+	}
+}

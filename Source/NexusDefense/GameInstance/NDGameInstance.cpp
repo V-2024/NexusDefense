@@ -3,6 +3,7 @@
 
 #include "GameInstance/NDGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Interfaces/NDManagerInterface.h"
 #include "Manager/NDStageManager.h"
 #include "Manager/NDUIManager.h"
 #include "Manager/NDSpawnManager.h"
@@ -15,35 +16,42 @@
 #include "Manager/NDItemManager.h"
 
 
-UNDGameInstance::UNDGameInstance()
+UNDGameInstance::UNDGameInstance() : InitializationCheckInterval(0.1f), MaxInitializationTime(10.0f)
 {
-    
+	StageManager = nullptr;
+	SpawnManager = nullptr;
+	UIManager = nullptr;
+	ObjectManager = nullptr;
+	EffectManager = nullptr;
+	DataManager = nullptr;
+	EventManager = nullptr;
+	ScoreManager = nullptr;
+	SoundManager = nullptr;
+	ItemManager = nullptr;
+	CurrentGameState = EGameState::Ready;
+	CurrentLevelName = NAME_None;
+	InitializationTimer = 0.0f;
 }
+
 
 void UNDGameInstance::Init()
 {
 	Super::Init();
 
-    StageManager = nullptr;
-    SpawnManager = nullptr;
-    UIManager = nullptr;
-    ObjectManager = nullptr;
-    EffectManager = nullptr;
-    DataManager = nullptr;
-    EventManager = nullptr;
-    ScoreManager = nullptr;
-    SoundManager = nullptr;
-    ItemManager = nullptr;
-
-    PlanetInfos.Empty();
     LevelGameModes.Empty();
     CurrentGameState = EGameState::Ready;
     CurrentLevelName = NAME_None;
     InitializationTimer = 0.0f;
 
+}
+
+void UNDGameInstance::OnStart()
+{
+	Super::OnStart();
+
+	// 게임 시작 시 초기화 상태 확인
     InitializeManagers();
     SetLevelGameModes();
-    InitializePlanetInfos();
 
     // 주기적으로 초기화 상태를 확인하는 타이머 설정
     GetTimerManager().SetTimer(InitializationTimerHandle, this, &UNDGameInstance::CheckInitialization, InitializationCheckInterval, true);
@@ -58,7 +66,7 @@ void UNDGameInstance::CheckInitialization()
     if (AreAllManagersInitialized() && GetWorld() && GetWorld()->bIsWorldInitialized)
     {
         GetTimerManager().ClearTimer(InitializationTimerHandle);
-        SubscribeToEvents();
+        
         StartGame();
     }
     else if (InitializationTimer >= MaxInitializationTime)
@@ -77,33 +85,12 @@ bool UNDGameInstance::AreAllManagersInitialized()
         SoundManager && ItemManager;
 }
 
-void UNDGameInstance::InitializePlanetInfos()
-{
-    // Initialized the planet information
-    // In practice, we need to load from a datatable or external file
-    FPlanetInfo Planet1;
-    Planet1.PlanetName = TEXT("Terra Prime");
-    Planet1.Description = TEXT("A lush, Earth-like planet teeming with life.");
-    Planet1.bIsUnlocked = true;
-    Planet1.Position = FVector2D(100, 100);
-    Planet1.StageIDs = { 1, 2, 3 };
-    PlanetInfos.Add(Planet1);
 
-    FPlanetInfo Planet2;
-    Planet2.PlanetName = TEXT("Frozen Helios");
-    Planet2.Description = TEXT("An icy world with hidden resources beneath its surface.");
-    Planet2.bIsUnlocked = false;
-    Planet2.Position = FVector2D(300, 200);
-    Planet2.StageIDs = { 4, 5, 6 };
-    PlanetInfos.Add(Planet2);
-
-    // more planets...
-}
 
 void UNDGameInstance::SetLevelGameModes()
 {
     LevelGameModes.Add("StartLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDStartLevelGameMode")));
-	LevelGameModes.Add("StageSelectLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDInStageGameMode")));
+	LevelGameModes.Add("StageSelectLevel", TSoftClassPtr<AGameModeBase>(FSoftClassPath("/Script/NexusDefense.NDStageSelectedGameMode")));
 }
 
 void UNDGameInstance::StartGame()
@@ -168,8 +155,12 @@ void UNDGameInstance::SubscribeToEvents()
     if (EventManager && UIManager)
     {
         UE_LOG(LogTemp, Warning, TEXT("Subscribing to events"));
-        EventManager->OnStageSelected.AddUObject(UIManager, &ANDUIManager::UpdateUI);
-        EventManager->OnStartLevel.AddUObject(UIManager, &ANDUIManager::StartUI);
+        UE_LOG(LogTemp, Warning, TEXT("UIManager address: %p"), UIManager);
+
+        EventManager->OnStageSelected.AddUObject(UIManager, &UNDUIManager::UpdateUI);
+        EventManager->OnStartLevel.AddUObject(UIManager, &UNDUIManager::StartUI);
+        EventManager->OnGetPlanetInfos.BindUObject(StageManager, &UNDStageManager::GetPlanetInfos);
+        EventManager->OnPlanetClicked.AddUObject(UIManager, &UNDUIManager::OnPlanetClicked);
 
         // 바인딩 확인
         if (EventManager->OnStageSelected.IsBound())
@@ -200,8 +191,8 @@ void UNDGameInstance::UnsubscribeFromEvents()
 {
 	if (EventManager)
 	{
-        EventManager->OnStageSelected.Clear();
-        EventManager->OnStartLevel.Clear();
+        EventManager->OnStageSelected.RemoveAll(UIManager);
+        EventManager->OnStartLevel.RemoveAll(UIManager);
 	}
     else
     {
@@ -211,94 +202,48 @@ void UNDGameInstance::UnsubscribeFromEvents()
 
 void UNDGameInstance::InitializeManagers()
 {
-    if (EventManager) EventManager->ConditionalBeginDestroy();
-    if (UIManager) UIManager->ConditionalBeginDestroy();
-    if (StageManager) StageManager->ConditionalBeginDestroy();
-    if (SpawnManager) SpawnManager->ConditionalBeginDestroy();
-    if (ObjectManager) ObjectManager->ConditionalBeginDestroy();
-    if (EffectManager) EffectManager->ConditionalBeginDestroy();
-    if (DataManager) DataManager->ConditionalBeginDestroy();
-    if (ScoreManager) ScoreManager->ConditionalBeginDestroy();
-    if (SoundManager) SoundManager->ConditionalBeginDestroy();
-    if (ItemManager) ItemManager->ConditionalBeginDestroy();
+    CleanupManagers();
 
-    CreateManager<ANDStageManager>(StageManager, ANDStageManager::StaticClass(), "StageManager");
-    CreateManager<ANDSpawnManager>(SpawnManager, ANDSpawnManager::StaticClass(), "SpawnManager");
-    CreateManager<ANDUIManager>(UIManager, ANDUIManager::StaticClass(), "UIManager");
-    CreateManager<ANDObjectPoolManager>(ObjectManager, ANDObjectPoolManager::StaticClass(), "ObjectManager");
-    CreateManager<ANDEffectManager>(EffectManager, ANDEffectManager::StaticClass(), "EffectManager");
+    CreateManager<UNDStageManager>(StageManager, UNDStageManager::StaticClass(), "StageManager");
+    CreateManager<UNDSpawnManager>(SpawnManager, UNDSpawnManager::StaticClass(), "SpawnManager");
+    CreateManager<UNDUIManager>(UIManager, UNDUIManager::StaticClass(), "UIManager");
+    CreateManager<UNDObjectPoolManager>(ObjectManager, UNDObjectPoolManager::StaticClass(), "ObjectManager");
+    CreateManager<UNDEffectManager>(EffectManager, UNDEffectManager::StaticClass(), "EffectManager");
     CreateManager<UNDDataManager>(DataManager, UNDDataManager::StaticClass(), "DataManager");
     CreateManager<UNDEventManager>(EventManager, UNDEventManager::StaticClass(), "EventManager");
     CreateManager<UNDScoreManager>(ScoreManager, UNDScoreManager::StaticClass(), "ScoreManager");
     CreateManager<UNDSoundManager>(SoundManager, UNDSoundManager::StaticClass(), "SoundManager");
-    CreateManager<ANDItemManager>(ItemManager, ANDItemManager::StaticClass(), "ItemManager");
+    CreateManager<UNDItemManager>(ItemManager, UNDItemManager::StaticClass(), "ItemManager");
+
+    SubscribeToEvents();
 }
 
 void UNDGameInstance::CleanupManagers()
 {
     if (EventManager)
 	{
+        UE_LOG(LogTemp, Warning, TEXT("Cleaning up subscribe"));
 		UnsubscribeFromEvents();
 	}
 
-	if (StageManager) StageManager->ConditionalBeginDestroy();
-	if (SpawnManager) SpawnManager->ConditionalBeginDestroy();
-	if (UIManager) UIManager->ConditionalBeginDestroy();
-	if (ObjectManager) ObjectManager->ConditionalBeginDestroy();
-	if (EffectManager) EffectManager->ConditionalBeginDestroy();
-	if (DataManager) DataManager->ConditionalBeginDestroy();
-	if (EventManager) EventManager->ConditionalBeginDestroy();
-	if (ScoreManager) ScoreManager->ConditionalBeginDestroy();
-	if (SoundManager) SoundManager->ConditionalBeginDestroy();
-	if (ItemManager) ItemManager->ConditionalBeginDestroy();
-}
-
-void UNDGameInstance::CleanupOnGameEnd()
-{
-    CleanupManagers();
-
-    // 타이머 해제
-    GetTimerManager().ClearAllTimersForObject(this);
-
     // 모든 매니저 해제
-    StageManager = nullptr;
-    SpawnManager = nullptr;
-    UIManager = nullptr;
-    ObjectManager = nullptr;
-    EffectManager = nullptr;
-    DataManager = nullptr;
-    EventManager = nullptr;
-    ScoreManager = nullptr;
-    SoundManager = nullptr;
-    ItemManager = nullptr;
-
-    // 기타 정리 작업
-    PlanetInfos.Empty();
-    LevelGameModes.Empty();
-    CurrentGameState = EGameState::Ready;
-    CurrentLevelName = NAME_None;
-    InitializationTimer = 0.0f;
+    if (StageManager) { StageManager->RemoveFromRoot(); StageManager = nullptr; }
+    if (SpawnManager) { SpawnManager->RemoveFromRoot(); SpawnManager = nullptr; }
+    if (UIManager) { UIManager->RemoveFromRoot(); UIManager = nullptr; }
+    if (ObjectManager) { ObjectManager->RemoveFromRoot(); ObjectManager = nullptr; }
+    if (EffectManager) { EffectManager->RemoveFromRoot(); EffectManager = nullptr; }
+    if (DataManager) { DataManager->RemoveFromRoot();  DataManager = nullptr; }
+    if (EventManager) { EventManager->RemoveFromRoot();  EventManager = nullptr; }
+    if (ScoreManager) { ScoreManager->RemoveFromRoot();  ScoreManager = nullptr; }
+    if (SoundManager) { SoundManager->RemoveFromRoot();  SoundManager = nullptr; }
+    if (ItemManager) { ItemManager->RemoveFromRoot(); ItemManager = nullptr; }
 }
+
 
 void UNDGameInstance::OnLevelChanged(const FName& LevelName)
 {
     
 
-}
-
-TArray<FPlanetInfo> UNDGameInstance::GetPlanetInfos() const
-{
-    return PlanetInfos;
-}
-
-bool UNDGameInstance::IsPlanetUnlocked(int32 PlanetIndex) const
-{
-    if (PlanetInfos.IsValidIndex(PlanetIndex))
-    {
-        return PlanetInfos[PlanetIndex].bIsUnlocked;
-    }
-
-    return false;
 }
 
 void UNDGameInstance::TriggerGameStartedEvent()
@@ -317,92 +262,55 @@ void UNDGameInstance::TriggerSelectStageEvent()
 {
     SetGameState(EGameState::StageSelect);
 
-    if (EventManager)
+    if (EventManager && UIManager)
 	{
 		EventManager->TriggerStageSelected(CurrentGameState);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("TriggerSelectStageEvent: EventManager is null"));
+		UE_LOG(LogTemp, Error, TEXT("TriggerSelectStageEvent: EventManager or UIManager is null"));
 	}
 }
 
-template<typename T>
-void UNDGameInstance::CreateManager(T*& ManagerPtr, TSubclassOf<T> ManagerClass, FName ManagerName)
+TArray<FPlanetInfo> UNDGameInstance::TriggerGetPlanetInfosEvent() const
 {
-    if (!ManagerClass)
-    {
-        UE_LOG(LogTemp, Error, TEXT("CreateManager: ManagerClass is null for %s"), *T::StaticClass()->GetName());
-        return;
-    }
+    if (EventManager)
+	{
+		return EventManager->TriggerGetPlanetInfos();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TriggerGetPlanetInfosEvent: EventManager is null"));
+	}
 
-    if (ManagerPtr)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("CreateManager: Manager already exists for %s"), *T::StaticClass()->GetName());
-        return;
-    }
-
-    ManagerPtr = CreateManagerInternal<T>(ManagerClass, ManagerName);
-
-    if (ManagerPtr)
-    {
-        UE_LOG(LogTemp, Log, TEXT("CreateManager: Successfully created manager of class %s"), *ManagerClass->GetName());
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("CreateManager: Failed to create manager of class %s"), *ManagerClass->GetName());
-    }
+	return TArray<FPlanetInfo>();
 }
 
-template<typename T>
-typename std::enable_if<std::is_base_of<AActor, T>::value, T*>::type
-UNDGameInstance::CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName)
+void UNDGameInstance::TriggerPlanetClickedEvent(int32 PlanetIndex)
 {
-    UWorld* GameWorld = GetWorld();
-    if (!GameWorld)
-    {
-        UE_LOG(LogTemp, Error, TEXT("CreateManagerInternal: World is null"));
-        return nullptr;
-    }
-
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    if (ManagerName != NAME_None)
-    {
-        SpawnParams.Name = ManagerName;
-    }
-
-    return GameWorld->SpawnActor<T>(ManagerClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	if (EventManager)
+	{
+		EventManager->TriggerPlanetClicked(PlanetIndex);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TriggerPlanetClickedEvent: EventManager is null"));
+	}
 }
 
-template<typename T>
-typename std::enable_if<!std::is_base_of<AActor, T>::value, T*>::type
-UNDGameInstance::CreateManagerInternal(TSubclassOf<T> ManagerClass, FName ManagerName)
-{
-    return NewObject<T>(this, ManagerClass, ManagerName);
-}
 
 void UNDGameInstance::Shutdown()
 {
     Super::Shutdown();
 
+    UE_LOG(LogTemp, Warning, TEXT("GameInstance shutting down"));
+
+    CleanupManagers();
+
     // 타이머 해제
     GetTimerManager().ClearAllTimersForObject(this);
 
-    // 모든 매니저 해제
-    StageManager = nullptr;
-    SpawnManager = nullptr;
-    UIManager = nullptr;
-    ObjectManager = nullptr;
-    EffectManager = nullptr;
-    DataManager = nullptr;
-    EventManager = nullptr;
-    ScoreManager = nullptr;
-    SoundManager = nullptr;
-    ItemManager = nullptr;
-
     // 기타 정리 작업
-    PlanetInfos.Empty();
     LevelGameModes.Empty();
     CurrentGameState = EGameState::Ready;
     CurrentLevelName = NAME_None;

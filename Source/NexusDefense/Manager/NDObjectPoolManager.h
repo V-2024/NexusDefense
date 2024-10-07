@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UObject/NoExportTypes.h"
 #include "NDObjectPoolManager.generated.h"
 
-class ANDObjectPoolManager;
+class UNDObjectPoolManager;
 class UAudioComponent;
 class UParticleSystemComponent;
 
@@ -20,14 +20,12 @@ struct FObjectPool
 };
 
 UCLASS()
-class NEXUSDEFENSE_API ANDObjectPoolManager : public AActor
+class NEXUSDEFENSE_API UNDObjectPoolManager : public UObject
 {
     GENERATED_BODY()
 
 public:
-    ANDObjectPoolManager();
-
-    virtual void BeginPlay() override;
+    UNDObjectPoolManager();
 
     UFUNCTION(BlueprintCallable, Category = "Object Pool")
     AActor* GetPooledObject(TSubclassOf<AActor> ActorClass);

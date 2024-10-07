@@ -3,26 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UObject/NoExportTypes.h"
+#include "Stages/FPlanetInfo.h"
 #include "NDStageManager.generated.h"
 
 class UStageData;
 class ANDStage;
 class UNDEventManager;
 class UNDDataManager;
-class ANDObjectPoolManager;
-class ANDSpawnManager;
+class UNDObjectPoolManager;
+class UNDSpawnManager;
 
 UCLASS()
-class NEXUSDEFENSE_API ANDStageManager : public AActor
+class NEXUSDEFENSE_API UNDStageManager : public UObject
 {
 	GENERATED_BODY()
 	
 public:	
-	ANDStageManager();
+	UNDStageManager();
 
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Stage")
 	void StartStage(int32 StageIndex);
@@ -36,6 +35,14 @@ public:
 	UFUNCTION()
 	void OnStageFailed(int32 StageIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "Planet")
+	TArray<FPlanetInfo> GetPlanetInfos() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Planet")
+	bool IsPlanetUnlocked(int32 PlanetIndex) const;
+
+	//void OnPlanetClicked(int32 PlanetIndex);
+
 	void CreateStage(int32 StageIndex);
 
 	void LoadStageData();
@@ -45,8 +52,10 @@ public:
 	ANDStage* GetCurrentStage() const { return CurrentStage; }
 
 private:
+	void InitializePlanetInfos();
 	void CleanupCurrentStage();
 	void SetupNextStage();
+	
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Stage")
@@ -65,10 +74,13 @@ private:
 	UNDDataManager* DataManager;
 
 	UPROPERTY()
-	ANDObjectPoolManager* ObjectPoolManager;
+	UNDObjectPoolManager* ObjectPoolManager;
 
 	UPROPERTY()
-	ANDSpawnManager* SpawnManager;
+	UNDSpawnManager* SpawnManager;
+
+	UPROPERTY()
+	TArray<FPlanetInfo>     PlanetInfos;
 
 	int32 CurrentStageIndex;
 };

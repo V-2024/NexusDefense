@@ -4,6 +4,7 @@
 #include "Manager/NDEventManager.h"
 #include "Enemy/NDEnemyBase.h"
 #include "Item/NDItemBase.h"
+#include "Stages/FPlanetInfo.h"
 #include "Character/NDCharacterBase.h"
 
 
@@ -20,6 +21,15 @@ void UNDEventManager::UnsubscribeFromEvents()
 void UNDEventManager::TriggerStartLevel()
 {
 	UE_LOG(LogTemp, Warning, TEXT("TriggerStartLevel"));
+
+	if (OnStartLevel.IsBound())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnStartLevel is bound"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnStartLevel is not bound"));
+	}
 
 	OnStartLevel.Broadcast();
 }
@@ -49,9 +59,45 @@ void UNDEventManager::TriggerGameOver()
 	OnGameOver.Broadcast();
 }
 
+TArray<FPlanetInfo> UNDEventManager::TriggerGetPlanetInfos()
+{
+	if (OnGetPlanetInfos.IsBound())
+	{
+		return OnGetPlanetInfos.Execute();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnGetPlanetInfos is not bound"));
+		return TArray<FPlanetInfo>();
+	}
+}
+
+void UNDEventManager::TriggerPlanetClicked(int32 PlanetIndex)
+{
+	if (OnPlanetClicked.IsBound())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnPlanetClicked is bound"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnPlanetClicked is not bound"));
+	}
+
+	OnPlanetClicked.Broadcast(PlanetIndex);
+}
+
 void UNDEventManager::TriggerStageSelected(EGameState GameState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("TriggerStageSelected"));
+
+	if(OnStageSelected.IsBound())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnStageSelected is bound"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnStageSelected is not bound"));
+	}
 
 	OnStageSelected.Broadcast(GameState);
 }

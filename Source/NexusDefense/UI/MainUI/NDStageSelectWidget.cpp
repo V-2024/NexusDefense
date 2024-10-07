@@ -5,7 +5,8 @@
 #include "GameInstance/NDGameInstance.h"
 #include "UI/MainUI/NDPlanetWidget.h"
 #include "UI/MainUI/NDPlanetDetailWidget.h"
-#include "Stages/FPlanetInfo.h"
+#include "Components/CanvasPanel.h"
+#include "Manager/NDStageManager.h"
 
 
 
@@ -21,9 +22,10 @@ void UNDStageSelectWidget::SelectPlanet(int32 PlanetIndex)
 void UNDStageSelectWidget::InitializePlanets()
 {
     // GameInstance에서 행성 정보를 가져와 동적으로 PlanetWidgets 생성
-    if (GameInstance && StarSystemCanvas && PlanetWidgetClass)
+    if (StageManager && StarSystemCanvas && PlanetWidgetClass)
     {
-        TArray<FPlanetInfo> PlanetInfos = GameInstance->GetPlanetInfos();
+        //TArray<FPlanetInfo> PlanetInfos = GameInstance->TriggerGetPlanetInfosEvent();
+        PlanetInfos = StageManager->GetPlanetInfos();
         for (int32 i = 0; i < PlanetInfos.Num(); ++i)
         {
             UNDPlanetWidget* PlanetWidget = CreateWidget<UNDPlanetWidget>(this, PlanetWidgetClass);
@@ -31,11 +33,16 @@ void UNDStageSelectWidget::InitializePlanets()
             {
                 PlanetWidget->SetPlanetInfo(PlanetInfos[i]);
                 PlanetWidget->SetPlanetIndex(i);
+                
                 StarSystemCanvas->AddChild(PlanetWidget);
                 PlanetWidgets.Add(PlanetWidget);
 
-                // 행성 위치 설정 (원형 배치 등)
-                // PlanetWidget->SetRenderTransform(...);
+                // 원형 배치 로직
+                FVector2D Center(StarSystemCanvas->GetCachedGeometry().GetLocalSize() / 2);
+                float Radius = FMath::Min(Center.X, Center.Y) * 0.8f;
+                float Angle = (2 * PI * i) / PlanetInfos.Num();
+                FVector2D Position = Center + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Radius;
+                PlanetWidget->SetRenderTranslation(Position);
             }
         }
     }
@@ -44,11 +51,11 @@ void UNDStageSelectWidget::InitializePlanets()
 void UNDStageSelectWidget::UpdatePlanetStates()
 {
     // GameInstance에서 행성 상태 정보를 가져와 각 PlanetWidget 업데이트
-    if (GameInstance)
+    if (StageManager)
     {
         for (UNDPlanetWidget* PlanetWidget : PlanetWidgets)
         {
-            bool bIsUnlocked = GameInstance->IsPlanetUnlocked(PlanetWidget->GetPlanetIndex());
+            bool bIsUnlocked = StageManager->IsPlanetUnlocked(PlanetWidget->GetPlanetIndex());
             PlanetWidget->SetUnlocked(bIsUnlocked);
         }
     }
@@ -66,15 +73,33 @@ void UNDStageSelectWidget::OnBackButtonClicked()
     }
 }
 
+void UNDStageSelectWidget::OnPlanetClicked(int32 PlanetIndex)
+{
+    if (PlanetInfos.IsValidIndex(PlanetIndex))
+	{
+		if (PlanetInfos[PlanetIndex].bIsUnlocked)
+		{
+            PlanetDetailWidget->SetPlanetInfo(PlanetWidgets[PlanetIndex]->GetPlanetInfo());
+            PlanetDetailWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+}
+
 void UNDStageSelectWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    GameInstance = Cast<UNDGameInstance>(GetGameInstance());
+    //GameInstance = Cast<UNDGameInstance>(GetGameInstance());
 
+    StageManager = GetGameInstance<UNDGameInstance>()->GetStageManager();
 
     InitializePlanets();
     UpdatePlanetStates();
+
+    if (PlanetDetailWidget)
+    {
+        PlanetDetailWidget->SetVisibility(ESlateVisibility::Collapsed);
+    }
 }
 
 void UNDStageSelectWidget::NativeDestruct()
@@ -85,17 +110,20 @@ void UNDStageSelectWidget::NativeDestruct()
 
 void UNDStageSelectWidget::BackToMainMenu()
 {
-    if (GameInstance)
+    /*if (GameInstance)
     {
         GameInstance->ReturnToMainMenu();
-    }
+    }*/
 }
 
 void UNDStageSelectWidget::ZoomToPlanet(int32 PlanetIndex)
 {
-    if (PlanetDetailWidget && GameInstance)
+    if (PlanetDetailWidget && StageManager)
     {
-        FPlanetInfo PlanetInfo = GameInstance->GetPlanetInfos()[PlanetIndex];
+        FPlanetInfo PlanetInfo = StageManager->GetPlanetInfos()[PlanetIndex];
+
+        //PlanetWidgets[PlanetIndex]->SetVisibility(ESlateVisibility::Hidden);
+
         PlanetDetailWidget->SetPlanetInfo(PlanetInfo);
         PlanetDetailWidget->SetVisibility(ESlateVisibility::Visible);
 

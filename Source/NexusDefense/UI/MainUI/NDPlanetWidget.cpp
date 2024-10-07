@@ -37,3 +37,8 @@ void UNDPlanetWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 }
+
+void UNDPlanetWidget::OnPlanetButtonClicked()
+{
+
+}

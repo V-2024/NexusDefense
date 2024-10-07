@@ -8,7 +8,7 @@
 #include "Character/NDCharacterBase.h"
 #include "NDItemBase.generated.h"
 
-class ANDItemManager;
+class UNDItemManager;
 class ANDCharacterBase;
 
 UCLASS()
@@ -26,12 +26,12 @@ public:
 	UFUNCTION()
 	virtual void ApplyEffectToCharacter(ANDCharacterBase* Character);
 
-	void SetItemManager(ANDItemManager* Manager) { ItemManager = Manager; }
+	void SetItemManager(UNDItemManager* Manager) { ItemManager = Manager; }
 
 protected:
 
 	UPROPERTY()
-	ANDItemManager* ItemManager;
+	UNDItemManager* ItemManager;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USphereComponent* CollisionComponent;

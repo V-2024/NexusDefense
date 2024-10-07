@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "NDMainMenuWidget.generated.h"
 
-class ANDUIManager;
+class UNDUIManager;
 class UNDGameInstance;
 class UNDEventManager;
 
@@ -65,7 +65,7 @@ private:
 	class UWidget* SettingsMenu;
 
 	UPROPERTY()
-	ANDUIManager* UIManager;
+	UNDUIManager* UIManager;
 
 	UPROPERTY()
 	UNDGameInstance* GameInstance;

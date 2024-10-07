@@ -3,23 +3,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UObject/NoExportTypes.h"
 #include "NDItemManager.generated.h"
 
 class ANDItemBase;
 class ANDCharacterBase;
-class ANDObjectPoolManager;
+class UNDObjectPoolManager;
 
 UCLASS()
-class NEXUSDEFENSE_API ANDItemManager : public AActor
+class NEXUSDEFENSE_API UNDItemManager : public UObject
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ANDItemManager();
+	UNDItemManager();
 
-	void Initialize(ANDObjectPoolManager* ObjectManager);
+	void Initialize(UNDObjectPoolManager* ObjectManager);
 	void RegisterItem(ANDItemBase* Item);
 	void UnregisterItem(ANDItemBase* Item);
 	void ProcessItemEffect(ANDItemBase* Item, ANDCharacterBase* Character);
@@ -29,14 +29,7 @@ private:
 	TArray<ANDItemBase*> ActiveItems;
 
 	UPROPERTY()
-	ANDObjectPoolManager* ObjectPoolManager;
+	UNDObjectPoolManager* ObjectPoolManager;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };
