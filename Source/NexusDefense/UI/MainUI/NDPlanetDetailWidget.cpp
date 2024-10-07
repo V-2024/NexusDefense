@@ -5,6 +5,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "Components/ScrollBox.h"
 #include "NDStageButtonWidget.h"
 
 void UNDPlanetDetailWidget::SetPlanetInfo(const FPlanetInfo& InPlanetInfo)
@@ -27,7 +28,6 @@ void UNDPlanetDetailWidget::SetPlanetInfo(const FPlanetInfo& InPlanetInfo)
 	}
 
 	UpdateStageButtons();
-	OnPlanetInfoUpdated();
 }
 
 

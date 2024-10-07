@@ -38,7 +38,6 @@ void UNDGameInstance::Init()
 {
 	Super::Init();
 
-    PlanetInfos.Empty();
     LevelGameModes.Empty();
     CurrentGameState = EGameState::Ready;
     CurrentLevelName = NAME_None;
@@ -53,7 +52,6 @@ void UNDGameInstance::OnStart()
 	// 게임 시작 시 초기화 상태 확인
     InitializeManagers();
     SetLevelGameModes();
-    InitializePlanetInfos();
 
     // 주기적으로 초기화 상태를 확인하는 타이머 설정
     GetTimerManager().SetTimer(InitializationTimerHandle, this, &UNDGameInstance::CheckInitialization, InitializationCheckInterval, true);
@@ -87,28 +85,7 @@ bool UNDGameInstance::AreAllManagersInitialized()
         SoundManager && ItemManager;
 }
 
-void UNDGameInstance::InitializePlanetInfos()
-{
-    // Initialized the planet information
-    // In practice, we need to load from a datatable or external file
-    FPlanetInfo Planet1;
-    Planet1.PlanetName = TEXT("Terra Prime");
-    Planet1.Description = TEXT("A lush, Earth-like planet teeming with life.");
-    Planet1.bIsUnlocked = true;
-    Planet1.Position = FVector2D(100, 100);
-    Planet1.StageIDs = { 1, 2, 3 };
-    PlanetInfos.Add(Planet1);
 
-    FPlanetInfo Planet2;
-    Planet2.PlanetName = TEXT("Frozen Helios");
-    Planet2.Description = TEXT("An icy world with hidden resources beneath its surface.");
-    Planet2.bIsUnlocked = false;
-    Planet2.Position = FVector2D(300, 200);
-    Planet2.StageIDs = { 4, 5, 6 };
-    PlanetInfos.Add(Planet2);
-
-    // more planets...
-}
 
 void UNDGameInstance::SetLevelGameModes()
 {
@@ -182,6 +159,8 @@ void UNDGameInstance::SubscribeToEvents()
 
         EventManager->OnStageSelected.AddUObject(UIManager, &UNDUIManager::UpdateUI);
         EventManager->OnStartLevel.AddUObject(UIManager, &UNDUIManager::StartUI);
+        EventManager->OnGetPlanetInfos.BindUObject(StageManager, &UNDStageManager::GetPlanetInfos);
+        EventManager->OnPlanetClicked.AddUObject(UIManager, &UNDUIManager::OnPlanetClicked);
 
         // 바인딩 확인
         if (EventManager->OnStageSelected.IsBound())
@@ -267,21 +246,6 @@ void UNDGameInstance::OnLevelChanged(const FName& LevelName)
 
 }
 
-TArray<FPlanetInfo> UNDGameInstance::GetPlanetInfos() const
-{
-    return PlanetInfos;
-}
-
-bool UNDGameInstance::IsPlanetUnlocked(int32 PlanetIndex) const
-{
-    if (PlanetInfos.IsValidIndex(PlanetIndex))
-    {
-        return PlanetInfos[PlanetIndex].bIsUnlocked;
-    }
-
-    return false;
-}
-
 void UNDGameInstance::TriggerGameStartedEvent()
 {
     if (EventManager)
@@ -308,6 +272,32 @@ void UNDGameInstance::TriggerSelectStageEvent()
 	}
 }
 
+TArray<FPlanetInfo> UNDGameInstance::TriggerGetPlanetInfosEvent() const
+{
+    if (EventManager)
+	{
+		return EventManager->TriggerGetPlanetInfos();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TriggerGetPlanetInfosEvent: EventManager is null"));
+	}
+
+	return TArray<FPlanetInfo>();
+}
+
+void UNDGameInstance::TriggerPlanetClickedEvent(int32 PlanetIndex)
+{
+	if (EventManager)
+	{
+		EventManager->TriggerPlanetClicked(PlanetIndex);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TriggerPlanetClickedEvent: EventManager is null"));
+	}
+}
+
 
 void UNDGameInstance::Shutdown()
 {
@@ -321,7 +311,6 @@ void UNDGameInstance::Shutdown()
     GetTimerManager().ClearAllTimersForObject(this);
 
     // 기타 정리 작업
-    PlanetInfos.Empty();
     LevelGameModes.Empty();
     CurrentGameState = EGameState::Ready;
     CurrentLevelName = NAME_None;

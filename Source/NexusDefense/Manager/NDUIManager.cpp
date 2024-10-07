@@ -205,3 +205,9 @@ void UNDUIManager::CloseStageSelectUI()
 		StageSelectWidget->RemoveFromParent();
 	}
 }
+
+void UNDUIManager::OnPlanetClicked(int32 PlanetIndex)
+{
+	StageSelectWidget->OnPlanetClicked(PlanetIndex);
+}
+

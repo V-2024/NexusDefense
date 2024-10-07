@@ -124,6 +124,32 @@ void UNDStageManager::OnStageFailed(int32 StageIndex)
     }
 }
 
+TArray<FPlanetInfo> UNDStageManager::GetPlanetInfos() const
+{
+    return PlanetInfos;
+}
+
+bool UNDStageManager::IsPlanetUnlocked(int32 PlanetIndex) const
+{
+    if (PlanetInfos.IsValidIndex(PlanetIndex))
+    {
+        return PlanetInfos[PlanetIndex].bIsUnlocked;
+    }
+
+    return false;
+}
+
+//void UNDStageManager::OnPlanetClicked(int32 PlanetIndex)
+//{
+//    if (PlanetInfos.IsValidIndex(PlanetIndex))
+//	{
+//		if (PlanetInfos[PlanetIndex].bIsUnlocked)
+//		{
+//			//EventManager->OnPlanetClicked.Broadcast(PlanetIndex);
+//		}
+//	}
+//}
+
 void UNDStageManager::CleanupCurrentStage()
 {
     if (CurrentStage)
@@ -132,6 +158,29 @@ void UNDStageManager::CleanupCurrentStage()
         CurrentStage->Destroy();
         CurrentStage = nullptr;
     }
+}
+
+void UNDStageManager::InitializePlanetInfos()
+{
+    // Initialized the planet information
+    // In practice, we need to load from a datatable or external file
+    FPlanetInfo Planet1;
+    Planet1.PlanetName = TEXT("Terra Prime");
+    Planet1.Description = TEXT("A lush, Earth-like planet teeming with life.");
+    Planet1.bIsUnlocked = true;
+    Planet1.Position = FVector2D(100, 100);
+    Planet1.StageIDs = { 1, 2, 3 };
+    PlanetInfos.Add(Planet1);
+
+    FPlanetInfo Planet2;
+    Planet2.PlanetName = TEXT("Frozen Helios");
+    Planet2.Description = TEXT("An icy world with hidden resources beneath its surface.");
+    Planet2.bIsUnlocked = false;
+    Planet2.Position = FVector2D(300, 200);
+    Planet2.StageIDs = { 4, 5, 6 };
+    PlanetInfos.Add(Planet2);
+
+    // more planets...
 }
 
 void UNDStageManager::SetupNextStage()

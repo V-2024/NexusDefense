@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Types/NDGameTypes.h"
-#include "Stages/FPlanetInfo.h"
 #include "NDGameInstance.generated.h"
 
 class UNDStageManager;
@@ -19,6 +18,7 @@ class UNDEventManager;
 class UNDScoreManager;
 class UNDSoundManager;
 class UNDItemManager;
+struct FPlanetInfo;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDGameInstance : public UGameInstance
@@ -57,14 +57,10 @@ public:
     // event handeling level changed
     void OnLevelChanged(const FName& LevelName);
 
-    UFUNCTION(BlueprintCallable, Category = "Planet")
-    TArray<FPlanetInfo> GetPlanetInfos() const;
-
-    UFUNCTION(BlueprintCallable, Category = "Planet")
-    bool IsPlanetUnlocked(int32 PlanetIndex) const;
-
     void TriggerGameStartedEvent();
     void TriggerSelectStageEvent();
+    TArray<FPlanetInfo> TriggerGetPlanetInfosEvent() const;
+    void TriggerPlanetClickedEvent(int32 PlanetIndex);
 
 private:
     template<typename T>
@@ -74,7 +70,6 @@ private:
     void StartGame();
     void CheckInitialization();
     bool AreAllManagersInitialized();
-    void InitializePlanetInfos();
 
 private:
 	UPROPERTY()
@@ -104,9 +99,6 @@ private:
     UNDItemManager*         ItemManager;
 
     EGameState              CurrentGameState;
-
-    UPROPERTY()
-    TArray<FPlanetInfo>     PlanetInfos;
 
     FTimerHandle InitializationTimerHandle;
 

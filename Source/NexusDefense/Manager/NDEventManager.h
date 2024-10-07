@@ -12,6 +12,7 @@
 class ANDEnemyBase;
 class ANDItemBase;
 class ANDCharacterBase;
+struct FPlanetInfo;
 
 DECLARE_MULTICAST_DELEGATE(FOnStartLevel);
 
@@ -24,7 +25,11 @@ DECLARE_MULTICAST_DELEGATE(FOnGamePaused);
 DECLARE_MULTICAST_DELEGATE(FOnGameResumed);
 DECLARE_MULTICAST_DELEGATE(FOnGameOver);
 
+// Planet Events Delegates
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlanetClicked, int32);
+
 // Stage Events Delegates
+DECLARE_DELEGATE_RetVal(TArray<FPlanetInfo>, FOnGetPlanetInfos);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageSelected, EGameState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageStarted, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageCompleted, int32);
@@ -93,8 +98,11 @@ public:
     FOnGameResumed          OnGameResumed;
     FOnGameOver             OnGameOver;
 
+    // Planet Events
+    FOnPlanetClicked        OnPlanetClicked;
 
     // Stage Events
+    FOnGetPlanetInfos       OnGetPlanetInfos;
     FOnStageSelected        OnStageSelected;
     FOnStageStarted         OnStageStarted;
     FOnStageCompleted       OnStageCompleted;
@@ -161,6 +169,10 @@ public:
     void TriggerGameResumed();
 
     void TriggerGameOver();
+
+    TArray<FPlanetInfo> TriggerGetPlanetInfos();
+
+    void TriggerPlanetClicked(int32 PlanetIndex);
 
     void TriggerStageSelected(EGameState GameState);
 

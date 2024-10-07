@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Stages/FPlanetInfo.h"
 #include "NDStageManager.generated.h"
 
 class UStageData;
@@ -34,6 +35,14 @@ public:
 	UFUNCTION()
 	void OnStageFailed(int32 StageIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "Planet")
+	TArray<FPlanetInfo> GetPlanetInfos() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Planet")
+	bool IsPlanetUnlocked(int32 PlanetIndex) const;
+
+	//void OnPlanetClicked(int32 PlanetIndex);
+
 	void CreateStage(int32 StageIndex);
 
 	void LoadStageData();
@@ -43,8 +52,10 @@ public:
 	ANDStage* GetCurrentStage() const { return CurrentStage; }
 
 private:
+	void InitializePlanetInfos();
 	void CleanupCurrentStage();
 	void SetupNextStage();
+	
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Stage")
@@ -67,6 +78,9 @@ private:
 
 	UPROPERTY()
 	UNDSpawnManager* SpawnManager;
+
+	UPROPERTY()
+	TArray<FPlanetInfo>     PlanetInfos;
 
 	int32 CurrentStageIndex;
 };

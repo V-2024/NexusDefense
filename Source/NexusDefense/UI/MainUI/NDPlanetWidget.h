@@ -19,13 +19,21 @@ public:
 	void SetUnlocked(bool bInUnlocked);
 	int32 GetPlanetIndex() const { return PlanetIndex; }
 
+	FORCEINLINE FPlanetInfo GetPlanetInfo() const { return PlanetInfo; }
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Planet")
 	void OnPlanetInfoUpdated();
 
 protected:
 	virtual void NativeConstruct() override;
 
+	UFUNCTION()
+	void OnPlanetButtonClicked();
+
 protected:
+	UPROPERTY(meta = (BindWidget))
+	class UButton* PlanetButton;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Planet")
 	FPlanetInfo PlanetInfo;
 

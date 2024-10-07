@@ -35,7 +35,13 @@ public:
 	void CloseGameUI();
 	void CloseGameOverUI();
 	void CloseStageSelectUI();
+	void OnPlanetClicked(int32 PlanetIndex);
 
+	FORCEINLINE UNDMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidget; }
+	FORCEINLINE UNDPauseMenuWidget* GetPauseMenuWidget() const { return PauseMenuWidget; }
+	FORCEINLINE UNDGameUIWidget* GetGameUIWidget() const { return GameUIWidget; }
+	FORCEINLINE UNDGameOverUIWidget* GetGameOverUIWidget() const { return GameOverUIWidget; }
+	FORCEINLINE UNDStageSelectWidget* GetStageSelectWidget() const { return StageSelectWidget; }
 
 private:
 	void CreateWidgets();
