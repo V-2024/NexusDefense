@@ -8,7 +8,7 @@ UNDSoundManager::UNDSoundManager()
 
 }
 
-void UNDSoundManager::Initialize(ANDObjectPoolManager* PoolManager)
+void UNDSoundManager::Initialize(UNDObjectPoolManager* PoolManager)
 {
     ObjectPoolManager = PoolManager;
 }

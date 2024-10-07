@@ -21,6 +21,15 @@ void UNDEventManager::TriggerStartLevel()
 {
 	UE_LOG(LogTemp, Warning, TEXT("TriggerStartLevel"));
 
+	if (OnStartLevel.IsBound())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnStartLevel is bound"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnStartLevel is not bound"));
+	}
+
 	OnStartLevel.Broadcast();
 }
 
@@ -52,6 +61,15 @@ void UNDEventManager::TriggerGameOver()
 void UNDEventManager::TriggerStageSelected(EGameState GameState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("TriggerStageSelected"));
+
+	if(OnStageSelected.IsBound())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnStageSelected is bound"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnStageSelected is not bound"));
+	}
 
 	OnStageSelected.Broadcast(GameState);
 }

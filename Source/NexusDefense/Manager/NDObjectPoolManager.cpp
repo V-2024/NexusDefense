@@ -9,22 +9,13 @@
 // ReturnObjectPool 함수에서 오브젝트 초기화 필요
 // 풀 정책 추가 필요 (LRU, MRU, FIFO, LIFO 등), 현재는 단순히 비활성화 오브젝트 찾아 반환
 
-ANDObjectPoolManager::ANDObjectPoolManager()
+UNDObjectPoolManager::UNDObjectPoolManager()
 {
-    PrimaryActorTick.bCanEverTick = false;
+
 }
 
-void ANDObjectPoolManager::BeginPlay()
-{
-    Super::BeginPlay();
 
-    for (auto ClassToPreload : PreloadClasses)
-    {
-        InitializePool(ClassToPreload, DefaultPoolSize);
-    }
-}
-
-void ANDObjectPoolManager::InitializePool(TSubclassOf<AActor> ActorClass, int32 PoolSize)
+void UNDObjectPoolManager::InitializePool(TSubclassOf<AActor> ActorClass, int32 PoolSize)
 {
     if (!ObjectPools.Contains(ActorClass))
     {
@@ -41,7 +32,7 @@ void ANDObjectPoolManager::InitializePool(TSubclassOf<AActor> ActorClass, int32 
     }
 }
 
-AActor* ANDObjectPoolManager::GetPooledObject(TSubclassOf<AActor> ActorClass)
+AActor* UNDObjectPoolManager::GetPooledObject(TSubclassOf<AActor> ActorClass)
 {
     if (!ObjectPools.Contains(ActorClass))
     {
@@ -72,7 +63,7 @@ AActor* ANDObjectPoolManager::GetPooledObject(TSubclassOf<AActor> ActorClass)
     return nullptr;
 }
 
-void ANDObjectPoolManager::ReturnObjectToPool(AActor* ActorToReturn)
+void UNDObjectPoolManager::ReturnObjectToPool(AActor* ActorToReturn)
 {
     if (ActorToReturn)
     {
@@ -83,7 +74,7 @@ void ANDObjectPoolManager::ReturnObjectToPool(AActor* ActorToReturn)
     }
 }
 
-void ANDObjectPoolManager::ReturnParticleToPool(UParticleSystemComponent* ReturnParticle)
+void UNDObjectPoolManager::ReturnParticleToPool(UParticleSystemComponent* ReturnParticle)
 {
     if (ReturnParticle)
 	{
@@ -94,7 +85,7 @@ void ANDObjectPoolManager::ReturnParticleToPool(UParticleSystemComponent* Return
 	}
 }
 
-void ANDObjectPoolManager::ReturnSoundToPool(UAudioComponent* ReturnSound)
+void UNDObjectPoolManager::ReturnSoundToPool(UAudioComponent* ReturnSound)
 {
     if (ReturnSound)
 	{
@@ -103,7 +94,7 @@ void ANDObjectPoolManager::ReturnSoundToPool(UAudioComponent* ReturnSound)
 	}
 }
 
-AActor* ANDObjectPoolManager::CreateNewObject(TSubclassOf<AActor> ActorClass)
+AActor* UNDObjectPoolManager::CreateNewObject(TSubclassOf<AActor> ActorClass)
 {
     if (ActorClass)
     {

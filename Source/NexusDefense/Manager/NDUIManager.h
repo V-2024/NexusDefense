@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UObject/NoExportTypes.h"
 #include "Types/NDGameTypes.h"
 #include "NDUIManager.generated.h"
 
@@ -14,16 +14,13 @@ class UNDGameOverUIWidget;
 class UNDStageSelectWidget;
 
 UCLASS()
-class NEXUSDEFENSE_API ANDUIManager : public AActor
+class NEXUSDEFENSE_API UNDUIManager : public UObject
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ANDUIManager();
-
-	// get instance
-	FORCEINLINE static ANDUIManager* GetInstance() { return Instance; }
+	UNDUIManager();
 
 	UFUNCTION()
 	void StartUI();
@@ -39,11 +36,6 @@ public:
 	void CloseGameOverUI();
 	void CloseStageSelectUI();
 
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 private:
 	void CreateWidgets();
@@ -78,6 +70,4 @@ private:
 	UNDGameOverUIWidget*						GameOverUIWidget;
 
 	UNDStageSelectWidget*						StageSelectWidget;
-
-	static ANDUIManager*						Instance;
 };

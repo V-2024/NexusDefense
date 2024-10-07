@@ -9,38 +9,37 @@
 #include "Kismet/GameplayStatics.h"
 
 
-ANDStageManager::ANDStageManager()
+UNDStageManager::UNDStageManager()
 {
-    PrimaryActorTick.bCanEverTick = false;
     CurrentStageIndex = -1;
 }
 
-void ANDStageManager::BeginPlay()
-{
-    Super::BeginPlay();
+//void ANDStageManager::BeginPlay()
+//{
+//    Super::BeginPlay();
+//
+//    //EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
+//    //DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
+//
+//    //SpawnManager = Cast<ANDSpawnManager>(GetGameInstance()->GetSubsystem<ANDSpawnManager>());
+//    //ObjectPoolManager = Cast<ANDObjectPoolManager>(GetGameInstance()->GetSubsystem<ANDObjectPoolManager>());
+//
+//    if (EventManager)
+//    {
+//        EventManager->OnStageCompleted.AddUObject(this, &ANDStageManager::OnStageCleared);
+//        EventManager->OnStageEnd.AddUObject(this, &ANDStageManager::OnStageFailed);
+//    }
+//
+//    LoadStageData();
+//}
 
-    //EventManager = Cast<UNDEventManager>(GetGameInstance()->GetSubsystem<UNDEventManager>());
-    //DataManager = Cast<UNDDataManager>(GetGameInstance()->GetSubsystem<UNDDataManager>());
+//void ANDStageManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+//{
+//    Super::EndPlay(EndPlayReason);
+//    CleanupCurrentStage();
+//}
 
-    //SpawnManager = Cast<ANDSpawnManager>(GetGameInstance()->GetSubsystem<ANDSpawnManager>());
-    //ObjectPoolManager = Cast<ANDObjectPoolManager>(GetGameInstance()->GetSubsystem<ANDObjectPoolManager>());
-
-    if (EventManager)
-    {
-        EventManager->OnStageCompleted.AddUObject(this, &ANDStageManager::OnStageCleared);
-        EventManager->OnStageEnd.AddUObject(this, &ANDStageManager::OnStageFailed);
-    }
-
-    LoadStageData();
-}
-
-void ANDStageManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-    Super::EndPlay(EndPlayReason);
-    CleanupCurrentStage();
-}
-
-void ANDStageManager::LoadStageData()
+void UNDStageManager::LoadStageData()
 {
     FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
     IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
@@ -61,7 +60,7 @@ void ANDStageManager::LoadStageData()
     }
 }
 
-void ANDStageManager::StartStage(int32 StageIndex)
+void UNDStageManager::StartStage(int32 StageIndex)
 {
     if (!LoadedStages.IsValidIndex(StageIndex))
     {
@@ -76,7 +75,7 @@ void ANDStageManager::StartStage(int32 StageIndex)
     if (World)
     {
         FActorSpawnParameters SpawnParams;
-        SpawnParams.Owner = this;
+        //SpawnParams.Owner = this;
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
         CurrentStage = World->SpawnActor<ANDStage>(ANDStage::StaticClass(), SpawnParams);
@@ -93,7 +92,7 @@ void ANDStageManager::StartStage(int32 StageIndex)
     }
 }
 
-void ANDStageManager::EndCurrentStage()
+void UNDStageManager::EndCurrentStage()
 {
     if (CurrentStage)
     {
@@ -102,7 +101,7 @@ void ANDStageManager::EndCurrentStage()
     }
 }
 
-void ANDStageManager::OnStageCleared(int32 StageIndex)
+void UNDStageManager::OnStageCleared(int32 StageIndex)
 {
     UE_LOG(LogTemp, Log, TEXT("Stage %d cleared!"), StageIndex);
 
@@ -115,7 +114,7 @@ void ANDStageManager::OnStageCleared(int32 StageIndex)
     SetupNextStage();
 }
 
-void ANDStageManager::OnStageFailed(int32 StageIndex)
+void UNDStageManager::OnStageFailed(int32 StageIndex)
 {
     UE_LOG(LogTemp, Log, TEXT("Stage %d failed!"), StageIndex);
 
@@ -125,7 +124,7 @@ void ANDStageManager::OnStageFailed(int32 StageIndex)
     }
 }
 
-void ANDStageManager::CleanupCurrentStage()
+void UNDStageManager::CleanupCurrentStage()
 {
     if (CurrentStage)
     {
@@ -135,7 +134,7 @@ void ANDStageManager::CleanupCurrentStage()
     }
 }
 
-void ANDStageManager::SetupNextStage()
+void UNDStageManager::SetupNextStage()
 {
     CurrentStageIndex++;
     if (LoadedStages.IsValidIndex(CurrentStageIndex))

@@ -4,19 +4,17 @@
 #include "UI/MainUI/NDMainMenuWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameModeBase.h"
-#include "Manager/NDEventManager.h"
 #include "GameInstance/NDGameInstance.h"
 
 void UNDMainMenuWidget::StartGame()
 {
     UE_LOG(LogTemp, Warning, TEXT("StartGame"));
 
-    // 레벨 전환
-    GameInstance->ChangeGameModeForLevel("StageSelectLevel");
 
     if (GameInstance)
     {
-        GameInstance->TriggerGameStartedEvent();
+        //GameInstance->TriggerSelectStageEvent();
+        GameInstance->ChangeGameModeForLevel("StageSelectLevel");
     }
     else
     {

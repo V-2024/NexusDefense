@@ -8,13 +8,8 @@
 #include "UI/MainUI/NDGameOverUIWidget.h"
 #include "UI/MainUI/NDStageSelectWidget.h"
 
-
-ANDUIManager* ANDUIManager::Instance = nullptr;
-
-ANDUIManager::ANDUIManager()
+UNDUIManager::UNDUIManager()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	MainMenuWidgetClass			= nullptr;
 	GameUIWidgetClass			= nullptr;
 	PauseMenuWidgetClass		= nullptr;
@@ -40,14 +35,16 @@ ANDUIManager::ANDUIManager()
 	}
 }
 
-void ANDUIManager::StartUI()
+void UNDUIManager::StartUI()
 {
 	UpdateUI(EGameState::Ready);
 }
 
-void ANDUIManager::UpdateUI(EGameState NewState)
+void UNDUIManager::UpdateUI(EGameState NewState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UpdateUI"));
+
+	UE_LOG(LogTemp, Warning, TEXT("this UIManager address: %p"), this);
 	switch (NewState)
 	{
 		case EGameState::Ready:
@@ -70,64 +67,35 @@ void ANDUIManager::UpdateUI(EGameState NewState)
 	}
 }
 
-// Called when the game starts or when spawned
-void ANDUIManager::BeginPlay()
+
+void UNDUIManager::CreateWidgets()
 {
-	Super::BeginPlay();
-
-	//UNDEventManager::GetInstance()->OnGameStarted.AddUObject(this, &ANDUIManager::StartUI);
-	
-
-	if (!Instance)
-	{
-		Instance = this;
-	}
-	else
-	{
-		Destroy();
-	}
-
-	CreateWidgets();
+	//if (PauseMenuWidgetClass)
+	//{
+	//	PauseMenuWidget = CreateWidget<UNDPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass);
+	//	//PauseMenuWidget->AddToViewport();
+	//}
+	//if (GameUIWidgetClass)
+	//{
+	//	GameUIWidget = CreateWidget<UNDGameUIWidget>(GetWorld(), GameUIWidgetClass);
+	//	//GameUIWidget->AddToViewport();
+	//}
+	//if (GameOverUIWidgetClass)
+	//{
+	//	GameOverUIWidget = CreateWidget<UNDGameOverUIWidget>(GetWorld(), GameOverUIWidgetClass);
+	//	//GameOverUIWidget->AddToViewport();
+	//}
 }
 
-// Called every frame
-void ANDUIManager::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void ANDUIManager::CreateWidgets()
+void UNDUIManager::ShowMainMenu()
 {
 	if (MainMenuWidgetClass)
 	{
 		MainMenuWidget = CreateWidget<UNDMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
 
 	}
-	if (PauseMenuWidgetClass)
-	{
-		PauseMenuWidget = CreateWidget<UNDPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass);
-		//PauseMenuWidget->AddToViewport();
-	}
-	if (GameUIWidgetClass)
-	{
-		GameUIWidget = CreateWidget<UNDGameUIWidget>(GetWorld(), GameUIWidgetClass);
-		//GameUIWidget->AddToViewport();
-	}
-	if (GameOverUIWidgetClass)
-	{
-		GameOverUIWidget = CreateWidget<UNDGameOverUIWidget>(GetWorld(), GameOverUIWidgetClass);
-		//GameOverUIWidget->AddToViewport();
-	}
-	if (StageSelectUIWidgetClass)
-	{
-		StageSelectWidget = CreateWidget<UNDStageSelectWidget>(GetWorld(), StageSelectUIWidgetClass);
-		//StageSelectUIWidget->AddToViewport();
-	}
-}
 
-void ANDUIManager::ShowMainMenu()
-{
-	if (MainMenuWidgetClass)
+	if (MainMenuWidget)
 	{
 		MainMenuWidget->AddToViewport();
 
@@ -152,9 +120,16 @@ void ANDUIManager::ShowMainMenu()
 	}
 }
 
-void ANDUIManager::ShowStageSelectUI()
+void UNDUIManager::ShowStageSelectUI()
 {
+
+	if (StageSelectUIWidgetClass)
+	{
+		StageSelectWidget = CreateWidget<UNDStageSelectWidget>(GetWorld(), StageSelectUIWidgetClass);
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("ShowStageSelectUI"));
+
 	if(StageSelectWidget)
 	{
 		StageSelectWidget->AddToViewport();
@@ -163,25 +138,35 @@ void ANDUIManager::ShowStageSelectUI()
 	{
 		UE_LOG(LogTemp, Error, TEXT("StageSelectWidget is not set!"));
 	}
+
+	// 입력 모드 설정
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		PlayerController->SetShowMouseCursor(true);
+		FInputModeUIOnly InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PlayerController->SetInputMode(InputMode);
+	}
 }
 
-void ANDUIManager::ShowPauseMenu()
+void UNDUIManager::ShowPauseMenu()
 {
 
 }
 
-void ANDUIManager::ShowGameUI()
+void UNDUIManager::ShowGameUI()
 {
 
 }
 
-void ANDUIManager::ShowGameOverUI()
+void UNDUIManager::ShowGameOverUI()
 {
 
 }
 
 
-void ANDUIManager::CloseMainMenu()
+void UNDUIManager::CloseMainMenu()
 {
 	if (MainMenuWidget)
 	{
@@ -189,7 +174,7 @@ void ANDUIManager::CloseMainMenu()
 	}
 }
 
-void ANDUIManager::ClosePauseMenu()
+void UNDUIManager::ClosePauseMenu()
 {
 	if (PauseMenuWidget)
 	{
@@ -197,7 +182,7 @@ void ANDUIManager::ClosePauseMenu()
 	}
 }
 
-void ANDUIManager::CloseGameUI()
+void UNDUIManager::CloseGameUI()
 {
 	if (GameUIWidget)
 	{
@@ -205,7 +190,7 @@ void ANDUIManager::CloseGameUI()
 	}
 }
 
-void ANDUIManager::CloseGameOverUI()
+void UNDUIManager::CloseGameOverUI()
 {
 	if (GameOverUIWidget)
 	{
@@ -213,7 +198,7 @@ void ANDUIManager::CloseGameOverUI()
 	}
 }
 
-void ANDUIManager::CloseStageSelectUI()
+void UNDUIManager::CloseStageSelectUI()
 {
 	if (StageSelectWidget)
 	{

@@ -34,7 +34,7 @@ void ANDStage::Tick(float DeltaTime)
     }
 }
 
-void ANDStage::Initialize(UStageData* InStageData, ANDSpawnManager* InSpawnManager, ANDObjectPoolManager* InObjectPoolManager)
+void ANDStage::Initialize(UStageData* InStageData, UNDSpawnManager* InSpawnManager, UNDObjectPoolManager* InObjectPoolManager)
 {
     StageData = InStageData;
     SpawnManager = InSpawnManager;

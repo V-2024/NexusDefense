@@ -3,26 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UObject/NoExportTypes.h"
 #include "NDStageManager.generated.h"
 
 class UStageData;
 class ANDStage;
 class UNDEventManager;
 class UNDDataManager;
-class ANDObjectPoolManager;
-class ANDSpawnManager;
+class UNDObjectPoolManager;
+class UNDSpawnManager;
 
 UCLASS()
-class NEXUSDEFENSE_API ANDStageManager : public AActor
+class NEXUSDEFENSE_API UNDStageManager : public UObject
 {
 	GENERATED_BODY()
 	
 public:	
-	ANDStageManager();
+	UNDStageManager();
 
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Stage")
 	void StartStage(int32 StageIndex);
@@ -65,10 +63,10 @@ private:
 	UNDDataManager* DataManager;
 
 	UPROPERTY()
-	ANDObjectPoolManager* ObjectPoolManager;
+	UNDObjectPoolManager* ObjectPoolManager;
 
 	UPROPERTY()
-	ANDSpawnManager* SpawnManager;
+	UNDSpawnManager* SpawnManager;
 
 	int32 CurrentStageIndex;
 };

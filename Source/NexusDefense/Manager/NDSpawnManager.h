@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "UObject/NoExportTypes.h"
 #include "Stages/StageData.h"
 #include "NDSpawnManager.generated.h"
 
@@ -11,19 +11,17 @@ class ANDEnemyBase;
 class ANDStage;
 class UNDEventManager;
 class UNDDataManager;
-class ANDObjectPoolManager;
+class UNDObjectPoolManager;
 
 UCLASS()
-class NEXUSDEFENSE_API ANDSpawnManager : public AActor
+class NEXUSDEFENSE_API UNDSpawnManager : public UObject
 {
 	GENERATED_BODY()
 	
 public:	
-	ANDSpawnManager();
+	UNDSpawnManager();
 
-	virtual void BeginPlay() override;
-
-	void Initialize(ANDStage*, ANDObjectPoolManager*);
+	void Initialize(ANDStage*, UNDObjectPoolManager*);
 	void StartSpawning(ANDStage*, const FWaveInfo&);
 	void StopSpawning();
 
@@ -49,7 +47,7 @@ private:
 	UNDDataManager* DataManager;
 
 	UPROPERTY()
-	ANDObjectPoolManager* ObjectPoolManager;
+	UNDObjectPoolManager* ObjectPoolManager;
 
 	FWaveInfo CurrentWaveInfo;
 	FTimerHandle SpawnTimerHandle;

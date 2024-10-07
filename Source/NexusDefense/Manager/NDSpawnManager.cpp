@@ -15,30 +15,29 @@
 // 현재는 CurrentWaveInfo.SpawnPoints[0]만 사용하도록 되어있음
 
 
-ANDSpawnManager::ANDSpawnManager()
+UNDSpawnManager::UNDSpawnManager()
 {
-	PrimaryActorTick.bCanEverTick = true;
 	EnemiesSpawned = 0;
 	bIsSpawningActive = false;
 
 	DataManager = UNDDataManager::GetInstance();
 }
+//
+//void ANDSpawnManager::BeginPlay()
+//{
+//	Super::BeginPlay();
+//
+//	SetupSpawnPoints();
+//}
 
-void ANDSpawnManager::BeginPlay()
-{
-	Super::BeginPlay();
-
-	SetupSpawnPoints();
-}
-
-void ANDSpawnManager::Initialize(ANDStage* Stage, ANDObjectPoolManager* PoolManager)
+void UNDSpawnManager::Initialize(ANDStage* Stage, UNDObjectPoolManager* PoolManager)
 {
 	CurrentStage = Stage;
 	ObjectPoolManager = PoolManager;
 }
 
 
-void ANDSpawnManager::SetupSpawnPoints()
+void UNDSpawnManager::SetupSpawnPoints()
 {
 	// Find all spawn points in the level with Tag "SpawnPoint"
 	TArray<AActor*> FoundActors;
@@ -47,7 +46,7 @@ void ANDSpawnManager::SetupSpawnPoints()
 	SpawnPoints = FoundActors;
 }
 
-void ANDSpawnManager::StartSpawning(ANDStage* Stage, const FWaveInfo& WaveInfo)
+void UNDSpawnManager::StartSpawning(ANDStage* Stage, const FWaveInfo& WaveInfo)
 {
 	if (SpawnPoints.Num() == 0)
 	{
@@ -59,16 +58,16 @@ void ANDSpawnManager::StartSpawning(ANDStage* Stage, const FWaveInfo& WaveInfo)
 	EnemiesSpawned = 0;
 	bIsSpawningActive = true;
 
-	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ANDSpawnManager::SpawnEnemy, CurrentWaveInfo.SpawnInterval, true);
+	//GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &UNDSpawnManager::SpawnEnemy, CurrentWaveInfo.SpawnInterval, true);
 }
 
-void ANDSpawnManager::StopSpawning()
+void UNDSpawnManager::StopSpawning()
 {
 	bIsSpawningActive = false;
-	GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+	//GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
 }
 
-void ANDSpawnManager::SpawnEnemy()
+void UNDSpawnManager::SpawnEnemy()
 {
 	if (!bIsSpawningActive || EnemiesSpawned >= CurrentWaveInfo.EnemyCount)
 	{
@@ -95,7 +94,7 @@ void ANDSpawnManager::SpawnEnemy()
 		//EventManager->OnObjectSpawned.Broadcast(SpawnedEnemy);
 
 		// Set up a delegate to handle enemy death
-		SpawnedEnemy->OnEnemyDestroyed.AddDynamic(this, &ANDSpawnManager::ReturnEnemyToPool);
+		//SpawnedEnemy->OnEnemyDestroyed.AddDynamic(this, &ANDSpawnManager::ReturnEnemyToPool);
 	}
 
 
@@ -106,7 +105,7 @@ void ANDSpawnManager::SpawnEnemy()
 	}
 }
 
-void ANDSpawnManager::ReturnEnemyToPool(ANDEnemyBase* Enemy)
+void UNDSpawnManager::ReturnEnemyToPool(ANDEnemyBase* Enemy)
 {
 	if (Enemy)
 	{
