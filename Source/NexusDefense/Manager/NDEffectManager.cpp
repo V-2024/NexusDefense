@@ -17,7 +17,7 @@ void UNDEffectManager::PlayEffect(UParticleSystem* EffectTemplate, const FVector
 {
     if (EffectTemplate && ObjectPoolManager)
     {
-        UParticleSystemComponent* EffectComponent = Cast<UParticleSystemComponent>(ObjectPoolManager->GetPooledObject(UParticleSystemComponent::StaticClass()));
+        /*UParticleSystemComponent* EffectComponent = Cast<UParticleSystemComponent>(ObjectPoolManager->GetPooledObject(UParticleSystemComponent::StaticClass()));
         if (EffectComponent)
         {
             EffectComponent->SetTemplate(EffectTemplate);
@@ -33,7 +33,7 @@ void UNDEffectManager::PlayEffect(UParticleSystem* EffectTemplate, const FVector
                         StopEffect(EffectComponent);
                     }, Duration, false);
             }
-        }
+        }*/
     }
 }
 
@@ -43,7 +43,7 @@ void UNDEffectManager::StopEffect(UParticleSystemComponent* EffectComponent)
     {
         EffectComponent->Deactivate();
         ActiveEffects.Remove(EffectComponent);
-        ObjectPoolManager->ReturnParticleToPool(EffectComponent);
+        //ObjectPoolManager->ReturnParticleToPool(EffectComponent);
     }
 }
 

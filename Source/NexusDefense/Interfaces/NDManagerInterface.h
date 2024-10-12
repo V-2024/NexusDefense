@@ -17,15 +17,7 @@ class NEXUSDEFENSE_API INDManagerInterface
     GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintNativeEvent, Category = "Manager")
-    void Initialize();
     virtual void Initialize_Implementation() {}
-
-    UFUNCTION(BlueprintNativeEvent, Category = "Manager")
-    void Shutdown();
     virtual void Shutdown_Implementation() {}
-
-    UFUNCTION(BlueprintNativeEvent, Category = "Manager")
-    void OnLevelChanged(const FName& NewLevelName);
     virtual void OnLevelChanged_Implementation(const FName& NewLevelName) {}
 };

@@ -3,10 +3,8 @@
 #include "NDSpawnManager.h"
 #include "Stages/NDStage.h"
 #include "Enemy/NDEnemyBase.h"
-#include "NDEventManager.h"
-#include "NDDataManager.h"
-#include "NDObjectPoolManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameInstance/NDGameInstance.h"
 
 // 기존 랜덤 스폰 로직 수정
 // 스폰간격 조절 필요
@@ -15,25 +13,24 @@
 // 현재는 CurrentWaveInfo.SpawnPoints[0]만 사용하도록 되어있음
 
 
-UNDSpawnManager::UNDSpawnManager()
+UNDSpawnManager::UNDSpawnManager() : EnemiesSpawned(0), bIsSpawningActive(false)
 {
-	EnemiesSpawned = 0;
-	bIsSpawningActive = false;
 
-	DataManager = UNDDataManager::GetInstance();
 }
-//
-//void ANDSpawnManager::BeginPlay()
-//{
-//	Super::BeginPlay();
-//
-//	SetupSpawnPoints();
-//}
 
-void UNDSpawnManager::Initialize(ANDStage* Stage, UNDObjectPoolManager* PoolManager)
+void UNDSpawnManager::PostLoad()
+{
+	Super::PostLoad();
+
+	SetupSpawnPoints();
+
+	//GameInstance = Cast<UNDGameInstance>(GetGameInstance());
+}
+
+
+void UNDSpawnManager::Initialize(ANDStage* Stage)
 {
 	CurrentStage = Stage;
-	ObjectPoolManager = PoolManager;
 }
 
 
@@ -82,7 +79,8 @@ void UNDSpawnManager::SpawnEnemy()
 	TSubclassOf<ANDEnemyBase> EnemyTypeToSpawn = CurrentWaveInfo.SpawnPoints[0].EnemyTypes[FMath::RandRange(0, CurrentWaveInfo.SpawnPoints[0].EnemyTypes.Num() - 1)];
 
 	// Get an enemy from the object pool
-	ANDEnemyBase* SpawnedEnemy = Cast<ANDEnemyBase>(ObjectPoolManager->GetPooledObject(EnemyTypeToSpawn));
+	ANDEnemyBase* SpawnedEnemy = Cast<ANDEnemyBase>(GameInstance->EnemySpawned(EnemyTypeToSpawn));
+
 
 	if (SpawnedEnemy)
 	{
@@ -95,6 +93,7 @@ void UNDSpawnManager::SpawnEnemy()
 
 		// Set up a delegate to handle enemy death
 		//SpawnedEnemy->OnEnemyDestroyed.AddDynamic(this, &ANDSpawnManager::ReturnEnemyToPool);
+		GameInstance->TriggerEnemySpawn(SpawnedEnemy);
 	}
 
 
@@ -110,6 +109,6 @@ void UNDSpawnManager::ReturnEnemyToPool(ANDEnemyBase* Enemy)
 	if (Enemy)
 	{
 		Enemy->Deactivate();
-		ObjectPoolManager->ReturnObjectToPool(Enemy);
+		//ObjectPoolManager->ReturnObjectToPool(Enemy);
 	}
 }

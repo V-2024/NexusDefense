@@ -18,6 +18,7 @@ class UNDEventManager;
 class UNDScoreManager;
 class UNDSoundManager;
 class UNDItemManager;
+class ANDEnemyBase;
 struct FPlanetInfo;
 
 UCLASS()
@@ -54,6 +55,8 @@ public:
     void InitializeManagers();
     void CleanupManagers();
 
+	AActor* EnemySpawned(TSubclassOf<AActor> Enemy);
+
     // event handeling level changed
     void OnLevelChanged(const FName& LevelName);
 
@@ -61,6 +64,7 @@ public:
     void TriggerSelectStageEvent();
     TArray<FPlanetInfo> TriggerGetPlanetInfosEvent() const;
     void TriggerPlanetClickedEvent(int32 PlanetIndex);
+    void TriggerEnemySpawn(ANDEnemyBase* Enemy) const;
 
 private:
     template<typename T>

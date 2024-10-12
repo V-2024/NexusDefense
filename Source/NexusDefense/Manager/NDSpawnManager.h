@@ -9,9 +9,7 @@
 
 class ANDEnemyBase;
 class ANDStage;
-class UNDEventManager;
-class UNDDataManager;
-class UNDObjectPoolManager;
+class UNDGameInstance;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDSpawnManager : public UObject
@@ -21,7 +19,9 @@ class NEXUSDEFENSE_API UNDSpawnManager : public UObject
 public:	
 	UNDSpawnManager();
 
-	void Initialize(ANDStage*, UNDObjectPoolManager*);
+	virtual void PostLoad() override;
+
+	void Initialize(ANDStage*);
 	void StartSpawning(ANDStage*, const FWaveInfo&);
 	void StopSpawning();
 
@@ -41,13 +41,7 @@ private:
 	ANDStage* CurrentStage;
 
 	UPROPERTY()
-	UNDEventManager* EventManager;
-
-	UPROPERTY()
-	UNDDataManager* DataManager;
-
-	UPROPERTY()
-	UNDObjectPoolManager* ObjectPoolManager;
+	UNDGameInstance* GameInstance;
 
 	FWaveInfo CurrentWaveInfo;
 	FTimerHandle SpawnTimerHandle;

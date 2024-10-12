@@ -43,7 +43,7 @@ void ANDStage::Initialize(UStageData* InStageData, UNDSpawnManager* InSpawnManag
     RemainingEnemies = 0;
     StageTimer = 0.0f;
 
-    SpawnManager->Initialize(this, ObjectPoolManager);
+    //SpawnManager->Initialize(this, ObjectPoolManager);
 }
 
 void ANDStage::StartStage()

@@ -17,8 +17,8 @@ UNDScoreManager* UNDScoreManager::GetInstance()
 {
 	if (Instance == nullptr)
 	{
-		Instance = NewObject<UNDScoreManager>();
-		Instance->AddToRoot();
+		//Instance = NewObject<UNDScoreManager>();
+		//Instance->AddToRoot();
 	}
 
 	return Instance;

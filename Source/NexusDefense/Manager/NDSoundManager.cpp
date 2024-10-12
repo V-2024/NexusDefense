@@ -36,7 +36,7 @@ void UNDSoundManager::StopSound(UAudioComponent* AudioComponent)
     {
         AudioComponent->Stop();
         ActiveSounds.Remove(AudioComponent);
-        ObjectPoolManager->ReturnSoundToPool(AudioComponent);
+        //ObjectPoolManager->ReturnSoundToPool(AudioComponent);
     }
 }
 

@@ -6,18 +6,23 @@
 #include "UObject/NoExportTypes.h"
 #include "NDObjectPoolManager.generated.h"
 
-class UNDObjectPoolManager;
 class UAudioComponent;
 class UParticleSystemComponent;
 
 USTRUCT()
-struct FObjectPool
+struct FObjectPoolData
 {
     GENERATED_BODY()
 
     UPROPERTY()
-    TArray<AActor*> PooledObjects;
+    TArray<AActor*> ActiveObjects;
+
+    UPROPERTY()
+	TArray<AActor*> InactiveObjects;
+
+	int32 PoolSize = 0;
 };
+
 
 UCLASS()
 class NEXUSDEFENSE_API UNDObjectPoolManager : public UObject
@@ -27,30 +32,28 @@ class NEXUSDEFENSE_API UNDObjectPoolManager : public UObject
 public:
     UNDObjectPoolManager();
 
-    UFUNCTION(BlueprintCallable, Category = "Object Pool")
+    void InitializePool(TSubclassOf<AActor> ActorClass, int32 PoolSize);
+	
     AActor* GetPooledObject(TSubclassOf<AActor> ActorClass);
-
-    UFUNCTION(BlueprintCallable, Category = "Object Pool")
     void ReturnObjectToPool(AActor* ReturnObject);
 
-    UFUNCTION(BlueprintCallable, Category = "Object Pool")
-    void ReturnParticleToPool(UParticleSystemComponent* ReturnParticle);
-
-    UFUNCTION(BlueprintCallable, Category = "Object Pool")
-    void ReturnSoundToPool(UAudioComponent* ReturnSound);
-
-    UFUNCTION(BlueprintCallable, Category = "Object Pool")
-    void InitializePool(TSubclassOf<AActor> ActorClass, int32 PoolSize);
+    void CleanupPool();
 
 private:
     AActor* CreateNewObject(TSubclassOf<AActor>);
+    void ExpandPool(TSubclassOf<AActor> ActorClass, int32 AdditionalSize);
 
+
+private:
     UPROPERTY()
-    TMap<TSubclassOf<AActor>, FObjectPool> ObjectPools;
+    TMap<TSubclassOf<AActor>, FObjectPoolData> ObjectPools;
 
     UPROPERTY(EditDefaultsOnly, Category = "Object Pool")
     int32 DefaultPoolSize = 20;
 
     UPROPERTY(EditDefaultsOnly, Category = "Object Pool")
     TArray<TSubclassOf<AActor>> PreloadClasses;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Object Pool")
+	float PoolExpansionFactor = 1.5f;
 };

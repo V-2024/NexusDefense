@@ -14,6 +14,7 @@
 #include "Manager/NDScoreManager.h"
 #include "Manager/NDSoundManager.h"
 #include "Manager/NDItemManager.h"
+#include "Enemy/NDEnemyBase.h"
 
 
 UNDGameInstance::UNDGameInstance() : InitializationCheckInterval(0.1f), MaxInitializationTime(10.0f)
@@ -239,6 +240,20 @@ void UNDGameInstance::CleanupManagers()
     if (ItemManager) { ItemManager->RemoveFromRoot(); ItemManager = nullptr; }
 }
 
+AActor* UNDGameInstance::EnemySpawned(TSubclassOf<AActor> Enemy)
+{
+	if (ObjectPoolManager)
+	{
+		return ObjectPoolManager->GetPooledObject(Enemy);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("EnemySpawned: ObjectPoolManager is null"));
+	}
+
+	return nullptr;
+}
+
 
 void UNDGameInstance::OnLevelChanged(const FName& LevelName)
 {
@@ -296,6 +311,18 @@ void UNDGameInstance::TriggerPlanetClickedEvent(int32 PlanetIndex)
 	{
 		UE_LOG(LogTemp, Error, TEXT("TriggerPlanetClickedEvent: EventManager is null"));
 	}
+}
+
+void UNDGameInstance::TriggerEnemySpawn(ANDEnemyBase* Enemy) const
+{
+    if (EventManager)
+    {
+        EventManager->TriggerEnemySpawned(Enemy);
+	}
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("TriggerEnemySpawn: EventManager is null"));
+    }
 }
 
 
