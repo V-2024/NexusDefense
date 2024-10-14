@@ -43,7 +43,6 @@ public:
     FORCEINLINE UNDEventManager*        GetEventManager()       const { return EventManager; }
     FORCEINLINE UNDScoreManager*        GetScoreManager()       const { return ScoreManager; }
     FORCEINLINE UNDSoundManager*        GetSoundManager()       const { return SoundManager; }
-    FORCEINLINE UNDItemManager*         GetItemManager()        const { return ItemManager; }
     FORCEINLINE EGameState              GetGameState()          const { return CurrentGameState; }
 
     UFUNCTION(BlueprintCallable, Category = "Game")
@@ -99,8 +98,6 @@ private:
     UNDScoreManager*        ScoreManager;
     UPROPERTY()
     UNDSoundManager*        SoundManager;
-    UPROPERTY()
-    UNDItemManager*         ItemManager;
 
     EGameState              CurrentGameState;
 

@@ -3,76 +3,56 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/NDCharacterBase.h"
-#include "InputActionValue.h"
+#include "GameFramework/Character.h"
 #include "NDCharacterPlayer.generated.h"
 
-/**
- * 
- */
 UCLASS()
-class NEXUSDEFENSE_API ANDCharacterPlayer : public ANDCharacterBase
+class NEXUSDEFENSE_API ANDCharacterPlayer : public ACharacter
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    ANDCharacterPlayer();
+	// Sets default values for this character's properties
+	ANDCharacterPlayer();
 
-public:
-    UFUNCTION(BlueprintCallable, Category = "Leveling")
-    void GainExperience(int32 Amount);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	class USpringArmComponent* CameraBoom;
 
-    UFUNCTION(BlueprintCallable, Category = "Leveling")
-    void LevelUp();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	class UCameraComponent* FollowCamera;
 
-    UFUNCTION(BlueprintPure, Category = "Leveling")
-    int32 GetCurrentLevel() const { return CurrentLevel; }
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	class UInputMappingContext* imc_ND;
 
-    UFUNCTION(BlueprintPure, Category = "Leveling")
-    int32 GetCurrentExperience() const { return CurrentExperience; }
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	class UInputAction* ia_LookUp;
 
-    UFUNCTION(BlueprintPure, Category = "Leveling")
-    int32 GetExperienceRequiredForNextLevel() const;
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	class UInputAction* ia_Turn;
+
+	void Turn(const struct FInputActionValue& inputValue);
+	void LookUp(const struct FInputActionValue& inputValue);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* ia_Move;
+
+	UPROPERTY(EditAnywhere, Category = PlayerSetting)
+	float walkSpeed = 600;
+
+	FVector direction;
+
+	void Move(const struct FInputActionValue& inputValue);
+
+	void PlayerMove();
 
 protected:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leveling")
-    int32 CurrentLevel;
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leveling")
-    int32 CurrentExperience;
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leveling")
-    int32 MaxLevel;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Leveling")
-    int32 BaseExperienceRequirement;
-
-protected:
-    virtual void Attack() override;
-    virtual void BeginPlay() override;
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class USpringArmComponent> CameraBoom;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UCameraComponent> FollowCamera;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UInputMappingContext> DefaultMappingContext;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UInputAction> JumpAction;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UInputAction> MoveAction;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UInputAction> LookAction;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UInputAction> AttackAction;
-
-    void Move(const FInputActionValue& Value);
-    void Look(const FInputActionValue& Value);
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };

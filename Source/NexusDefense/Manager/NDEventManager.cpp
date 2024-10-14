@@ -3,9 +3,7 @@
 
 #include "Manager/NDEventManager.h"
 #include "Enemy/NDEnemyBase.h"
-#include "Item/NDItemBase.h"
 #include "Stages/FPlanetInfo.h"
-#include "Character/NDCharacterBase.h"
 
 
 void UNDEventManager::SubscribeToEvents()

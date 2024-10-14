@@ -13,7 +13,6 @@
 #include "Manager/NDDataManager.h"
 #include "Manager/NDScoreManager.h"
 #include "Manager/NDSoundManager.h"
-#include "Manager/NDItemManager.h"
 #include "Enemy/NDEnemyBase.h"
 
 
@@ -28,7 +27,6 @@ UNDGameInstance::UNDGameInstance() : InitializationCheckInterval(0.1f), MaxIniti
 	EventManager = nullptr;
 	ScoreManager = nullptr;
 	SoundManager = nullptr;
-	ItemManager = nullptr;
 	CurrentGameState = EGameState::Ready;
 	CurrentLevelName = NAME_None;
 	InitializationTimer = 0.0f;
@@ -83,7 +81,7 @@ bool UNDGameInstance::AreAllManagersInitialized()
     // Check if all managers are initialized
     return StageManager && SpawnManager && UIManager && ObjectManager &&
         EffectManager && DataManager && EventManager && ScoreManager &&
-        SoundManager && ItemManager;
+        SoundManager;
 }
 
 
@@ -214,7 +212,6 @@ void UNDGameInstance::InitializeManagers()
     CreateManager<UNDEventManager>(EventManager, UNDEventManager::StaticClass(), "EventManager");
     CreateManager<UNDScoreManager>(ScoreManager, UNDScoreManager::StaticClass(), "ScoreManager");
     CreateManager<UNDSoundManager>(SoundManager, UNDSoundManager::StaticClass(), "SoundManager");
-    CreateManager<UNDItemManager>(ItemManager, UNDItemManager::StaticClass(), "ItemManager");
 
     SubscribeToEvents();
 }
@@ -237,7 +234,6 @@ void UNDGameInstance::CleanupManagers()
     if (EventManager) { EventManager->RemoveFromRoot();  EventManager = nullptr; }
     if (ScoreManager) { ScoreManager->RemoveFromRoot();  ScoreManager = nullptr; }
     if (SoundManager) { SoundManager->RemoveFromRoot();  SoundManager = nullptr; }
-    if (ItemManager) { ItemManager->RemoveFromRoot(); ItemManager = nullptr; }
 }
 
 AActor* UNDGameInstance::EnemySpawned(TSubclassOf<AActor> Enemy)
