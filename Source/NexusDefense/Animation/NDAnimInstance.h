@@ -20,8 +20,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = AnimationProperties)
 	void UpdateAnimationProperties();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float MovementSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+	float Direction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
 	bool bIsInAir;
@@ -31,4 +34,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
 	class ANDCharacterPlayer* CharacterPlayer;
+
+
 };

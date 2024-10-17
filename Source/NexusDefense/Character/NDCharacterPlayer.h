@@ -17,33 +17,13 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY(EditDefaultsOnly, Category = Input)
-	class UInputMappingContext* imc_ND;
-
-	UPROPERTY(EditDefaultsOnly, Category = Input)
-	class UInputAction* ia_LookUp;
-
-	UPROPERTY(EditDefaultsOnly, Category = Input)
-	class UInputAction* ia_Turn;
-
-	void Turn(const struct FInputActionValue& inputValue);
-	void LookUp(const struct FInputActionValue& inputValue);
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	class UInputAction* ia_Move;
-
-	UPROPERTY(EditAnywhere, Category = PlayerSetting)
-	float walkSpeed = 600;
-
-	FVector direction;
-
-	void Move(const struct FInputActionValue& inputValue);
-
-	void PlayerMove();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float BaseTurnRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+	float BaseLookUpRate;
 
 protected:
 	// Called when the game starts or when spawned
@@ -55,4 +35,11 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void MoveForward(float Value);
+	void MoveRight(float Value);
+	void TurnAtRate(float Rate);
+	void LookUpAtRate(float Rate);
+	void Turn(float Value);
+	void LookUp(float Value);
 };

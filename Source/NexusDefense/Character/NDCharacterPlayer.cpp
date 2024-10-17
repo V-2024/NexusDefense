@@ -4,9 +4,8 @@
 #include "Character/NDCharacterPlayer.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
-#include "InputActionValue.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ANDCharacterPlayer::ANDCharacterPlayer()
@@ -16,78 +15,99 @@ ANDCharacterPlayer::ANDCharacterPlayer()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
-	CameraBoom->TargetArmLength = 600.f;
+	CameraBoom->SetRelativeLocation(FVector(0, 70, 90));
+	CameraBoom->TargetArmLength = 600.0f;
 	CameraBoom->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	BaseTurnRate = 65.f;
+	BaseLookUpRate = 65.f;
+
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
+	GetCharacterMovement()->JumpZVelocity = 650.f;
+	GetCharacterMovement()->AirControl = 0.2f;
 }
 
-void ANDCharacterPlayer::Turn(const FInputActionValue& inputValue)
-{
-	float value = inputValue.Get<float>();
-	AddControllerYawInput(value);
-}
-
-void ANDCharacterPlayer::LookUp(const FInputActionValue& inputValue)
-{
-	float value = inputValue.Get<float>();
-	AddControllerPitchInput(value);
-}
-
-void ANDCharacterPlayer::Move(const FInputActionValue& inputValue)
-{
-	FVector2D value = inputValue.Get<FVector2D>();
-	direction.X = value.X;
-	direction.Y = value.Y;
-}
-
-void ANDCharacterPlayer::PlayerMove()
-{
-	direction = FTransform(GetControlRotation()).TransformVector(direction);
-	AddMovementInput(direction);
-	direction = FVector::ZeroVector;
-}
-
-// Called when the game starts or when spawned
 void ANDCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	auto pc = Cast<APlayerController>(Controller);
-	if (pc)
-	{
-		auto subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
-		if (subsystem)
-		{
-			subsystem->AddMappingContext(imc_ND, 0);
-		}
-	}
 }
 
-// Called every frame
 void ANDCharacterPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	PlayerMove();
 }
 
-// Called to bind functionality to input
 void ANDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ANDCharacterPlayer::MoveForward);
+	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ANDCharacterPlayer::MoveRight);
+	PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ANDCharacterPlayer::TurnAtRate);
+	PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ANDCharacterPlayer::LookUpAtRate);
+	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ANDCharacterPlayer::Turn);
+	PlayerInputComponent->BindAxis("LookUp", this, &ANDCharacterPlayer::LookUp);
+}
 
-	auto PlayerInput = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
-	if (PlayerInput)
+void ANDCharacterPlayer::MoveForward(float Value)
+{
+	if (Controller != nullptr && Value != 0.0f)
 	{
-		PlayerInput->BindAction(ia_Turn, ETriggerEvent::Triggered, this,
-			&ANDCharacterPlayer::Turn);
-		PlayerInput->BindAction(ia_LookUp, ETriggerEvent::Triggered, this,
-			&ANDCharacterPlayer::LookUp);
-		PlayerInput->BindAction(ia_Move, ETriggerEvent::Triggered, this,
-			&ANDCharacterPlayer::Move);
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		AddMovementInput(Direction, Value);
 	}
 }
 
+void ANDCharacterPlayer::MoveRight(float Value)
+{
+	if (Controller != nullptr && Value != 0.0f)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void ANDCharacterPlayer::TurnAtRate(float Rate)
+{
+	if (Controller != nullptr && Rate != 0.0f)
+	{
+		AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	}
+}
+
+void ANDCharacterPlayer::LookUpAtRate(float Rate)
+{
+	if (Controller != nullptr && Rate != 0.0f)
+	{
+		AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	}
+}
+
+void ANDCharacterPlayer::Turn(float Value)
+{
+	if (Controller != nullptr && Value != 0.0f)
+	{
+		AddControllerYawInput(Value);
+	}
+}
+
+void ANDCharacterPlayer::LookUp(float Value)
+{
+	if (Controller != nullptr && Value != 0.0f)
+	{
+		AddControllerPitchInput(Value);
+	}
+}
