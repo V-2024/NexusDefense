@@ -2,6 +2,7 @@
 
 
 #include "Character/NDCharacterPlayer.h"
+#include "Weapon/Gun.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -15,8 +16,8 @@ ANDCharacterPlayer::ANDCharacterPlayer()
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
-	CameraBoom->SetRelativeLocation(FVector(0, 70, 90));
-	CameraBoom->TargetArmLength = 600.0f;
+	CameraBoom->SetRelativeLocation(FVector(0, 0, 90));
+	CameraBoom->TargetArmLength = 350.0f;
 	CameraBoom->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -39,6 +40,12 @@ ANDCharacterPlayer::ANDCharacterPlayer()
 void ANDCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
+	GetMesh()->HideBoneByName(TEXT("weapon_l"), EPhysBodyOp::PBO_None);
+	Gun->AttachToComponent(GetMesh(),
+		FAttachmentTransformRules::KeepRelativeTransform, TEXT("hand_lSocket"));
+	Gun->SetOwner(this);
 }
 
 void ANDCharacterPlayer::Tick(float DeltaTime)
@@ -53,7 +60,8 @@ void ANDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ANDCharacterPlayer::TurnAtRate);
 	PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ANDCharacterPlayer::LookUpAtRate);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ANDCharacterPlayer::Turn);
-	PlayerInputComponent->BindAxis("LookUp", this, &ANDCharacterPlayer::LookUp);
+	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ANDCharacterPlayer::LookUp);
+	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &ANDCharacterPlayer::Shoot);
 }
 
 void ANDCharacterPlayer::MoveForward(float Value)
@@ -110,4 +118,9 @@ void ANDCharacterPlayer::LookUp(float Value)
 	{
 		AddControllerPitchInput(Value);
 	}
+}
+
+void ANDCharacterPlayer::Shoot()
+{
+	Gun->PullTrigger();
 }

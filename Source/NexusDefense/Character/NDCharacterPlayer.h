@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "NDCharacterPlayer.generated.h"
 
+class AGun;
+
 UCLASS()
 class NEXUSDEFENSE_API ANDCharacterPlayer : public ACharacter
 {
@@ -25,6 +27,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AGun> GunClass;
+
+	UPROPERTY()
+	AGun* Gun;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -42,4 +50,6 @@ public:
 	void LookUpAtRate(float Rate);
 	void Turn(float Value);
 	void LookUp(float Value);
+
+	void Shoot();
 };
