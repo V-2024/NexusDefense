@@ -2,6 +2,7 @@
 
 
 #include "Ammo/NDBullet.h"
+#include "Manager/NDObjectPoolManager.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
@@ -12,8 +13,9 @@ ANDBullet::ANDBullet()
 	PrimaryActorTick.bCanEverTick = true;
 
 	collisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
-	collisionComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	collisionComponent->SetCollisionProfileName(TEXT("Projectile"));
 	collisionComponent->SetSphereRadius(10);
+	//collisionComponent->OnComponentHit.AddDynamic(this, &ABullet::OnHit);
 	RootComponent = collisionComponent;
 	meshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	meshComponent->SetupAttachment(collisionComponent);
@@ -30,11 +32,25 @@ ANDBullet::ANDBullet()
 
 }
 
+void ANDBullet::FireInDirection(const FVector& Direction)
+{
+	movementComponent->Velocity = Direction * movementComponent->InitialSpeed;
+}
+
 // Called when the game starts or when spawned
 void ANDBullet::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	UE_LOG(LogTemp, Warning, TEXT("collision Profile: %s"), *collisionComponent->GetCollisionProfileName().ToString());
+}
+
+void ANDBullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (UNDObjectPoolManager* Pool = Cast<UNDObjectPoolManager>(GetOwner()))
+	{
+		Pool->ReturnToPool(this);
+	}
 }
 
 // Called every frame

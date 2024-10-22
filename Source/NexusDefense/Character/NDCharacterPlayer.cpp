@@ -61,7 +61,8 @@ void ANDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ANDCharacterPlayer::LookUpAtRate);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ANDCharacterPlayer::Turn);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ANDCharacterPlayer::LookUp);
-	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &ANDCharacterPlayer::Shoot);
+	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &ANDCharacterPlayer::StartFiring);
+	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Released, this, &ANDCharacterPlayer::StopFiring);
 }
 
 void ANDCharacterPlayer::MoveForward(float Value)
@@ -120,7 +121,18 @@ void ANDCharacterPlayer::LookUp(float Value)
 	}
 }
 
-void ANDCharacterPlayer::Shoot()
+void ANDCharacterPlayer::StartFiring()
 {
-	Gun->PullTrigger();
+	if (Gun)
+	{
+		Gun->PullTrigger();
+	}
+}
+
+void ANDCharacterPlayer::StopFiring()
+{
+	if (Gun)
+	{
+		Gun->StopFiring();
+	}
 }

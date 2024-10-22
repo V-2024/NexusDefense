@@ -54,8 +54,6 @@ public:
     void InitializeManagers();
     void CleanupManagers();
 
-	AActor* EnemySpawned(TSubclassOf<AActor> Enemy);
-
     // event handeling level changed
     void OnLevelChanged(const FName& LevelName);
 

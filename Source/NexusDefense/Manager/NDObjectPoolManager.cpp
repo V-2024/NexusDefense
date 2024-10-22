@@ -1,134 +1,75 @@
 #include "NDObjectPoolManager.h"
-#include "Math/UnrealMathUtility.h"
-
-
-// 게임 종료 시 풀의 모든 오브젝트 제거 필요
-// ReturnObjectPool 함수에서 오브젝트 초기화 필요
-// 풀 정책 추가 필요 (LRU, MRU, FIFO, LIFO 등), 현재는 단순히 비활성화 오브젝트 찾아 반환
 
 UNDObjectPoolManager::UNDObjectPoolManager()
 {
+    UE_LOG(LogTemp, Warning, TEXT("UObjectPoolManager Constructor Called"));
+}
 
+void UNDObjectPoolManager::BeginDestroy()
+{
+    UE_LOG(LogTemp, Warning, TEXT("UObjectPoolManager BeginDestroy Called"));
+    Super::BeginDestroy();
 }
 
 
-void UNDObjectPoolManager::InitializePool(TSubclassOf<AActor> ActorClass, int32 PoolSize)
+
+void UNDObjectPoolManager::CreatePool(UWorld* WorldContext, TSubclassOf<AActor> ActorToSpawn, int32 PoolSize)
 {
-    if (!ObjectPools.Contains(ActorClass))
+    World = WorldContext;
+    PooledObjectClass = ActorToSpawn;
+
+    if (!World || !PooledObjectClass) return;
+
+    for (int32 i = 0; i < PoolSize; i++)
     {
-        FObjectPoolData& NewPool = ObjectPools.Add(ActorClass);
-        ExpandPool(ActorClass, PoolSize);
-    }
-}
-
-
-void UNDObjectPoolManager::ExpandPool(TSubclassOf<AActor> ActorClass, int32 AdditionalSize)
-{
-    FObjectPoolData& Pool = ObjectPools[ActorClass];
-
-    for (int32 i = 0; i < AdditionalSize; ++i)
-    {
-        AActor* NewObject = CreateNewObject(ActorClass);
+        AActor* NewObject = CreateNewObject(FVector::ZeroVector, FRotator::ZeroRotator);
         if (NewObject)
         {
-            Pool.InactiveObjects.Add(NewObject);
-            Pool.PoolSize++;
+            NewObject->SetActorHiddenInGame(true);
+            NewObject->SetActorEnableCollision(false);
+            PooledObjects.Add(NewObject);
         }
     }
 }
 
-
-
-AActor* UNDObjectPoolManager::GetPooledObject(TSubclassOf<AActor> ActorClass)
+AActor* UNDObjectPoolManager::GetPooledObject(const FVector& Position, const FRotator& Rotation)
 {
-    if (!ObjectPools.Contains(ActorClass))
+    for (AActor* PooledObject : PooledObjects)
     {
-        InitializePool(ActorClass, DefaultPoolSize);
+        if (PooledObject && PooledObject->IsHidden())
+        {
+            PooledObject->SetActorLocation(Position);
+            PooledObject->SetActorRotation(Rotation);
+            PooledObject->SetActorHiddenInGame(false);
+            PooledObject->SetActorEnableCollision(true);
+            return PooledObject;
+        }
     }
 
-    FObjectPoolData& Pool = ObjectPools[ActorClass];
-
-    if (Pool.InactiveObjects.Num() == 0)
+    // 부족하면 추가 생성
+    AActor* NewObject = CreateNewObject(Position, Rotation);
+    if (NewObject)
     {
-        ExpandPool(ActorClass, FMath::Max(1, static_cast<int32>(Pool.PoolSize * (PoolExpansionFactor - 1))));
+        PooledObjects.Add(NewObject);
+        return NewObject;
     }
+    return nullptr;
+}
 
-    AActor* PooledObject = Pool.InactiveObjects.Pop();
-    Pool.ActiveObjects.Add(PooledObject);
-
-    if (PooledObject)
+void UNDObjectPoolManager::ReturnToPool(AActor* ActorToReturn)
+{
+    if (ActorToReturn)
     {
-        PooledObject->SetActorTickEnabled(true);
-        PooledObject->SetActorHiddenInGame(false);
-        PooledObject->SetActorEnableCollision(true);
+        ActorToReturn->SetActorHiddenInGame(true);
+        ActorToReturn->SetActorEnableCollision(false);
     }
-
-    return PooledObject;
 }
 
-
-void UNDObjectPoolManager::ReturnObjectToPool(AActor* ActorToReturn)
+AActor* UNDObjectPoolManager::CreateNewObject(const FVector& Position, const FRotator& Rotation)
 {
-	if (!ActorToReturn) return;
+    if (!World || !PooledObjectClass) return nullptr;
 
-	for (auto& Pair : ObjectPools)
-	{
-		FObjectPoolData& Pool = Pair.Value;
-		int32 Index = Pool.ActiveObjects.Find(ActorToReturn);
-		if (Index != INDEX_NONE)
-		{
-			Pool.ActiveObjects.RemoveAtSwap(Index);
-			Pool.InactiveObjects.Add(ActorToReturn);
-
-			ActorToReturn->SetActorTickEnabled(false);
-			ActorToReturn->SetActorHiddenInGame(true);
-			ActorToReturn->SetActorEnableCollision(false);
-			ActorToReturn->SetActorLocation(FVector(0, 0, -10000));
-
-			return;
-		}
-	}
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    return World->SpawnActor<AActor>(PooledObjectClass, Position, Rotation, SpawnParams);
 }
-
-
-void UNDObjectPoolManager::CleanupPool()
-{
-	for (auto& Pair : ObjectPools)
-	{
-		FObjectPoolData& Pool = Pair.Value;
-		for (AActor* Object : Pool.ActiveObjects)
-		{
-			if (Object) Object->Destroy();
-		}
-		for (AActor* Object : Pool.InactiveObjects)
-		{
-			if (Object) Object->Destroy();
-		}
-		Pool.ActiveObjects.Empty();
-		Pool.InactiveObjects.Empty();
-		Pool.PoolSize = 0;
-	}
-	ObjectPools.Empty();
-}
-
-
-
-AActor* UNDObjectPoolManager::CreateNewObject(TSubclassOf<AActor> ActorClass)
-{
-	if (!ActorClass || !GetWorld()) return nullptr;
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	AActor* NewObject = GetWorld()->SpawnActor<AActor>(ActorClass, FVector(0, 0, -10000), FRotator::ZeroRotator, SpawnParams);
-
-	if (NewObject)
-	{
-		NewObject->SetActorTickEnabled(false);
-		NewObject->SetActorHiddenInGame(true);
-		NewObject->SetActorEnableCollision(false);
-	}
-
-	return NewObject;
-}
-
-

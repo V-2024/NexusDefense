@@ -51,5 +51,6 @@ public:
 	void Turn(float Value);
 	void LookUp(float Value);
 
-	void Shoot();
+	void StartFiring();
+	void StopFiring();
 };

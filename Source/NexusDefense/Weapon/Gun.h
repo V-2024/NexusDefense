@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Manager/NDObjectPoolManager.h"
 #include "Gun.generated.h"
 
 UCLASS()
@@ -16,6 +17,7 @@ public:
 	AGun();
 
 	void PullTrigger();
+	void StopFiring();
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,10 +28,48 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+    // ÄÄÆ÷³ÍÆ®
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
 
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* Mesh;
 
+    // ÃÑ¾Ë
+    UPROPERTY(Transient)
+    UNDObjectPoolManager* BulletPool;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    TSubclassOf<AActor> BulletClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    int32 PoolSize = 30;
+
+    // ¹ß»ç
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    float FireRate = 0.1f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    bool bAutomatic = true;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    FName MuzzleSocketName = "Muzzle";
+
+    // ÀÌÆåÆ®
+    UPROPERTY(EditDefaultsOnly, Category = "Effects")
+    UParticleSystem* MuzzleFlash;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Effects")
+    USoundBase* FireSound;
+
+    // Å¸ÀÌ¸Ó
+    FTimerHandle FireRateTimerHandle;
+    bool bCanFire = true;
+
+private:
+    void InitializeBulletPool();
+    void StartFiring();
+    void Fire();
+    FVector GetMuzzleLocation() const;
+    FRotator GetMuzzleRotation() const;
 };

@@ -15,19 +15,19 @@ void UNDSoundManager::Initialize(UNDObjectPoolManager* PoolManager)
 
 void UNDSoundManager::PlaySound(USoundBase* Sound, const FVector& Location, float VolumeMultiplier, float PitchMultiplier)
 {
-    if (Sound && ObjectPoolManager)
-    {
-        UAudioComponent* AudioComponent = Cast<UAudioComponent>(ObjectPoolManager->GetPooledObject(UAudioComponent::StaticClass()));
-        if (AudioComponent)
-        {
-            AudioComponent->SetSound(Sound);
-            AudioComponent->SetWorldLocation(Location);
-            AudioComponent->SetVolumeMultiplier(VolumeMultiplier);
-            AudioComponent->SetPitchMultiplier(PitchMultiplier);
-            AudioComponent->Play();
-            ActiveSounds.Add(AudioComponent);
-        }
-    }
+    //if (Sound && ObjectPoolManager)
+    //{
+    //    UAudioComponent* AudioComponent = Cast<UAudioComponent>(ObjectPoolManager->GetPooledObject(UAudioComponent::StaticClass()));
+    //    if (AudioComponent)
+    //    {
+    //        AudioComponent->SetSound(Sound);
+    //        AudioComponent->SetWorldLocation(Location);
+    //        AudioComponent->SetVolumeMultiplier(VolumeMultiplier);
+    //        AudioComponent->SetPitchMultiplier(PitchMultiplier);
+    //        AudioComponent->Play();
+    //        ActiveSounds.Add(AudioComponent);
+    //    }
+    //}
 }
 
 void UNDSoundManager::StopSound(UAudioComponent* AudioComponent)

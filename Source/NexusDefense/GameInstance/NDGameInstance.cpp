@@ -236,20 +236,6 @@ void UNDGameInstance::CleanupManagers()
     if (SoundManager) { SoundManager->RemoveFromRoot();  SoundManager = nullptr; }
 }
 
-AActor* UNDGameInstance::EnemySpawned(TSubclassOf<AActor> Enemy)
-{
-	if (ObjectPoolManager)
-	{
-		return ObjectPoolManager->GetPooledObject(Enemy);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("EnemySpawned: ObjectPoolManager is null"));
-	}
-
-	return nullptr;
-}
-
 
 void UNDGameInstance::OnLevelChanged(const FName& LevelName)
 {
