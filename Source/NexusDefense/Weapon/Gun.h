@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Manager/NDObjectPoolManager.h"
+#include "Ammo/NDBullet.h"
 #include "Gun.generated.h"
 
 UCLASS()
@@ -17,15 +18,11 @@ public:
 	AGun();
 
 	void PullTrigger();
-	void StopFiring();
+	void ReleaseTrigger();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 private:
     // 컴포넌트
@@ -40,7 +37,7 @@ private:
     UNDObjectPoolManager* BulletPool;
 
     UPROPERTY(EditDefaultsOnly, Category = "Combat")
-    TSubclassOf<AActor> BulletClass;
+    TSubclassOf<ANDBullet> BulletClass;
 
     UPROPERTY(EditDefaultsOnly, Category = "Combat")
     int32 PoolSize = 30;
@@ -62,6 +59,7 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Effects")
     USoundBase* FireSound;
 
+
     // 타이머
     FTimerHandle FireRateTimerHandle;
     bool bCanFire = true;
@@ -69,6 +67,7 @@ private:
 private:
     void InitializeBulletPool();
     void StartFiring();
+    void StopFiring();
     void Fire();
     FVector GetMuzzleLocation() const;
     FRotator GetMuzzleRotation() const;

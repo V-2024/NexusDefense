@@ -1,75 +1,21 @@
 #include "NDObjectPoolManager.h"
 
-UNDObjectPoolManager::UNDObjectPoolManager()
+#include "Manager/NDObjectPoolManager.h"
+
+void UNDObjectPoolManager::LogPoolStatus()
 {
-    UE_LOG(LogTemp, Warning, TEXT("UObjectPoolManager Constructor Called"));
-}
-
-void UNDObjectPoolManager::BeginDestroy()
-{
-    UE_LOG(LogTemp, Warning, TEXT("UObjectPoolManager BeginDestroy Called"));
-    Super::BeginDestroy();
-}
-
-
-
-void UNDObjectPoolManager::CreatePool(UWorld* WorldContext, TSubclassOf<AActor> ActorToSpawn, int32 PoolSize)
-{
-    World = WorldContext;
-    PooledObjectClass = ActorToSpawn;
-
-    if (!World || !PooledObjectClass) return;
-
-    for (int32 i = 0; i < PoolSize; i++)
+    int32 ActiveCount = 0;
+    for (AActor* Object : PooledObjects)
     {
-        AActor* NewObject = CreateNewObject(FVector::ZeroVector, FRotator::ZeroRotator);
-        if (NewObject)
-        {
-            NewObject->SetActorHiddenInGame(true);
-            NewObject->SetActorEnableCollision(false);
-            PooledObjects.Add(NewObject);
-        }
-    }
-}
+        if (!IsValid(Object)) continue;
 
-AActor* UNDObjectPoolManager::GetPooledObject(const FVector& Position, const FRotator& Rotation)
-{
-    for (AActor* PooledObject : PooledObjects)
-    {
-        if (PooledObject && PooledObject->IsHidden())
+        INDPoolableInterface* Poolable = Cast<INDPoolableInterface>(Object);
+        if (Poolable && Poolable->IsPoolableActive())
         {
-            PooledObject->SetActorLocation(Position);
-            PooledObject->SetActorRotation(Rotation);
-            PooledObject->SetActorHiddenInGame(false);
-            PooledObject->SetActorEnableCollision(true);
-            return PooledObject;
+            ActiveCount++;
         }
     }
 
-    // 부족하면 추가 생성
-    AActor* NewObject = CreateNewObject(Position, Rotation);
-    if (NewObject)
-    {
-        PooledObjects.Add(NewObject);
-        return NewObject;
-    }
-    return nullptr;
-}
-
-void UNDObjectPoolManager::ReturnToPool(AActor* ActorToReturn)
-{
-    if (ActorToReturn)
-    {
-        ActorToReturn->SetActorHiddenInGame(true);
-        ActorToReturn->SetActorEnableCollision(false);
-    }
-}
-
-AActor* UNDObjectPoolManager::CreateNewObject(const FVector& Position, const FRotator& Rotation)
-{
-    if (!World || !PooledObjectClass) return nullptr;
-
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    return World->SpawnActor<AActor>(PooledObjectClass, Position, Rotation, SpawnParams);
+    UE_LOG(LogTemp, Warning, TEXT("Pool Status - Active: %d, Total: %d"),
+        ActiveCount, PooledObjects.Num());
 }

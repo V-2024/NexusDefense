@@ -2,8 +2,6 @@
 
 
 #include "Weapon/Gun.h"
-#include "Ammo/NDBullet.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AGun::AGun()
@@ -24,23 +22,7 @@ void AGun::BeginPlay()
 	Super::BeginPlay();
 
     UE_LOG(LogTemp, Warning, TEXT("Gun BeginPlay Called"));
-    FTimerHandle InitTimerHandle;
-    GetWorld()->GetTimerManager().SetTimer(
-        InitTimerHandle,
-        [this]()
-        {
-            InitializeBulletPool();
-        },
-        0.1f,
-        false
-    );
-}
-
-// Called every frame
-void AGun::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+    InitializeBulletPool();
 }
 
 void AGun::InitializeBulletPool()
@@ -65,103 +47,68 @@ void AGun::InitializeBulletPool()
 	if (BulletPool)
 	{
         UE_LOG(LogTemp, Warning, TEXT("BulletPool created successfully"));
-		BulletPool->CreatePool(GetWorld(), BulletClass, PoolSize);
+        BulletPool->Initialize<ANDBullet>(GetWorld(), BulletClass, PoolSize);
+        UE_LOG(LogTemp, Log, TEXT("Bullet pool initialized with size: %d"), PoolSize);
 	}
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("Failed to create BulletPool"));
+        UE_LOG(LogTemp, Error, TEXT("BulletPool already exists"));
     }
 }
 
 void AGun::PullTrigger()
 {
-	if (bAutomatic)
-	{
-		StartFiring();
-	}
-	else
-	{
-		Fire();
-	}
+    if (bAutomatic)
+    {
+        StartFiring();
+    }
+    else
+    {
+        Fire();
+    }
+}
+
+void AGun::ReleaseTrigger()
+{
+    if (bAutomatic)
+    {
+        StopFiring();
+    }
 }
 
 void AGun::StartFiring()
 {
-	GetWorldTimerManager().SetTimer(
-		FireRateTimerHandle,
-		this,
-		&AGun::Fire,
-		FireRate,
-		true,
-		0.0f
-	);
+    GetWorld()->GetTimerManager().SetTimer(
+        FireRateTimerHandle,
+        this,
+        &AGun::Fire,
+        FireRate,
+        true,
+        0.0f
+    );
 }
 
 void AGun::StopFiring()
 {
-	GetWorldTimerManager().ClearTimer(FireRateTimerHandle);
+    GetWorld()->GetTimerManager().ClearTimer(FireRateTimerHandle);
 }
 
 void AGun::Fire()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Fire Called")); // 발사 함수 호출 확인
+    if (!BulletPool || !bCanFire) return;
 
-    if (!BulletPool)
+    if (ANDBullet* Bullet = BulletPool->GetPooledObject<ANDBullet>(GetMuzzleLocation(), GetMuzzleRotation()))
     {
-        UE_LOG(LogTemp, Error, TEXT("BulletPool is null")); // 풀이 null인지 확인
-        return;
+        Bullet->FireInDirection(GetMuzzleRotation().Vector());
+
+        // 사운드 및 이펙트 재생 (필요시 구현)
+        // PlayFireEffects();
     }
 
-    if (!BulletClass)
-    {
-        UE_LOG(LogTemp, Error, TEXT("BulletClass is not set")); // 총알 클래스가 설정되었는지 확인
-        return;
-    }
-
-    FVector MuzzleLocation = GetMuzzleLocation();
-    FRotator MuzzleRotation = GetMuzzleRotation();
-
-    UE_LOG(LogTemp, Warning, TEXT("Attempting to spawn bullet at location: %s"), *MuzzleLocation.ToString());
-
-
-    // 총알 발사
-    if (AActor* Bullet = BulletPool->GetPooledObject(GetMuzzleLocation(), GetMuzzleRotation()))
-    {
-        if (ANDBullet* BulletActor = Cast<ANDBullet>(Bullet))
-        {
-            BulletActor->FireInDirection(GetMuzzleRotation().Vector());
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Failed to get bullet from pool"));
-    }
-
-    // 이펙트 재생
-    if (MuzzleFlash)
-    {
-        UGameplayStatics::SpawnEmitterAttached(
-            MuzzleFlash,
-            Mesh,
-            MuzzleSocketName
-        );
-    }
-
-    // 사운드 재생
-    if (FireSound)
-    {
-        UGameplayStatics::PlaySoundAtLocation(
-            this,
-            FireSound,
-            GetMuzzleLocation()
-        );
-    }
-
-    // 발사 딜레이 설정 (반자동의 경우)
     if (!bAutomatic)
     {
         bCanFire = false;
-        GetWorldTimerManager().SetTimer(
+        GetWorld()->GetTimerManager().SetTimer(
             FireRateTimerHandle,
             [this]() { bCanFire = true; },
             FireRate,
@@ -176,7 +123,7 @@ FVector AGun::GetMuzzleLocation() const
     {
         return Mesh->GetSocketLocation(MuzzleSocketName);
     }
-    return GetActorLocation();
+    return GetActorLocation() + GetActorForwardVector() * 100.0f;
 }
 
 FRotator AGun::GetMuzzleRotation() const

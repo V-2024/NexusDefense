@@ -133,6 +133,6 @@ void ANDCharacterPlayer::StopFiring()
 {
 	if (Gun)
 	{
-		Gun->StopFiring();
+		Gun->ReleaseTrigger();
 	}
 }

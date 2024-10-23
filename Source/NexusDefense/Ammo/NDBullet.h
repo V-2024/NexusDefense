@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Pattern/NDPoolableComponent.h"
 #include "NDBullet.generated.h"
 
 UCLASS()
@@ -30,6 +31,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UNDPoolableComponent* PoolableComponent;
+
 	UPROPERTY(VisibleAnywhere, Category = "Movement")
 	class UProjectileMovementComponent* movementComponent;
 
@@ -39,4 +43,11 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "BodyMesh")
 	class UStaticMeshComponent* meshComponent;
 
+private:
+	void InitializeComponents();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	float LifeSpan = 3.0f;
+
+	FTimerHandle LifeSpanTimer;
 };
