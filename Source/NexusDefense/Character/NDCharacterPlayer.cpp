@@ -63,17 +63,35 @@ void ANDCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ANDCharacterPlayer::LookUp);
 	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &ANDCharacterPlayer::StartFiring);
 	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Released, this, &ANDCharacterPlayer::StopFiring);
+	PlayerInputComponent->BindAction(TEXT("ToggleCamera"), EInputEvent::IE_Pressed, this, &ANDCharacterPlayer::StartToggleCameraDistance);
+	PlayerInputComponent->BindAction(TEXT("ToggleCamera"), EInputEvent::IE_Released, this, &ANDCharacterPlayer::StopToggleCameraDistance);
 }
 
 void ANDCharacterPlayer::MoveForward(float Value)
 {
+	//if (Controller != nullptr && Value != 0.0f)
+	//{
+	//	const FRotator Rotation = Controller->GetControlRotation();
+	//	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+	//	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	//	AddMovementInput(Direction, Value);
+	//}
 	if (Controller != nullptr && Value != 0.0f)
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		AddMovementInput(Direction, Value);
+		if (bIsFPSMode)
+		{
+			const FVector Direction = FRotationMatrix(Rotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
+		else
+		{
+			const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
 	}
 }
 
@@ -134,5 +152,91 @@ void ANDCharacterPlayer::StopFiring()
 	if (Gun)
 	{
 		Gun->ReleaseTrigger();
+	}
+}
+
+void ANDCharacterPlayer::StartToggleCameraDistance()
+{
+	if (CameraBoom)
+	{
+		float CurrentDistance = CameraBoom->TargetArmLength;
+		TransitionAlpha = 0.0f;
+
+		// FPS 모드로 전환
+		SetFPSMode(true);
+
+		GetWorld()->GetTimerManager().SetTimer(
+			CameraTransitionTimerHandle,
+			[this, CurrentDistance]()
+			{
+				TransitionAlpha += 0.06;
+				if (TransitionAlpha >= 1.0f)
+				{
+					CameraBoom->TargetArmLength = CloseDistance;
+					GetWorld()->GetTimerManager().ClearTimer(CameraTransitionTimerHandle);
+					return;
+				}
+
+				CameraBoom->TargetArmLength = FMath::Lerp(CurrentDistance, CloseDistance, TransitionAlpha);
+			},
+			0.008,
+			true
+		);
+	}
+}
+
+void ANDCharacterPlayer::StopToggleCameraDistance()
+{
+	if (CameraBoom)
+	{
+		float CurrentDistance = CameraBoom->TargetArmLength;
+		TransitionAlpha = 0.0f;
+
+		// TPS 모드로 복귀
+		SetFPSMode(false);
+
+		GetWorld()->GetTimerManager().SetTimer(
+			CameraTransitionTimerHandle,
+			[this, CurrentDistance]()
+			{
+				TransitionAlpha += 0.06;
+				if (TransitionAlpha >= 1.0f)
+				{
+					CameraBoom->TargetArmLength = FarDistance;
+					GetWorld()->GetTimerManager().ClearTimer(CameraTransitionTimerHandle);
+					return;
+				}
+
+				CameraBoom->TargetArmLength = FMath::Lerp(CurrentDistance, FarDistance, TransitionAlpha);
+			},
+			0.008,
+			true
+		);
+	}
+}
+
+void ANDCharacterPlayer::SetFPSMode(bool bEnabled)
+{
+	bIsFPSMode = bEnabled;
+
+	if (bEnabled)
+	{
+		// 모드 설정
+		bOriginalUseControllerRotationYaw = bUseControllerRotationYaw;
+		bOriginalOrientRotationToMovement = GetCharacterMovement()->bOrientRotationToMovement;
+
+		bUseControllerRotationYaw = true;  
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+	}
+	else
+	{
+		bUseControllerRotationYaw = bOriginalUseControllerRotationYaw;
+		GetCharacterMovement()->bOrientRotationToMovement = bOriginalOrientRotationToMovement;
+
+		if (CameraBoom)
+		{
+			CameraBoom->SocketOffset = FVector::ZeroVector;
+			CameraBoom->TargetOffset = FVector::ZeroVector;
+		}
 	}
 }

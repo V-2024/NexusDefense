@@ -32,6 +32,11 @@ void UNDPoolableComponent::ActivatePoolable()
 	GetOwner()->SetActorEnableCollision(true);
 	GetOwner()->SetActorTickEnabled(true);
 
+	if (UProjectileMovementComponent* ProjectileMovement = GetOwner()->FindComponentByClass<UProjectileMovementComponent>())
+	{
+		ProjectileMovement->SetActive(true);
+	}
+
 	if (AutoDeactivateTime > 0.0f)
 	{
 		GetWorld()->GetTimerManager().SetTimer(
@@ -54,6 +59,14 @@ void UNDPoolableComponent::DeactivatePoolable()
 	GetOwner()->SetActorHiddenInGame(true);
 	GetOwner()->SetActorEnableCollision(false);
 	GetOwner()->SetActorTickEnabled(false);
+
+	GetOwner()->SetActorLocation(FVector(0, 0, -10000.0f));
+
+	if (UProjectileMovementComponent* ProjectileMovement = GetOwner()->FindComponentByClass<UProjectileMovementComponent>())
+	{
+		ProjectileMovement->StopMovementImmediately();  // 즉시 이동 중지
+		ProjectileMovement->SetActive(false);  // 컴포넌트 비활성화
+	}
 
 	if (GetWorld())
 	{

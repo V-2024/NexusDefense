@@ -97,24 +97,52 @@ void AGun::Fire()
 {
     if (!BulletPool || !bCanFire) return;
 
-    if (ANDBullet* Bullet = BulletPool->GetPooledObject<ANDBullet>(GetMuzzleLocation(), GetMuzzleRotation()))
-    {
-        Bullet->FireInDirection(GetMuzzleRotation().Vector());
+    // 카메라 위치와 회전값 가져오기
+    FVector CameraLocation;
+    FRotator CameraRotation;
+    GetCameraViewPoint(CameraLocation, CameraRotation);
 
-        // 사운드 및 이펙트 재생 (필요시 구현)
-        // PlayFireEffects();
-    }
+    // 총알 스폰 위치는 총구 위치 사용
+    FVector SpawnLocation = GetMuzzleLocation();
 
-    if (!bAutomatic)
+    // 발사 방향은 카메라 방향 사용
+    FRotator SpawnRotation = CameraRotation;
+
+    if (ANDBullet* Bullet = BulletPool->GetPooledObject<ANDBullet>(SpawnLocation, SpawnRotation))
     {
-        bCanFire = false;
-        GetWorld()->GetTimerManager().SetTimer(
-            FireRateTimerHandle,
-            [this]() { bCanFire = true; },
-            FireRate,
-            false
-        );
+        // 카메라 방향으로 발사
+        Bullet->FireInDirection(GetAdjustedAimDirection());
     }
+}
+
+void AGun::GetCameraViewPoint(FVector& Location, FRotator& Rotation) const
+{
+    AController* OwnerController = GetOwnerController();
+    if (OwnerController)
+    {
+        // 카메라 위치와 회전값 가져오기
+        OwnerController->GetPlayerViewPoint(Location, Rotation);
+    }
+}
+
+AController* AGun::GetOwnerController() const
+{
+    APawn* OwnerPawn = Cast<APawn>(GetOwner());
+    if (OwnerPawn)
+    {
+        return OwnerPawn->GetController();
+    }
+    return nullptr;
+}
+
+FVector AGun::GetAdjustedAimDirection() const
+{
+    FVector Location;
+    FRotator Rotation;
+    GetCameraViewPoint(Location, Rotation);
+
+    // 카메라의 전방 벡터를 사용하여 발사 방향 설정
+    return Rotation.Vector();
 }
 
 FVector AGun::GetMuzzleLocation() const

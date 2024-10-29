@@ -69,6 +69,10 @@ private:
     void StartFiring();
     void StopFiring();
     void Fire();
+    void GetCameraViewPoint(FVector& Location, FRotator& Rotation) const;
+
+    AController* GetOwnerController() const;
+    FVector GetAdjustedAimDirection() const;
     FVector GetMuzzleLocation() const;
     FRotator GetMuzzleRotation() const;
 };

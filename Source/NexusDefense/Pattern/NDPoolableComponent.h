@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Interfaces/NDPoolableInterface.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "NDPoolableComponent.generated.h"
 
 

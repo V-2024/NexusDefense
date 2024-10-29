@@ -53,4 +53,27 @@ public:
 
 	void StartFiring();
 	void StopFiring();
+
+	void StartToggleCameraDistance();
+	void StopToggleCameraDistance();
+
+
+private:
+	bool bIsFPSMode = false;
+
+	bool bOriginalUseControllerRotationYaw;
+	bool bOriginalOrientRotationToMovement;
+
+	void SetFPSMode(bool bEnabled);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	float CloseDistance = 150.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	float FarDistance = 350.0f;
+
+	bool bIsCloseView = false;
+
+	FTimerHandle CameraTransitionTimerHandle;
+	float TransitionAlpha = 0.0f;
 };
