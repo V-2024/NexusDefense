@@ -37,16 +37,16 @@ void UNDPoolableComponent::ActivatePoolable()
 		ProjectileMovement->SetActive(true);
 	}
 
-	if (AutoDeactivateTime > 0.0f)
-	{
-		GetWorld()->GetTimerManager().SetTimer(
-			DeactivationTimerHandle,
-			this,
-			&UNDPoolableComponent::ReturnToPool,
-			AutoDeactivateTime, false
-		);
+	//if (AutoDeactivateTime > 0.0f)
+	//{
+	//	GetWorld()->GetTimerManager().SetTimer(
+	//		DeactivationTimerHandle,
+	//		this,
+	//		&UNDPoolableComponent::ReturnToPool,
+	//		AutoDeactivateTime, false
+	//	);
 
-	}
+	//}
 	OnPoolableActivated.Broadcast();
 }
 

@@ -31,6 +31,7 @@ public:
 	FOnPoolableActivated OnPoolableActivated;
 	FOnPoolableDeactivated OnPoolableDeactivated;
 
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -39,7 +40,7 @@ private:
 	bool bIsActive;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Object Pool")
-	float AutoDeactivateTime = 5.0f;
+	float AutoDeactivateTime = 0.0f;
 
 	FTimerHandle DeactivationTimerHandle;
 		

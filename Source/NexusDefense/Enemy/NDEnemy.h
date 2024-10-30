@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Pattern/NDPoolableComponent.h"
 #include "NDEnemy.generated.h"
 
 UCLASS()
@@ -14,6 +15,9 @@ class NEXUSDEFENSE_API ANDEnemy : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ANDEnemy();
+
+	void ActivateEnemy(const FVector& SpawnLocation);
+	void DeactivateEnemy();
 
 protected:
 	// Called when the game starts or when spawned
@@ -32,6 +36,9 @@ private:
 
 	UPROPERTY()
 	class ACharacter* PlayerCharacter;  // 플레이어 캐릭터 참조
+
+	UPROPERTY(VisibleAnywhere)
+	class UNDPoolableComponent* PoolableComponent;
 
 	void ChasePlayer();
 	bool IsPlayerInRange() const;
