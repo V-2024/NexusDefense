@@ -3,20 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "HAL/Runnable.h"
 #include "HAL/ThreadSafeBool.h"
 #include "AI/NDAITask.h"
-#include "NDAIWorker.generated.h"
 
-UCLASS()
-class NEXUSDEFENSE_API UNDAIWorker : public UObject, public FRunnable
+class NEXUSDEFENSE_API FNDAIWorker : public FRunnable
 {
-    GENERATED_BODY()
-
 public:
-    UNDAIWorker();
-    virtual ~UNDAIWorker();
+    FNDAIWorker();
+    virtual ~FNDAIWorker();
 
     virtual bool Init() override;
     virtual uint32 Run() override;

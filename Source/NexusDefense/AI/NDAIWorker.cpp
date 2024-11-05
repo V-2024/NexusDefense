@@ -1,15 +1,15 @@
 
 #include "AI/NDAIWorker.h"
 
-UNDAIWorker::UNDAIWorker()
-    : Thread(nullptr)
-    , bStopThread(false)
+FNDAIWorker::FNDAIWorker()
+    : bStopThread(false)
+    , Thread(nullptr)
 {
     Thread = FRunnableThread::Create(this, TEXT("NDAIWorker"), 0, TPri_Normal);
     UE_LOG(LogTemp, Warning, TEXT("ND AI Worker Thread Created"));
 }
 
-UNDAIWorker::~UNDAIWorker()
+FNDAIWorker::~FNDAIWorker()
 {
     if (Thread)
     {
@@ -19,13 +19,13 @@ UNDAIWorker::~UNDAIWorker()
     }
 }
 
-bool UNDAIWorker::Init()
+bool FNDAIWorker::Init()
 {
     UE_LOG(LogTemp, Warning, TEXT("ND AI Worker Thread Initialized"));
     return true;
 }
 
-uint32 UNDAIWorker::Run()
+uint32 FNDAIWorker::Run()
 {
     while (!bStopThread)
     {
@@ -50,29 +50,29 @@ uint32 UNDAIWorker::Run()
     return 0;
 }
 
-void UNDAIWorker::Stop()
+void FNDAIWorker::Stop()
 {
     bStopThread = true;
 }
 
-void UNDAIWorker::Exit()
+void FNDAIWorker::Exit()
 {
     UE_LOG(LogTemp, Warning, TEXT("ND AI Worker Thread Exited"));
 }
 
-void UNDAIWorker::AddTask(const FNDAITask& NewTask)
+void FNDAIWorker::AddTask(const FNDAITask& NewTask)
 {
     FScopeLock Lock(&TaskLock);
     TaskQueue.Enqueue(NewTask);
 }
 
-bool UNDAIWorker::GetCompletedTask(FNDAITask& OutTask)
+bool FNDAIWorker::GetCompletedTask(FNDAITask& OutTask)
 {
     FScopeLock Lock(&TaskLock);
     return CompletedTasks.Dequeue(OutTask);
 }
 
-void UNDAIWorker::ProcessTask(FNDAITask& Task)
+void FNDAIWorker::ProcessTask(FNDAITask& Task)
 {
     if (!Task.Enemy || !Task.Player)
         return;

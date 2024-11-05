@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Pattern/NDPoolableComponent.h"
+#include "AI/NDAITask.h"
 #include "NDEnemy.generated.h"
 
 UCLASS()
@@ -15,21 +15,26 @@ class NEXUSDEFENSE_API ANDEnemy : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ANDEnemy();
+	virtual void Tick(float DeltaTime) override;
 
 	void ActivateEnemy(const FVector& SpawnLocation);
 	void DeactivateEnemy();
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	float GetAttackRange() const { return AttackRange; }
+
+	void ExecuteAIResult(const FNDAITask& CompletedTask);
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 private:
-	UPROPERTY(EditAnywhere, Category = "AI")
-	float DetectionRange = 1000.f;
+	//UPROPERTY(EditAnywhere, Category = "AI")
+	//float DetectionRange = 1000.f;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float AttackRange = 200.f;
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	float MovementSpeed = 300.f;
@@ -40,7 +45,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UNDPoolableComponent* PoolableComponent;
 
-	void ChasePlayer();
-	bool IsPlayerInRange() const;
+	//void ChasePlayer();
+	//bool IsPlayerInRange() const;
 
 };
