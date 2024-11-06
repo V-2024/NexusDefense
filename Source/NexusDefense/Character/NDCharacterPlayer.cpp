@@ -18,11 +18,11 @@ ANDCharacterPlayer::ANDCharacterPlayer()
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->SetRelativeLocation(FVector(0, 0, 90));
 	CameraBoom->TargetArmLength = 350.0f;
-	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->bUsePawnControlRotation = false;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
-	FollowCamera->bUsePawnControlRotation = false;
+	FollowCamera->bUsePawnControlRotation = true;
 
 	BaseTurnRate = 65.f;
 	BaseLookUpRate = 65.f;
