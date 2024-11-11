@@ -126,6 +126,7 @@ void ANDCharacterWhite::BeginPlay()
 
 void ANDCharacterWhite::Attack()
 {
+	if (bAttacking) return;
 	bAttacking = true;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
