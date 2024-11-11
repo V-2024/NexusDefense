@@ -32,6 +32,13 @@ ANDCharacterWhite::ANDCharacterWhite()
 	GetCharacterMovement()->JumpZVelocity = 650.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
+	MaxHealth = 100.f;
+	Health = 90.f;
+	MaxStamina = 150.f;
+	Stamina = 120.f;
+	MaxExperience = 100.0f;
+	Experience = 0.0f;
+
 	bLMBDown = false;
 	bAttacking = false;
 }
