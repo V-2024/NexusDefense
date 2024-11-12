@@ -1,5 +1,6 @@
 
 #include "AI/NDAIWorker.h"
+#include "Enemy/NDEnemy.h"
 
 FNDAIWorker::FNDAIWorker()
     : bStopThread(false)

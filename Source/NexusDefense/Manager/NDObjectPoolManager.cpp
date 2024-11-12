@@ -1,5 +1,3 @@
-#include "NDObjectPoolManager.h"
-
 #include "Manager/NDObjectPoolManager.h"
 
 void UNDObjectPoolManager::LogPoolStatus()
