@@ -32,6 +32,9 @@ ANDCharacterWhite::ANDCharacterWhite()
 	GetCharacterMovement()->JumpZVelocity = 650.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
+	DamageSystem = CreateDefaultSubobject<UND_C_DamageSystem>(TEXT("DamageSystem"));
+	AttacksComponent = CreateDefaultSubobject<UNDAttacksComponent>(TEXT("AttacksComponent"));
+
 	MaxStamina = 150.f;
 	Stamina = 120.f;
 
@@ -125,12 +128,26 @@ void ANDCharacterWhite::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (DamageSystem)
+	{
+		DamageSystem->MaxHealth = MaxHealth;
+		DamageSystem->CurrentHealth = Health;
+		DamageSystem->OnDamageResponseEvent.AddUObject(this, &ANDCharacterWhite::OnDamageReceived);
+		DamageSystem->OnDeathEvent.AddUObject(this, &ANDCharacterWhite::OnDeathReceived);
+	}
 }
 
 void ANDCharacterWhite::Attack()
 {
 	if (bAttacking) return;
 	bAttacking = true;
+
+	UE_LOG(LogTemp, Log, TEXT("Character %s is trying to attack"), *GetName());
+	//if (AttacksComponent)
+	//{
+	//	AttacksComponent->PerformMeleeAttack();
+	//}
+
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && CombatMontage)
@@ -158,4 +175,50 @@ void ANDCharacterWhite::Attack()
 void ANDCharacterWhite::AttackEnd()
 {
 	bAttacking = false;
+}
+
+bool ANDCharacterWhite::TakeDamage(const FS_DamageInfo& DamageInfo)
+{
+	if (DamageSystem)
+	{
+		bool bDamageApplied = DamageSystem->TakeDamage(DamageInfo);
+		if (bDamageApplied)
+		{
+			Health = DamageSystem->GetCurrentHealth();
+		}
+		return bDamageApplied;
+	}
+	return false;
+}
+
+void ANDCharacterWhite::OnAttackMontageNotifyBegin(FName NotifyName)
+{
+	if (NotifyName == FName("AttackCheck"))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Attack Check Started"));
+		if (AttacksComponent)
+		{
+			AttacksComponent->ActivateAttack();
+		}
+	}
+}
+
+void ANDCharacterWhite::OnAttackMontageNotifyEnd(FName NotifyName)
+{
+	if (NotifyName == FName("AttackCheck"))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Attack Check Ended"));
+		if (AttacksComponent)
+		{
+			AttacksComponent->DeactivateAttack();
+		}
+	}
+}
+
+void ANDCharacterWhite::OnDamageReceived(float DamageAmount)
+{
+}
+
+void ANDCharacterWhite::OnDeathReceived()
+{
 }
