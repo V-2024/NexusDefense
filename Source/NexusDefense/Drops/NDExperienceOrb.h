@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Drops/NDItem.h"
-#include "Pattern/NDExperienceComponent.h"
+#include "Components/NDExperienceComponent.h"
 #include "NDExperienceOrb.generated.h"
 
 /**

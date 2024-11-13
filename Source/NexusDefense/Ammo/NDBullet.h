@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Pattern/NDPoolableComponent.h"
+#include "Components/NDPoolableComponent.h"
 #include "NDBullet.generated.h"
 
 UCLASS()

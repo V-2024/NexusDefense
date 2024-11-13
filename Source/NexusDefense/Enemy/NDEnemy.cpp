@@ -4,7 +4,7 @@
 #include "Enemy/NDEnemy.h"
 #include "Manager/NDAIManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Pattern/NDPoolableComponent.h"
+#include "Components/NDPoolableComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "AIController.h"
 

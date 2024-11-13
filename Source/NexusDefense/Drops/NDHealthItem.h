@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Drops/NDItem.h"
-#include "Pattern/NDHealthComponent.h"
+#include "Components/NDHealthComponent.h"
 #include "NDHealthItem.generated.h"
 
 /**

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Pattern/NDPoolableComponent.h"
+#include "Components/NDPoolableComponent.h"
 #include "NDObjectPoolManager.generated.h"
 
 UCLASS()
