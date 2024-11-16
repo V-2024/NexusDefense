@@ -32,14 +32,12 @@ ANDCharacterWhite::ANDCharacterWhite()
 	GetCharacterMovement()->JumpZVelocity = 650.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
-	DamageSystem = CreateDefaultSubobject<UND_C_DamageSystem>(TEXT("DamageSystem"));
-	AttacksComponent = CreateDefaultSubobject<UNDAttacksComponent>(TEXT("AttacksComponent"));
-
 	MaxStamina = 150.f;
 	Stamina = 120.f;
 
-	bLMBDown = false;
 	bAttacking = false;
+	bLMBDown = false;
+	CurrentAttackType = EAttackType::None;
 }
 
 // Called every frame
@@ -54,22 +52,18 @@ void ANDCharacterWhite::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveForward", this,
-		&ANDCharacterWhite::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this,
-		&ANDCharacterWhite::MoveRight);
-	PlayerInputComponent->BindAxis("Turn", this,
-		&ANDCharacterWhite::Turn);
-	PlayerInputComponent->BindAxis("LookUp", this,
-		&ANDCharacterWhite::LookUp);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this,
-		&ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this,
-		&ACharacter::StopJumping);
-	PlayerInputComponent->BindAction("LMB", IE_Pressed, this,
-		&ANDCharacterWhite::LMBDown);
-	PlayerInputComponent->BindAction("LMB", IE_Released, this,
-		&ANDCharacterWhite::LMBUp);
+	PlayerInputComponent->BindAxis("MoveForward", this, &ANDCharacterWhite::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ANDCharacterWhite::MoveRight);
+	PlayerInputComponent->BindAxis("Turn", this, &ANDCharacterWhite::Turn);
+	PlayerInputComponent->BindAxis("LookUp", this, &ANDCharacterWhite::LookUp);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("LMB", IE_Pressed, this, &ANDCharacterWhite::LMBDown);
+	PlayerInputComponent->BindAction("LMB", IE_Released, this, &ANDCharacterWhite::LMBUp);
+	PlayerInputComponent->BindAction("Attack1", IE_Pressed, this, &ANDCharacterWhite::InputAttack1);
+	PlayerInputComponent->BindAction("Attack2", IE_Pressed, this, &ANDCharacterWhite::InputAttack2);
+	PlayerInputComponent->BindAction("Attack3", IE_Pressed, this, &ANDCharacterWhite::InputAttack3);
+	PlayerInputComponent->BindAction("Attack4", IE_Pressed, this, &ANDCharacterWhite::InputAttack4);
 }
 
 void ANDCharacterWhite::MoveForward(float Value)
@@ -115,12 +109,13 @@ void ANDCharacterWhite::LookUp(float Value)
 void ANDCharacterWhite::LMBDown()
 {
 	bLMBDown = true;
-	Attack();
+	UE_LOG(LogTemp, Display, TEXT("LMBDown"));
 }
 
 void ANDCharacterWhite::LMBUp()
 {
 	bLMBDown = false;
+	UE_LOG(LogTemp, Display, TEXT("LMBUp"));
 }
 
 // Called when the game starts or when spawned
@@ -128,97 +123,41 @@ void ANDCharacterWhite::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (DamageSystem)
+}
+
+void ANDCharacterWhite::InputAttack1()
+{
+	if (!bAttacking)
 	{
-		DamageSystem->MaxHealth = MaxHealth;
-		DamageSystem->CurrentHealth = Health;
-		DamageSystem->OnDamageResponseEvent.AddUObject(this, &ANDCharacterWhite::OnDamageReceived);
-		DamageSystem->OnDeathEvent.AddUObject(this, &ANDCharacterWhite::OnDeathReceived);
+		ExecuteAttack(EAttackType::Attack1);
 	}
 }
 
-void ANDCharacterWhite::Attack()
+void ANDCharacterWhite::InputAttack2()
 {
-	if (bAttacking) return;
-	bAttacking = true;
-
-	UE_LOG(LogTemp, Log, TEXT("Character %s is trying to attack"), *GetName());
-	//if (AttacksComponent)
-	//{
-	//	AttacksComponent->PerformMeleeAttack();
-	//}
-
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && CombatMontage)
+	if (!bAttacking)
 	{
-		int32 Section = FMath::RandRange(0, 1);
-		switch (Section)
-		{
-		case 0:
-			AnimInstance->Montage_Play(CombatMontage, 1.2f);
-			AnimInstance->Montage_JumpToSection(FName("Attack_1"),
-				CombatMontage);
-			break;
-		case 1:
-			AnimInstance->Montage_Play(CombatMontage, 1.2f);
-			AnimInstance->Montage_JumpToSection(FName("Attack_2"),
-				CombatMontage);
-			break;
-
-		default:
-			;
-		}
+		ExecuteAttack(EAttackType::Attack2);
 	}
 }
 
-void ANDCharacterWhite::AttackEnd()
+void ANDCharacterWhite::InputAttack3()
 {
-	bAttacking = false;
-}
-
-bool ANDCharacterWhite::TakeDamage(const FS_DamageInfo& DamageInfo)
-{
-	if (DamageSystem)
+	if (!bAttacking)
 	{
-		bool bDamageApplied = DamageSystem->TakeDamage(DamageInfo);
-		if (bDamageApplied)
-		{
-			Health = DamageSystem->GetCurrentHealth();
-		}
-		return bDamageApplied;
-	}
-	return false;
-}
-
-void ANDCharacterWhite::OnAttackMontageNotifyBegin(FName NotifyName)
-{
-	if (NotifyName == FName("AttackCheck"))
-	{
-		UE_LOG(LogTemp, Log, TEXT("Attack Check Started"));
-		if (AttacksComponent)
-		{
-			AttacksComponent->ActivateAttack();
-		}
+		ExecuteAttack(EAttackType::Attack3);
 	}
 }
 
-void ANDCharacterWhite::OnAttackMontageNotifyEnd(FName NotifyName)
+void ANDCharacterWhite::InputAttack4()
 {
-	if (NotifyName == FName("AttackCheck"))
+	if (!bAttacking)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Attack Check Ended"));
-		if (AttacksComponent)
-		{
-			AttacksComponent->DeactivateAttack();
-		}
+		ExecuteAttack(EAttackType::Attack4);
 	}
 }
 
-void ANDCharacterWhite::OnDamageReceived(float DamageAmount)
+void ANDCharacterWhite::ExecuteAttack(EAttackType AttackType)
 {
-}
-
-void ANDCharacterWhite::OnDeathReceived()
-{
+	
 }

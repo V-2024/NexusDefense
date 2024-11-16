@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/NDPoolableComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "AIController.h"
 
 ANDEnemy::ANDEnemy()
@@ -22,6 +23,14 @@ ANDEnemy::ANDEnemy()
     GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
+
+    DamageSystem = CreateDefaultSubobject<UND_C_DamageSystem>(TEXT("DamageSystem"));
+
+    // 데미지 이벤트 바인딩
+    if (DamageSystem)
+    {
+        DamageSystem->OnDamageResponseEvent.AddUObject(this, &ANDEnemy::OnDamageReceived);
+    }
 }
 
 void ANDEnemy::BeginPlay()
@@ -35,6 +44,11 @@ void ANDEnemy::BeginPlay()
     {
         SpawnDefaultController();
     }
+}
+
+void ANDEnemy::OnDamageReceived(float DamageAmount)
+{
+    UE_LOG(LogTemp, Warning, TEXT("Enemy took damage: %f"), DamageAmount);
 }
 
 void ANDEnemy::Tick(float DeltaTime)
@@ -54,18 +68,18 @@ void ANDEnemy::ExecuteAIResult(const FNDAITask& CompletedTask)
     if (CompletedTask.bInAttackRange)
     {
         // 공격 범위 안에 있을 때
-        UE_LOG(LogTemp, Warning, TEXT("%s is in attack range"), *GetName());
+        UE_LOG(LogTemp, Display, TEXT("%s is in attack range"), *GetName());
         // 여기에 공격 로직 추가 예정
     }
     else if (CompletedTask.bShouldMove)
     {
         // 이동해야 할 때
-        UE_LOG(LogTemp, Warning, TEXT("%s is moving to target"), *GetName());
+        UE_LOG(LogTemp, Display, TEXT("%s is moving to target"), *GetName());
 
         if (AAIController* AIController = Cast<AAIController>(GetController()))
         {
             AIController->MoveToLocation(CompletedTask.TargetLocation);
-            UE_LOG(LogTemp, Warning, TEXT("%s started moving to: %s"),
+            UE_LOG(LogTemp, Display, TEXT("%s started moving to: %s"),
                 *GetName(),
                 *CompletedTask.TargetLocation.ToString());
         }

@@ -97,7 +97,7 @@ void ANDAICBase::FindPlayerCharacters()
         return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Player Characters Found: %d"), PlayerCharacters.Num());
+	UE_LOG(LogTemp, Display, TEXT("Player Characters Found: %d"), PlayerCharacters.Num());
 
 	for (AActor* Player : PlayerActors)
 	{

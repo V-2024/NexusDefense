@@ -9,7 +9,7 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageResponseSignature, float);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSignature, FS_DamageInfo);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSignature, FND_S_DamageInfo);
 
 enum class EDamageResult
 {
@@ -29,11 +29,11 @@ public:
 	FORCEINLINE float GetMaxHealth() const { return CurrentHealth; }
 	FORCEINLINE float GetCurrentHealth() const { return CurrentHealth; }
 
-	bool TakeDamage(FS_DamageInfo);
+	bool TakeDamage(FND_S_DamageInfo);
 
 	float Heal(float);
 
-	void SetHealth(FS_DamageInfo);
+	void SetHealth(FND_S_DamageInfo);
 
 	void OnDeath() const;
 
