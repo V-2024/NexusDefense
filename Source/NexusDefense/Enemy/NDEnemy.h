@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AI/NDAITask.h"
+#include "DamageSystem/ND_C_DamageSystem.h"
 #include "NDEnemy.generated.h"
 
 UCLASS()
@@ -28,6 +29,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	UND_C_DamageSystem* DamageSystem;
+
+	UFUNCTION()
+	void OnDamageReceived(float DamageAmount);
 
 private:
 	//UPROPERTY(EditAnywhere, Category = "AI")

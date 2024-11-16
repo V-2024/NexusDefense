@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataTable.h"
 #include "ND_S_DamageInfo.generated.h"
 
 UENUM(BlueprintType)
@@ -24,7 +23,7 @@ enum class E_DamageResponse : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FS_DamageInfo
+struct FND_S_DamageInfo
 {
     GENERATED_BODY()
 
@@ -46,7 +45,7 @@ struct FS_DamageInfo
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool ShouldForceInterrupt;
 
-    FS_DamageInfo()
+    FND_S_DamageInfo()
         : Amount(0.0f)
         , DamageType(E_DamageType::None)
         , DamageResponse(E_DamageResponse::None)

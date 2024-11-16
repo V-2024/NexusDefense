@@ -10,7 +10,7 @@ UND_C_DamageSystem::UND_C_DamageSystem()
 	CurrentHealth = MaxHealth;
 }
 
-bool UND_C_DamageSystem::TakeDamage(FS_DamageInfo Damage_Info)
+bool UND_C_DamageSystem::TakeDamage(FND_S_DamageInfo Damage_Info)
 {
 	if (!IsDead)
 	{
@@ -86,7 +86,7 @@ float UND_C_DamageSystem::Heal(float Amount)
 	return 0.0f;
 }
 
-void UND_C_DamageSystem::SetHealth(FS_DamageInfo)
+void UND_C_DamageSystem::SetHealth(FND_S_DamageInfo)
 {
 
 }

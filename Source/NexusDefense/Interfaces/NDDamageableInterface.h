@@ -24,7 +24,7 @@ class NEXUSDEFENSE_API INDDamageableInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
     
-    virtual bool TakeDamage(const FS_DamageInfo& DamageInfo) = 0;
+    virtual bool TakeDamage(const FND_S_DamageInfo& DamageInfo) = 0;
     virtual float GetHealth() const = 0;
     virtual float GetMaxHealth() const = 0;
     virtual bool IsDead() const = 0;

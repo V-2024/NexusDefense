@@ -65,9 +65,9 @@ void UNDAIManager::ProcessCompletedTasks()
         {
             // Enemy에게 결과 전달
             CompletedTask.Enemy->ExecuteAIResult(CompletedTask);
-            UE_LOG(LogTemp, Warning, TEXT("AI Task Completed - Enemy: %s, InRange: %s"),
-                *CompletedTask.Enemy->GetName(),
-                CompletedTask.bInAttackRange ? TEXT("True") : TEXT("False"));
+            //UE_LOG(LogTemp, Warning, TEXT("AI Task Completed - Enemy: %s, InRange: %s"),
+            //    *CompletedTask.Enemy->GetName(),
+            //    CompletedTask.bInAttackRange ? TEXT("True") : TEXT("False"));
         }
     }
 }
