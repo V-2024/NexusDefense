@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "Drops/NDItem.h"
 #include "Components/NDHealthComponent.h"
+//사운드와 파티클
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystem.h"
 #include "NDHealthItem.generated.h"
 
 /**
@@ -26,4 +29,16 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
     float HealAmount = 25.f;
+
+    UNDHealthComponent* GetHealthComponent(AActor* Target) const;
+
+    // 힐링 효과 적용 함수
+    virtual void ApplyHealing(AActor* Target);
+
+    // 효과음
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    USoundCue* HealSound;
+    // 파티클
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    UParticleSystem* HealEffect;
 };

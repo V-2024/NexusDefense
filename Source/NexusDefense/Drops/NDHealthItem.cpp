@@ -23,5 +23,10 @@ void ANDHealthItem::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActo
     Super::OnOverlapEnd(OverlappedComponent,
         OtherActor, OtherComp, OtherBodyIndex);
 
-    UE_LOG(LogTemp, Warning, TEXT("HealthItem::OnOverlapBegin()"));
+    UE_LOG(LogTemp, Warning, TEXT("HealthItem::OnOverlapEnd()"));
+}
+
+void ANDHealthItem::ApplyHealing(AActor* Target)
+{
+
 }

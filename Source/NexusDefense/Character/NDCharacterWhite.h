@@ -1,11 +1,13 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DamageSystem/ND_C_DamageSystem.h"
-#include "Components/NDAttacksComponent.h"
+//#include "Components/NDAttacksComponent.h"
+#include "Components/NDHealthComponent.h"
+//사운드와 파티클
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystem.h"
 #include "NDCharacterWhite.generated.h"
 
 class USpringArmComponent;
@@ -60,6 +62,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HealthComponent")
+	UNDHealthComponent* HealthComponent;
+
+	// 체력 변경 델리게이트용 함수
+	UFUNCTION(BlueprintCallable, Category = "HealthComponent")
+	void OnHealthChanged(float NewHealth);
+
 	// 공격
 	void InputAttack1();
 	void InputAttack2();
@@ -95,4 +104,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
 	float Experience;
+
+	// 효과음
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	USoundCue* HealSound;
+	// 파티클
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	UParticleSystem* HealEffect;
 };

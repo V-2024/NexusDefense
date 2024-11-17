@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ANDCharacterWhite::ANDCharacterWhite()
@@ -22,6 +23,8 @@ ANDCharacterWhite::ANDCharacterWhite()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	HealthComponent = CreateDefaultSubobject<UNDHealthComponent>(TEXT("HealthComponent"));
 
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationPitch = false;
@@ -123,6 +126,41 @@ void ANDCharacterWhite::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (HealthComponent)
+	{
+		HealthComponent->OnHealthChanged.AddDynamic(this, &ANDCharacterWhite::OnHealthChanged);
+	}
+}
+
+void ANDCharacterWhite::OnHealthChanged(float NewHealth)
+{
+	float PreviousHealth = Health;
+	Health = NewHealth;
+
+	if (NewHealth > PreviousHealth)
+	{
+		// Èú »ç¿îµå
+		if (HealSound)
+		{
+			UGameplayStatics::PlaySound2D(this, HealSound);
+		}
+
+		// Èú ÆÄÆ¼Å¬
+		if (HealEffect)
+		{
+			UGameplayStatics::SpawnEmitterAttached(
+				HealEffect,
+				GetMesh(),
+				NAME_None,
+				FVector(0.f),
+				FRotator::ZeroRotator,
+				FVector(1.f),
+				EAttachLocation::SnapToTarget
+			);
+		}
+	}
+	UE_LOG(LogTemp, Log, TEXT("Health Changed - Previous: %f, New: %f"),
+		PreviousHealth, NewHealth);
 }
 
 void ANDCharacterWhite::InputAttack1()
