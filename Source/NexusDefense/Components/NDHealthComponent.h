@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "NDHealthComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, NewExperience);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, NewHealth, float, Delta);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NEXUSDEFENSE_API UNDHealthComponent : public UActorComponent
@@ -14,15 +14,23 @@ class NEXUSDEFENSE_API UNDHealthComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnHealthChanged OnHealthChanged;
+
 	UFUNCTION(BlueprintCallable)
 	void AddHealth(float Amount);
 
-	UPROPERTY(BlueprintAssignable)
-	FOnHealthChanged OnHealthChanged;
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetCurrentHealth() const { return CurrentHealth; }
+
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetMaxHealth() const { return MaxHealth; }
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float CurrentHealth = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float MaxHealth = 100.f;
+
 };

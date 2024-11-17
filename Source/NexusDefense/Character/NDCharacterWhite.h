@@ -4,10 +4,10 @@
 #include "GameFramework/Character.h"
 #include "DamageSystem/ND_C_DamageSystem.h"
 //#include "Components/NDAttacksComponent.h"
+
+#include "Interfaces/NDPlayerStatusInterface.h"
+#include "Components/NDExperienceComponent.h"
 #include "Components/NDHealthComponent.h"
-//사운드와 파티클
-#include "Sound/SoundCue.h"
-#include "Particles/ParticleSystem.h"
 #include "NDCharacterWhite.generated.h"
 
 class USpringArmComponent;
@@ -24,7 +24,7 @@ enum class EAttackType : uint8
 };
 
 UCLASS()
-class NEXUSDEFENSE_API ANDCharacterWhite : public ACharacter
+class NEXUSDEFENSE_API ANDCharacterWhite : public ACharacter, public INDPlayerStatusInterface
 {
 	GENERATED_BODY()
 
@@ -35,7 +35,11 @@ public:
     // Called every frame
     virtual void Tick(float DeltaTime) override;
 
-    // Called to bind functionality to input
+	// NDPlayerStatueInterface 가상함수 구현
+	virtual void AddExperience(float Amount) override;
+	virtual void AddHealth(float Amount) override;
+
+    // 인풋 바인딩
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// 인풋 함수 (추후에 점프 추가)
@@ -58,16 +62,13 @@ public:
 	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HealthComponent")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UNDHealthComponent* HealthComponent;
-
-	// 체력 변경 델리게이트용 함수
-	UFUNCTION(BlueprintCallable, Category = "HealthComponent")
-	void OnHealthChanged(float NewHealth);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UNDExperienceComponent* ExperienceComponent;
 
 	// 공격
 	void InputAttack1();
@@ -104,11 +105,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
 	float Experience;
-
-	// 효과음
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
-	USoundCue* HealSound;
-	// 파티클
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
-	UParticleSystem* HealEffect;
 };

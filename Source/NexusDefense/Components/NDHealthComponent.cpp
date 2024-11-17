@@ -5,8 +5,13 @@
 
 void UNDHealthComponent::AddHealth(float Amount)
 {
-	CurrentHealth = FMath::Min(CurrentHealth + Amount, MaxHealth);
-	OnHealthChanged.Broadcast(CurrentHealth);
-	UE_LOG(LogTemp, Log, TEXT("Health gained: %f, CurrentHealth: %f"),
-		Amount, CurrentHealth);
+    float OldHealth = CurrentHealth;
+    
+    CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.f, MaxHealth);
+    float Delta = CurrentHealth - OldHealth;
+
+    if (!FMath::IsNearlyZero(Delta))
+    {
+        OnHealthChanged.Broadcast(CurrentHealth, Delta);
+    }
 }

@@ -6,25 +6,26 @@
 #include "Drops/NDItemBase.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundBase.h"
-#include "NDExperienceOrb.generated.h"
+#include "NDHealOrb.generated.h"
 
+/**
+ * 
+ */
 UCLASS()
-class NEXUSDEFENSE_API ANDExperienceOrb : public ANDItemBase
+class NEXUSDEFENSE_API ANDHealOrb : public ANDItemBase
 {
 	GENERATED_BODY()
-	
+
 public:
-    ANDExperienceOrb();
+    ANDHealOrb();
 
 protected:
+    UPROPERTY(EditAnywhere, Category = "Healing")
+    float HealAmount = 25.f;
 
-    //경험치량
-    UPROPERTY(EditAnywhere, Category = "Experience")
-    float ExperienceAmount = 30.f;
-
-    //이펙트
     UPROPERTY(EditAnywhere, Category = "Effects")
     UParticleSystem* GainEffect;
+
     UPROPERTY(EditAnywhere, Category = "Effects")
     USoundBase* GainSound;
 
@@ -34,5 +35,5 @@ protected:
 
     void PlayGainEffect();
     void PlayGainSound();
-
+	
 };

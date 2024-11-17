@@ -25,6 +25,7 @@ ANDCharacterWhite::ANDCharacterWhite()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	HealthComponent = CreateDefaultSubobject<UNDHealthComponent>(TEXT("HealthComponent"));
+	ExperienceComponent = CreateDefaultSubobject<UNDExperienceComponent>(TEXT("ExperienceComponent"));
 
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationPitch = false;
@@ -48,6 +49,22 @@ void ANDCharacterWhite::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ANDCharacterWhite::AddExperience(float Amount)
+{
+	if (ExperienceComponent)
+	{
+		ExperienceComponent->AddExperience(Amount);
+	}
+}
+
+void ANDCharacterWhite::AddHealth(float Amount)
+{
+	if (HealthComponent)
+	{
+		HealthComponent->AddHealth(Amount);
+	}
 }
 
 // Called to bind functionality to input
@@ -125,42 +142,6 @@ void ANDCharacterWhite::LMBUp()
 void ANDCharacterWhite::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (HealthComponent)
-	{
-		HealthComponent->OnHealthChanged.AddDynamic(this, &ANDCharacterWhite::OnHealthChanged);
-	}
-}
-
-void ANDCharacterWhite::OnHealthChanged(float NewHealth)
-{
-	float PreviousHealth = Health;
-	Health = NewHealth;
-
-	if (NewHealth > PreviousHealth)
-	{
-		// Èú »ç¿îµå
-		if (HealSound)
-		{
-			UGameplayStatics::PlaySound2D(this, HealSound);
-		}
-
-		// Èú ÆÄÆ¼Å¬
-		if (HealEffect)
-		{
-			UGameplayStatics::SpawnEmitterAttached(
-				HealEffect,
-				GetMesh(),
-				NAME_None,
-				FVector(0.f),
-				FRotator::ZeroRotator,
-				FVector(1.f),
-				EAttachLocation::SnapToTarget
-			);
-		}
-	}
-	UE_LOG(LogTemp, Log, TEXT("Health Changed - Previous: %f, New: %f"),
-		PreviousHealth, NewHealth);
 }
 
 void ANDCharacterWhite::InputAttack1()

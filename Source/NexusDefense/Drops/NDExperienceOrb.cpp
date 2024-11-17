@@ -2,32 +2,45 @@
 
 
 #include "Drops/NDExperienceOrb.h"
+#include "Interfaces/NDPlayerStatusInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 ANDExperienceOrb::ANDExperienceOrb()
 {
-
+    CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ANDExperienceOrb::OnOverlapBegin);
 }
 
-void ANDExperienceOrb::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ANDExperienceOrb::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Super::OnOverlapBegin(OverlappedComponent, OtherActor, OtherComp,
-		OtherBodyIndex, bFromSweep, SweepResult);
-
-    if (ACharacter* Character = Cast<ACharacter>(OtherActor))
+    if (INDPlayerStatusInterface* ExpInterface = Cast<INDPlayerStatusInterface>(OtherActor))
     {
-        // 경험치 증가 처리
-        if (UNDExperienceComponent* ExpComp = Character->FindComponentByClass<UNDExperienceComponent>())
-        {
-            ExpComp->AddExperience(ExperienceAmount);
-        }
-        Destroy();
+        ExpInterface->AddExperience(ExperienceAmount);
+        PlayGainEffect();
+        PlayGainSound();
+        Destroy(); // 후에 수정 예정
     }
 }
 
-void ANDExperienceOrb::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void ANDExperienceOrb::PlayGainEffect()
 {
-	Super::OnOverlapEnd(OverlappedComponent,
-		OtherActor, OtherComp, OtherBodyIndex);
+    if (GainEffect)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(
+            GetWorld(),
+            GainEffect,
+            GetActorLocation()
+        );
+    }
+}
 
-	UE_LOG(LogTemp, Warning, TEXT("ExperienceOrb::OnOverlapBegin()"));
+void ANDExperienceOrb::PlayGainSound()
+{
+    if (GainSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(
+            this,
+            GainSound,
+            GetActorLocation()
+        );
+    }
 }

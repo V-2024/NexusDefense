@@ -5,9 +5,27 @@
 
 void UNDExperienceComponent::AddExperience(float Amount)
 {
-    if (Amount <= 0) return;
+    float OldExperience = CurrentExperience;
     CurrentExperience += Amount;
-    OnExperienceChanged.Broadcast(CurrentExperience);
-    UE_LOG(LogTemp, Log, TEXT("Experience gained: %f, Total: %f"),
-        Amount, CurrentExperience);
+
+    OnExperienceChanged.Broadcast(CurrentExperience, Amount);
+    CheckLevelUp();
+}
+
+void UNDExperienceComponent::CheckLevelUp()
+{
+    float RequiredExp = GetRequiredExperience();
+
+    while (CurrentExperience >= RequiredExp)
+    {
+        CurrentExperience -= RequiredExp;
+        CurrentLevel++;
+        OnLevelUp.Broadcast(CurrentLevel);
+        RequiredExp = GetRequiredExperience();
+    }
+}
+
+float UNDExperienceComponent::GetRequiredExperience() const
+{
+    return BaseExperienceRequired * CurrentLevel;
 }
