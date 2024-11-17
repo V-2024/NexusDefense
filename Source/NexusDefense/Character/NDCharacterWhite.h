@@ -86,23 +86,4 @@ public:
 	// 현재 공격 종류
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
 	EAttackType CurrentAttackType;
-
-	// 스탯
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
-	float MaxHealth;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
-	float Health;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
-	float MaxStamina;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
-	float Stamina;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
-	float MaxExperience;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
-	float Experience;
 };

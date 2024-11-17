@@ -36,9 +36,6 @@ ANDCharacterWhite::ANDCharacterWhite()
 	GetCharacterMovement()->JumpZVelocity = 650.f;
 	GetCharacterMovement()->AirControl = 0.2f;
 
-	MaxStamina = 150.f;
-	Stamina = 120.f;
-
 	bAttacking = false;
 	bLMBDown = false;
 	CurrentAttackType = EAttackType::None;
