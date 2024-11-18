@@ -24,12 +24,12 @@ ANDEnemy::ANDEnemy()
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
 
-    DamageSystem = CreateDefaultSubobject<UND_C_DamageSystem>(TEXT("DamageSystem"));
+    HealthComponent = CreateDefaultSubobject<UNDHealthComponent>(TEXT("HealthComponent"));
 
     // 데미지 이벤트 바인딩
-    if (DamageSystem)
+    if (HealthComponent)
     {
-        DamageSystem->OnDamageResponseEvent.AddUObject(this, &ANDEnemy::OnDamageReceived);
+        HealthComponent->OnDamageEvent.AddUObject(this, &ANDEnemy::OnDamageReceived);
     }
 }
 
@@ -46,9 +46,9 @@ void ANDEnemy::BeginPlay()
     }
 }
 
-void ANDEnemy::OnDamageReceived(float DamageAmount)
+void ANDEnemy::OnDamageReceived(const FND_S_DamageInfo& DamageInfo)
 {
-    UE_LOG(LogTemp, Warning, TEXT("Enemy took damage: %f"), DamageAmount);
+    UE_LOG(LogTemp, Warning, TEXT("Enemy took damage: %f"), DamageInfo.Amount);
 }
 
 void ANDEnemy::Tick(float DeltaTime)

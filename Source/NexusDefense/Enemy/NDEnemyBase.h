@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "UI/UIBase/NDEnemyWidgetInterface.h"
+#include "Components/NDHealthComponent.h"
 #include "NDEnemyBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDestroyedSignature, ANDEnemyBase*, DestroyedEnemy);
@@ -72,8 +73,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
     UAnimMontage* DeathAnimMontage;
 
-    UPROPERTY(BlueprintAssignable, Category = "Enemy")
-    FOnEnemyDestroyedSignature OnEnemyDestroyed;
 
 protected:
     virtual void SetUpEnemyWidget(class UNDUserWidget* Widget) override;
@@ -82,9 +81,8 @@ private:
     bool bIsActive;
 
 protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UND_C_DamageSystem> DamageableComponent;
-
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+    UNDHealthComponent* HealthComponent;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = "true"))
     TObjectPtr<class UNDWidgetComponent> HPBar;
 };

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DamageSystem/ND_S_AttackInfo.h"
-#include "DamageSystem/ND_C_DamageSystem.h"
+#include "Components/NDHealthComponent.h"
 #include "Combat/NDCombatTypes.h"
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
