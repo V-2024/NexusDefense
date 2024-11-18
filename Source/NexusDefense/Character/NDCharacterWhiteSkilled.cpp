@@ -54,6 +54,12 @@ UAnimMontage* ANDCharacterWhiteSkilled::GetAttackMontage(EAttackType AttackType)
     }
 }
 
+void ANDCharacterWhiteSkilled::AttackEnd()
+{
+    bAttacking = false;
+    CurrentAttackType = EAttackType::None;
+}
+
 FND_S_DamageInfo ANDCharacterWhiteSkilled::GetAttackDamageInfo(EAttackType AttackType) const
 {
     FND_S_DamageInfo DamageInfo;
@@ -143,7 +149,4 @@ void ANDCharacterWhiteSkilled::ProcessAttack(EAttackType AttackType)
         AttacksComponent->PrimaryMeleeAttack(AttackInfo, AttackRadius, AttackLength);
         break;
     }
-    // 공격 상태 초기화
-    bAttacking = false;
-    CurrentAttackType = EAttackType::None;
 }

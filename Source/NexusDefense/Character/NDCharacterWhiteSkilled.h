@@ -58,6 +58,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	UAnimMontage* GetAttackMontage(EAttackType AttackType) const;
 
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
+
 private:
 	// 현재 공격의 데미지 정보를 담는 변수
 	FND_S_DamageInfo CurrentAttackDamageInfo;
