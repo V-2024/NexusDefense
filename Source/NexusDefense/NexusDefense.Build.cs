@@ -11,5 +11,5 @@ public class NexusDefense : ModuleRules
         PublicIncludePaths.AddRange(new string[] { "NexusDefense" });
         PrivateDependencyModuleNames.AddRange(new string[] {"AIModule"});
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "AssetRegistry", "NavigationSystem" });
-	}
+    }
 }
