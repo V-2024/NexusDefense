@@ -1,6 +1,5 @@
 #include "Enemy/NDEnemyBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "DamageSystem/ND_C_DamageSystem.h"
 #include "UI/UIBase/NDWidgetComponent.h"
 #include "UI/Combat/NDHPBarWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -30,7 +29,7 @@ void ANDEnemyBase::BeginPlay()
 void ANDEnemyBase::SetComponents()
 {
     // Damage Component
-    DamageableComponent = CreateDefaultSubobject<UND_C_DamageSystem>(TEXT("DamageableComponent"));
+    HealthComponent = CreateDefaultSubobject<UNDHealthComponent>(TEXT("HealthComponent"));
 
     // HP Bar Widget
     HPBar = CreateDefaultSubobject<UNDWidgetComponent>(TEXT("Widget"));
@@ -63,12 +62,11 @@ void ANDEnemyBase::SetUpEnemyWidget(UNDUserWidget* Widget)
 {
     UNDHPBarWidget* HPBarWidget = Cast<UNDHPBarWidget>(Widget);
 
-    if (HPBarWidget)
-	{
-		HPBarWidget->SetMaxHP(DamageableComponent->GetMaxHealth());
-        HPBarWidget->UpdateHPBar(DamageableComponent->GetCurrentHealth());
-        DamageableComponent->OnDamageResponseEvent.AddUObject(HPBarWidget, &UNDHPBarWidget::UpdateHPBar);
-	}
+    if (HPBarWidget && HealthComponent)  // HealthComponent null 체크 추가
+    {
+        HPBarWidget->SetMaxHP(HealthComponent->GetMaxHealth());
+        HPBarWidget->UpdateHPBar(HealthComponent->GetHealth());  // GetCurrentHealth 대신 GetHealth 사용
+    }
 }
 
 void ANDEnemyBase::Activate()
@@ -108,8 +106,6 @@ void ANDEnemyBase::Deactivate()
         PlayDeathAnimMontage();
 
         HPBar->SetHiddenInGame(true);
-
-        OnEnemyDestroyed.Broadcast(this);
     }
 }
 

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AI/NDAITask.h"
-#include "DamageSystem/ND_C_DamageSystem.h"
+#include "Components/NDHealthComponent.h"
 #include "NDEnemy.generated.h"
 
 UCLASS()
@@ -31,10 +31,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-	UND_C_DamageSystem* DamageSystem;
+	UNDHealthComponent* HealthComponent;
 
 	UFUNCTION()
-	void OnDamageReceived(float DamageAmount);
+	void OnDamageReceived(const FND_S_DamageInfo& DamageInfo);
 
 private:
 	//UPROPERTY(EditAnywhere, Category = "AI")

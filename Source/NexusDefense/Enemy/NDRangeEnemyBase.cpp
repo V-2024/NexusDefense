@@ -6,7 +6,6 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Projectile/NDProjectileBase.h"
-#include "DamageSystem/ND_C_DamageSystem.h"
 #include "Data/NDRangeEnemyData.h"
 #include "GameFramework/CharacterMovementComponent.h"
 

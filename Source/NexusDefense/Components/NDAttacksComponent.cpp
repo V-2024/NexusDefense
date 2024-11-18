@@ -45,9 +45,9 @@ bool UNDAttacksComponent::DoLineTrace(const FND_S_AttackInfo& AttackInfo, float 
 	// 데미지 처리
 	if (bHit && HitResult.GetActor())
 	{
-		if (UND_C_DamageSystem* DamageSystem = HitResult.GetActor()->FindComponentByClass<UND_C_DamageSystem>())
+		if (UNDHealthComponent* HealthComp = HitResult.GetActor()->FindComponentByClass<UNDHealthComponent>())
 		{
-			return DamageSystem->TakeDamage(AttackInfo.DamageInfo);
+			return HealthComp->TakeDamage(AttackInfo.DamageInfo);
 		}
 	}
 
@@ -74,9 +74,9 @@ bool UNDAttacksComponent::DoSphereTrace(const FND_S_AttackInfo& AttackInfo, floa
 		{
 			if (AActor* HitActor = Hit.GetActor())
 			{
-				if (UND_C_DamageSystem* DamageSystem = HitActor->FindComponentByClass<UND_C_DamageSystem>())
+				if (UNDHealthComponent* HealthComp = HitActor->FindComponentByClass<UNDHealthComponent>())
 				{
-					if (DamageSystem->TakeDamage(AttackInfo.DamageInfo))
+					if (HealthComp->TakeDamage(AttackInfo.DamageInfo))
 					{
 						bAnyDamageDealt = true;
 					}
@@ -106,9 +106,9 @@ bool UNDAttacksComponent::DoOverlapping(const FND_S_AttackInfo& AttackInfo, floa
 	{
 		for (AActor* HitActor : OverlappedActors)
 		{
-			if (UND_C_DamageSystem* DamageSystem = HitActor->FindComponentByClass<UND_C_DamageSystem>())
+			if (UNDHealthComponent* HealthComp = HitActor->FindComponentByClass<UNDHealthComponent>())
 			{
-				if (DamageSystem->TakeDamage(AttackInfo.DamageInfo))
+				if (HealthComp->TakeDamage(AttackInfo.DamageInfo))
 				{
 					bAnyDamageDealt = true;
 				}

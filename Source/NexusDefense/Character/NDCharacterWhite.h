@@ -33,6 +33,7 @@ protected:
 	void MoveRight(float Value);
 	void Turn(float Value);
 	void LookUp(float Value);
+
 	void PressKeyboard1();
 	void PressKeyboard2();
 	void PressKeyboard3();
@@ -57,4 +58,5 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UNDAttacksComponent* AttacksComponent;
+
 };
