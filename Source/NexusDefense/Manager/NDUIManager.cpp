@@ -2,37 +2,12 @@
 
 
 #include "Manager/NDUIManager.h"
-#include "UI/MainUI/NDMainMenuWidget.h"
-#include "UI/MainUI/NDGameUIWidget.h"
-#include "UI/MainUI/NDPauseMenuWidget.h"
-#include "UI/MainUI/NDGameOverUIWidget.h"
-#include "UI/MainUI/NDStageSelectWidget.h"
 
 UNDUIManager::UNDUIManager()
 {
-	MainMenuWidgetClass			= nullptr;
-	GameUIWidgetClass			= nullptr;
-	PauseMenuWidgetClass		= nullptr;
-	GameOverUIWidgetClass		= nullptr;
-	StageSelectUIWidgetClass	= nullptr;
-	MainMenuWidget				= nullptr;
-	GameUIWidget				= nullptr;
-	PauseMenuWidget				= nullptr;
-	GameOverUIWidget			= nullptr;
-	StageSelectWidget			= nullptr;
-
-	static ConstructorHelpers::FClassFinder<UUserWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_MainmenuWidget.WBP_MainmenuWidget_C"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> StageSelectWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_StageSelectWidget.WBP_StageSelectWidget_C"));
-
-	if (MainMenuWidgetClassFinder.Class && StageSelectWidgetClassFinder.Class)
-	{
-		MainMenuWidgetClass = MainMenuWidgetClassFinder.Class;
-		StageSelectUIWidgetClass = StageSelectWidgetClassFinder.Class;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass or StageSelectWidgetClass is not found!"));
-	}
+	
+	//static ConstructorHelpers::FClassFinder<UUserWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_MainmenuWidget.WBP_MainmenuWidget_C"));
+	//static ConstructorHelpers::FClassFinder<UUserWidget> StageSelectWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_StageSelectWidget.WBP_StageSelectWidget_C"));
 }
 
 void UNDUIManager::StartUI()
@@ -89,57 +64,18 @@ void UNDUIManager::CreateWidgets()
 
 void UNDUIManager::ShowMainMenu()
 {
-	if (MainMenuWidgetClass)
-	{
-		MainMenuWidget = CreateWidget<UNDMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
-
-	}
-
-	if (MainMenuWidget)
-	{
-		MainMenuWidget->AddToViewport();
-
-		// ÀüÃ¼ È­¸é ¸ðµå ¼³Á¤
-		//MainMenuWidget->SetDesiredSizeInViewport(FVector2D(1920, 1080));  // ¿øÇÏ´Â ÇØ»óµµ
-		//MainMenuWidget->SetAnchorsInViewport(FAnchors(0, 0, 1, 1));
-		//MainMenuWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
-
-		// ÀÔ·Â ¸ðµå ¼³Á¤
-		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-		if (PlayerController)
-		{
-			PlayerController->SetShowMouseCursor(true);
-			FInputModeUIOnly InputMode;
-			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			PlayerController->SetInputMode(InputMode);
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass is not set!"));
-	}
+	
 }
 
 void UNDUIManager::ShowStageSelectUI()
 {
 
-	if (StageSelectUIWidgetClass)
-	{
-		StageSelectWidget = CreateWidget<UNDStageSelectWidget>(GetWorld(), StageSelectUIWidgetClass);
-	}
 
 	UE_LOG(LogTemp, Warning, TEXT("ShowStageSelectUI"));
 
-	if(StageSelectWidget)
-	{
-		StageSelectWidget->AddToViewport();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("StageSelectWidget is not set!"));
-	}
 
-	// ÀÔ·Â ¸ðµå ¼³Á¤
+
+	// ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
@@ -168,46 +104,31 @@ void UNDUIManager::ShowGameOverUI()
 
 void UNDUIManager::CloseMainMenu()
 {
-	if (MainMenuWidget)
-	{
-		MainMenuWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::ClosePauseMenu()
 {
-	if (PauseMenuWidget)
-	{
-		PauseMenuWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::CloseGameUI()
 {
-	if (GameUIWidget)
-	{
-		GameUIWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::CloseGameOverUI()
 {
-	if (GameOverUIWidget)
-	{
-		GameOverUIWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::CloseStageSelectUI()
 {
-	if (StageSelectWidget)
-	{
-		StageSelectWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::OnPlanetClicked(int32 PlanetIndex)
 {
-	StageSelectWidget->OnPlanetClicked(PlanetIndex);
+	//StageSelectWidget->OnPlanetClicked(PlanetIndex);
 }
 

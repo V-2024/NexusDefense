@@ -1,55 +1,102 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
+// NDPlanetDetailWidget.cpp
 #include "UI/MainUI/NDPlanetDetailWidget.h"
+#include "UI/MainUI/NDStageInfoWidget.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "Components/VerticalBox.h"
 #include "Components/ScrollBox.h"
-#include "NDStageButtonWidget.h"
-
-void UNDPlanetDetailWidget::SetPlanetInfo(const FPlanetInfo& InPlanetInfo)
-{
-	PlanetInfo = InPlanetInfo;
-
-	if (PlanetDetailImage)
-	{
-		PlanetDetailImage->SetBrushFromTexture(PlanetInfo.PlanetImage);
-	}
-
-	if (PlanetNameText)
-	{
-		PlanetNameText->SetText(FText::FromName(PlanetInfo.PlanetName));
-	}
-
-	if (PlanetDescriptionText)
-	{
-		PlanetDescriptionText->SetText(FText::FromString(PlanetInfo.Description));
-	}
-
-	UpdateStageButtons();
-}
-
+#include "Components/Button.h"
+#include "GameInstance/NDGameInstance.h"
+#include "Manager/NDEventManager.h"
 
 void UNDPlanetDetailWidget::NativeConstruct()
 {
-	Super::NativeConstruct();
+    Super::NativeConstruct();
+
+    if (BackButton)
+    {
+        BackButton->OnClicked.AddDynamic(this, &UNDPlanetDetailWidget::OnBackButtonClicked);
+    }
 }
 
-void UNDPlanetDetailWidget::UpdateStageButtons()
+void UNDPlanetDetailWidget::NativeDestruct()
 {
-	if (!StageButtonContainer || !StageButtonWidgetClass) return;
+    Super::NativeDestruct();
 
-	StageButtonContainer->ClearChildren();
+    if (BackButton)
+    {
+        BackButton->OnClicked.RemoveAll(this);
+    }
+}
 
-	for (int32 StageID : PlanetInfo.StageIDs)
-	{
-		UNDStageButtonWidget* StageButton = CreateWidget<UNDStageButtonWidget>(this, StageButtonWidgetClass);
-		if (StageButton)
-		{
-			StageButton->SetStageID(StageID);
-			// StageButton->SetStageInfo(...); // 스테이지 정보 설정
-			StageButtonContainer->AddChild(StageButton);
-		}
-	}
+void UNDPlanetDetailWidget::UpdatePlanetInfo(const FPlanetInfo& PlanetInfo)
+{
+    CurrentPlanetInfo = PlanetInfo;
+
+    if (PlanetImage)
+    {
+        PlanetImage->SetBrushFromTexture(PlanetInfo.PlanetImage);
+    }
+
+    if (PlanetNameText)
+    {
+        PlanetNameText->SetText(FText::FromName(PlanetInfo.PlanetName));
+    }
+
+    if (DescriptionText)
+    {
+        DescriptionText->SetText(FText::FromString(PlanetInfo.Description));
+    }
+
+    UpdateStageList(PlanetInfo.StageIDs);
+}
+
+void UNDPlanetDetailWidget::UpdateStageList(const TArray<int32>& StageIDs)
+{
+    ClearStageList();
+    CreateStageWidgets(StageIDs);
+}
+
+void UNDPlanetDetailWidget::ClearStageList()
+{
+    if (StageScrollBox)
+    {
+        StageScrollBox->ClearChildren();
+    }
+    StageWidgets.Empty();
+}
+
+void UNDPlanetDetailWidget::CreateStageWidgets(const TArray<int32>& StageIDs)
+{
+    if (!StageScrollBox || !StageInfoWidgetClass)
+        return;
+
+    UNDGameInstance* GameInstance = Cast<UNDGameInstance>(GetGameInstance());
+    if (!GameInstance)
+        return;
+
+    for (int32 StageID : StageIDs)
+    {
+        FStageInfo StageInfo = GameInstance->GetStageInfo(StageID);
+        
+        UNDStageInfoWidget* StageWidget = CreateWidget<UNDStageInfoWidget>(this, StageInfoWidgetClass);
+        if (StageWidget)
+        {
+            StageWidget->SetStageInfo(StageInfo);
+            StageScrollBox->AddChild(StageWidget);
+            StageWidgets.Add(StageWidget);
+        }
+    }
+}
+
+void UNDPlanetDetailWidget::OnBackButtonClicked()
+{
+    if (UNDGameInstance* GameInstance = Cast<UNDGameInstance>(GetGameInstance()))
+    {
+        if (UNDEventManager* EventManager = GameInstance->GetEventManager())
+        {
+            EventManager->TriggerPlanetZoomOut();
+        }
+    }
+
+    RemoveFromParent();
 }

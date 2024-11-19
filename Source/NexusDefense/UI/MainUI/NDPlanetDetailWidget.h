@@ -1,47 +1,59 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// NDPlanetDetailWidget.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Types/NDGameTypes.h"
 #include "Stages/FPlanetInfo.h"
 #include "NDPlanetDetailWidget.generated.h"
 
-/**
- * 
- */
+class UImage;
+class UTextBlock;
+class UScrollBox;
+class UButton;
+class UNDStageInfoWidget;
+
 UCLASS()
 class NEXUSDEFENSE_API UNDPlanetDetailWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
-public:
-	void SetPlanetInfo(const FPlanetInfo& InPlanetInfo);
-
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* PlanetImage;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* PlanetNameText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* DescriptionText;
+
+	UPROPERTY(meta = (BindWidget))
+	UScrollBox* StageScrollBox;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* BackButton;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UNDStageInfoWidget> StageInfoWidgetClass;
+
+public:
+	void UpdatePlanetInfo(const FPlanetInfo& PlanetInfo);
+	void UpdateStageList(const TArray<int32>& StageIDs);
 
 private:
-	void UpdateStageButtons();
+	UPROPERTY()
+	TArray<UNDStageInfoWidget*> StageWidgets;
 
-protected:
+	UPROPERTY()
+	FPlanetInfo CurrentPlanetInfo;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Planet")
-	FPlanetInfo PlanetInfo;
+	UFUNCTION()
+	void OnBackButtonClicked();
 
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UImage* PlanetDetailImage;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UTextBlock* PlanetNameText;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UTextBlock* PlanetDescriptionText;
-
-	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	class UScrollBox* StageButtonContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Planet")
-	TSubclassOf<class UNDStageButtonWidget> StageButtonWidgetClass;
+	void ClearStageList();
+	void CreateStageWidgets(const TArray<int32>& StageIDs);
 };
