@@ -118,6 +118,12 @@ void UNDCombatComponent::ProcessAttackHit()
 	}
 }
 
+void UNDCombatComponent::NotifySkillEnd()
+{
+	OnSkillEnd.Broadcast();
+	CurrentState = ECombatState::None;
+}
+
 void UNDCombatComponent::StartCooldown(FName SkillName, float CoolTime)
 {
 	FSkillState& State = SkillStates.FindOrAdd(SkillName);
@@ -144,9 +150,9 @@ void UNDCombatComponent::OnCooldownFinished(FName SkillName)
 	}
 }
 
-void UNDCombatComponent::ResetSkillState()
-{
-	CurrentState = ECombatState::None;
-	CurrentSkillName = NAME_None;
-	CurrentSkillData = nullptr;
-}
+//void UNDCombatComponent::ResetSkillState()
+//{
+//	CurrentState = ECombatState::None;
+//	CurrentSkillName = NAME_None;
+//	CurrentSkillData = nullptr;
+//}
