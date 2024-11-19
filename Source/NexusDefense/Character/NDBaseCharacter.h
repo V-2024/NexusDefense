@@ -1,23 +1,24 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Combat/NDCombatComponent.h"
 #include "Components/NDExperienceComponent.h"
 #include "Components/NDHealthComponent.h"
 #include "Interfaces/NDPlayerStatusInterface.h"
-#include "NDCharacterWhite.generated.h"
+#include "NDBaseCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
-class NEXUSDEFENSE_API ANDCharacterWhite : public ACharacter, public INDPlayerStatusInterface
+class NEXUSDEFENSE_API ANDBaseCharacter : public ACharacter, public INDPlayerStatusInterface
 {
 	GENERATED_BODY()
 
 public:
-	ANDCharacterWhite();
+	ANDBaseCharacter();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -28,18 +29,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	// 인풋 함수
-	void MoveForward(float Value);
-	void MoveRight(float Value);
-	void Turn(float Value);
-	void LookUp(float Value);
+	// 이동 함수
+	virtual void MoveForward(float Value);
+	virtual void MoveRight(float Value);
+	virtual void Turn(float Value);
+	virtual void LookUp(float Value);
 
-	void PressKeyboard1();
-	void PressKeyboard2();
-	void PressKeyboard3();
-	void PressKeyboard4();
-
-public:
+protected:
 	// 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -52,11 +48,5 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UNDExperienceComponent* ExperienceComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UNDCombatComponent* CombatComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UNDAttacksComponent* AttacksComponent;
 
 };

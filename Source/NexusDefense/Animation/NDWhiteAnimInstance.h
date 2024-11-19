@@ -33,5 +33,5 @@ public:
 	APawn* Pawn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
-	class ANDCharacterWhite* CharacterWhite;
+	class ANDBaseCharacter* BaseCharacter;
 };

@@ -3,7 +3,7 @@
 
 #include "Animation/NDWhiteAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Character/NDCharacterWhite.h"
+#include "Character/NDBaseCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
 void UNDWhiteAnimInstance::NativeInitializeAnimation()
@@ -13,7 +13,7 @@ void UNDWhiteAnimInstance::NativeInitializeAnimation()
 		Pawn = TryGetPawnOwner();
 		if (Pawn)
 		{
-			CharacterWhite = Cast<ANDCharacterWhite>(Pawn);
+			BaseCharacter = Cast<ANDBaseCharacter>(Pawn);
 		}
 	}
 }
@@ -26,7 +26,7 @@ void UNDWhiteAnimInstance::UpdateAnimationProperties()
 
 		if (Pawn)
 		{
-			CharacterWhite = Cast<ANDCharacterWhite>(Pawn);
+			BaseCharacter = Cast<ANDBaseCharacter>(Pawn);
 		}
 	}
 
@@ -52,9 +52,9 @@ void UNDWhiteAnimInstance::UpdateAnimationProperties()
 
 		bIsInAir = Pawn->GetMovementComponent()->IsFalling();
 
-		if (CharacterWhite == nullptr)
+		if (BaseCharacter == nullptr)
 		{
-			CharacterWhite = Cast<ANDCharacterWhite>(Pawn);
+			BaseCharacter = Cast<ANDBaseCharacter>(Pawn);
 		}
 	}
 }
