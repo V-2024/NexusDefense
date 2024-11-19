@@ -62,7 +62,7 @@ void ANDStage::EndStage()
     SpawnManager->StopSpawning();
     if (EventManager)
     {
-        EventManager->OnStageEnd.Broadcast(StageData->StageIndex);
+        EventManager->TriggerStageCompleted(StageData->StageIndex);
     }
     ScoreManager->FinalizeStageScore(StageData->StageIndex);
 }
@@ -87,7 +87,7 @@ void ANDStage::StartNextWave()
         SpawnManager->StartSpawning(this, StageData->Waves[CurrentWave - 1]);
         if (EventManager)
         {
-            EventManager->OnWaveStarted.Broadcast(StageData->StageIndex, CurrentWave);
+            EventManager->TriggerWaveStarted(StageData->StageIndex, CurrentWave);
         }
     }
     else
@@ -99,7 +99,7 @@ void ANDStage::StartNextWave()
 void ANDStage::OnEnemyDefeated(AActor* DefeatedEnemy)
 {
     RemainingEnemies--;
-    ScoreManager->AddScore(100); // ¿¹½Ã Á¡¼ö, ½ÇÁ¦·Î´Â Àû À¯Çü¿¡ µû¶ó ´Ù¸£°Ô ¼³Á¤
+    ScoreManager->AddScore(100); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (EventManager)
     {
         EventManager->OnEnemyDefeated.Broadcast(DefeatedEnemy);

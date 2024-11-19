@@ -26,7 +26,7 @@ struct FPlanetInfo
     bool bIsUnlocked;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FVector2D Position; // 항성계 지도에서의 위치
+    FVector2D Position; 
 
     FPlanetInfo()
         : PlanetName(TEXT("Unknown"))

@@ -57,6 +57,29 @@ void UNDEventManager::TriggerGameOver()
 	OnGameOver.Broadcast();
 }
 
+void UNDEventManager::TriggerPlanetZoomIn(const FPlanetInfo& PlanetInfo)
+{
+}
+
+void UNDEventManager::TriggerPlanetZoomOut()
+{
+}
+
+void UNDEventManager::TriggerPlanetInfoUpdated(const FPlanetInfo& PlanetInfo)
+{
+}
+
+void UNDEventManager::TriggerStageInfoUpdated(const FStageInfo& StageInfo)
+{
+}
+
+void UNDEventManager::TriggerStageUnlocked(int32 StageID)
+{
+}
+
+
+
+
 TArray<FPlanetInfo> UNDEventManager::TriggerGetPlanetInfos()
 {
 	if (OnGetPlanetInfos.IsBound())
@@ -70,21 +93,7 @@ TArray<FPlanetInfo> UNDEventManager::TriggerGetPlanetInfos()
 	}
 }
 
-void UNDEventManager::TriggerPlanetClicked(int32 PlanetIndex)
-{
-	if (OnPlanetClicked.IsBound())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OnPlanetClicked is bound"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OnPlanetClicked is not bound"));
-	}
-
-	OnPlanetClicked.Broadcast(PlanetIndex);
-}
-
-void UNDEventManager::TriggerStageSelected(EGameState GameState)
+void UNDEventManager::TriggerStageSelectedMenu(EGameState GameState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("TriggerStageSelected"));
 
@@ -100,15 +109,18 @@ void UNDEventManager::TriggerStageSelected(EGameState GameState)
 	OnStageSelected.Broadcast(GameState);
 }
 
+
+
 void UNDEventManager::TriggerStageStarted(int32 StageNumber)
 {
 	OnStageStarted.Broadcast(StageNumber);
 }
 
-void UNDEventManager::TriggerStageCompleted(int32 StageNumber)
+void UNDEventManager::TriggerStageCompleted(int32 StageID)
 {
-	OnStageCompleted.Broadcast(StageNumber);
+	OnStageCompleted.Broadcast(StageID);
 }
+
 
 void UNDEventManager::TriggerWaveStarted(int32 StageNumber, int32 WaveNumber)
 {
@@ -120,6 +132,7 @@ void UNDEventManager::TriggerWaveCompleted(int32 StageNumber, int32 WaveNumber)
 	OnWaveCompleted.Broadcast(StageNumber, WaveNumber);
 }
 
+
 void UNDEventManager::TriggerEnemySpawned(ANDEnemyBase* Enemy)
 {
 	OnEnemySpawned.Broadcast(Enemy);
@@ -128,6 +141,16 @@ void UNDEventManager::TriggerEnemySpawned(ANDEnemyBase* Enemy)
 void UNDEventManager::TriggerBossSpawned(ANDEnemyBase* Boss)
 {
 	OnBossSpawned.Broadcast(Boss);
+}
+
+void UNDEventManager::TriggerEnemyDamageTaken(ACharacter* HealthChangedCharacter, float Amount)
+{
+	OnHealthChanged.Broadcast(HealthChangedCharacter, Amount);
+}
+
+void UNDEventManager::TriggerEnemyDamageReceived(ACharacter* DamageTakenCharacter, FND_S_DamageInfo DamageInfo)
+{
+	OnDamageReceived.Broadcast(DamageTakenCharacter, DamageInfo);
 }
 
 void UNDEventManager::TriggerEnemyDefeated(AActor* Enemy)

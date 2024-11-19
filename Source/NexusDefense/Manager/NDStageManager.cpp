@@ -86,7 +86,7 @@ void UNDStageManager::StartStage(int32 StageIndex)
 
             if (EventManager)
             {
-                EventManager->OnStageStarted.Broadcast(CurrentStageIndex);
+                EventManager->TriggerStageStarted(CurrentStageIndex);
             }
         }
     }

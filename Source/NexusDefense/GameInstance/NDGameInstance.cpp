@@ -36,7 +36,7 @@ UNDGameInstance::UNDGameInstance() : InitializationCheckInterval(0.1f), MaxIniti
 void UNDGameInstance::Init()
 {
 	Super::Init();
-
+	InitializeGameData();
     LevelGameModes.Empty();
     CurrentGameState = EGameState::Ready;
     CurrentLevelName = NAME_None;
@@ -48,11 +48,11 @@ void UNDGameInstance::OnStart()
 {
 	Super::OnStart();
 
-	// °ÔÀÓ ½ÃÀÛ ½Ã ÃÊ±âÈ­ »óÅÂ È®ÀÎ
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
     InitializeManagers();
     SetLevelGameModes();
 
-    // ÁÖ±âÀûÀ¸·Î ÃÊ±âÈ­ »óÅÂ¸¦ È®ÀÎÇÏ´Â Å¸ÀÌ¸Ó ¼³Á¤
+    // ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½Â¸ï¿½ È®ï¿½ï¿½ï¿½Ï´ï¿½ Å¸ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½
     GetTimerManager().SetTimer(InitializationTimerHandle, this, &UNDGameInstance::CheckInitialization, InitializationCheckInterval, true);
 }
 
@@ -84,6 +84,54 @@ bool UNDGameInstance::AreAllManagersInitialized()
         SoundManager;
 }
 
+void UNDGameInstance::InitializeGameData()
+{
+	LoadStageData();
+	LoadPlanetData();
+}
+
+void UNDGameInstance::LoadStageData()
+{
+	// ì—¬ê¸°ì„œëŠ” ì˜ˆì‹œë¡œ í•˜ë“œì½”ë”©ëœ ë°ì´í„°ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.
+	// ì‹¤ì œ êµ¬í˜„ì—ì„œëŠ” ë°ì´í„° í…Œì´ë¸”ì´ë‚˜ JSON íŒŒì¼ ë“±ì—ì„œ ë¡œë“œí•˜ëŠ” ê²ƒì´ ì¢‹ìŠµë‹ˆë‹¤.
+    
+	FStageInfo Stage1;
+	Stage1.Name = TEXT("First Contact");
+	Stage1.bIsUnlocked = true;
+	Stage1.bIsCompleted = false;
+	StageDataMap.Add(1, Stage1);
+
+	FStageInfo Stage2;
+	Stage2.Name = TEXT("Dark Rising");
+	Stage2.bIsUnlocked = false;
+	Stage2.bIsCompleted = false;
+	StageDataMap.Add(2, Stage2);
+
+	// ì¶”ê°€ ìŠ¤í…Œì´ì§€ë“¤...
+}
+
+void UNDGameInstance::LoadPlanetData()
+{
+	// ì˜ˆì‹œ ë°ì´í„° ìƒì„±
+	FPlanetInfo Earth;
+	Earth.PlanetName = FName(TEXT("Earth"));
+	Earth.Description = TEXT("Our home planet, the starting point of the adventure.");
+	Earth.StageIDs = {1, 2};
+	Earth.bIsUnlocked = true;
+	Earth.Position = FVector2D(0.5f, 0.5f);
+	// Earth.PlanetImageëŠ” ë³„ë„ë¡œ ë¡œë“œí•´ì•¼ í•¨
+	PlanetDataMap.Add(Earth.PlanetName, Earth);
+
+	FPlanetInfo Mars;
+	Mars.PlanetName = FName(TEXT("Mars"));
+	Mars.Description = TEXT("The red planet, harboring ancient secrets.");
+	Mars.StageIDs = {3, 4};
+	Mars.bIsUnlocked = false;
+	Mars.Position = FVector2D(0.7f, 0.3f);
+	PlanetDataMap.Add(Mars.PlanetName, Mars);
+
+	// ì¶”ê°€ í–‰ì„±ë“¤...
+}
 
 
 void UNDGameInstance::SetLevelGameModes()
@@ -96,7 +144,7 @@ void UNDGameInstance::StartGame()
 {
     CurrentGameState = EGameState::Ready;
 
-    // ÇöÀç ·¹º§ ÀÌ¸§ °¡Á®¿À±â
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     UWorld* World = GetWorld();
     if (World)
     {
@@ -107,7 +155,7 @@ void UNDGameInstance::StartGame()
         UE_LOG(LogTemp, Error, TEXT("StartGame: World is null"));
     }
 
-    // "StartLevel"¿¡¼­¸¸ Å¸ÀÌÆ² UI Ç¥½Ã
+    // "StartLevel"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½Æ² UI Ç¥ï¿½ï¿½
     if (CurrentLevelName == "/Game/NexusDefense/Maps/UEDPIE_0_StartLevel" && UIManager)
     {
         UE_LOG(LogTemp, Log, TEXT("StartGame: Showing main menu"));
@@ -158,10 +206,11 @@ void UNDGameInstance::SubscribeToEvents()
 
         EventManager->OnStageSelected.AddUObject(UIManager, &UNDUIManager::UpdateUI);
         EventManager->OnStartLevel.AddUObject(UIManager, &UNDUIManager::StartUI);
-        EventManager->OnGetPlanetInfos.BindUObject(StageManager, &UNDStageManager::GetPlanetInfos);
+        //EventManager->OnGetPlanetInfos.BindUObject(StageManager, &UNDStageManager::GetPlanetInfos);
         EventManager->OnPlanetClicked.AddUObject(UIManager, &UNDUIManager::OnPlanetClicked);
 
-        // ¹ÙÀÎµù È®ÀÎ
+        // ï¿½ï¿½ï¿½Îµï¿½ È®ï¿½ï¿½
+    	/*
         if (EventManager->OnStageSelected.IsBound())
         {
             UE_LOG(LogTemp, Warning, TEXT("Successfully bound to OnStageSelected"));
@@ -170,6 +219,7 @@ void UNDGameInstance::SubscribeToEvents()
         {
             UE_LOG(LogTemp, Error, TEXT("Failed to bind to OnStageSelected"));
         }
+        */
 
         if(EventManager->OnStartLevel.IsBound())
 		{
@@ -190,7 +240,7 @@ void UNDGameInstance::UnsubscribeFromEvents()
 {
 	if (EventManager)
 	{
-        EventManager->OnStageSelected.RemoveAll(UIManager);
+        //EventManager->OnStageSelected.RemoveAll(UIManager);
         EventManager->OnStartLevel.RemoveAll(UIManager);
 	}
     else
@@ -224,7 +274,7 @@ void UNDGameInstance::CleanupManagers()
 		UnsubscribeFromEvents();
 	}
 
-    // ¸ğµç ¸Å´ÏÀú ÇØÁ¦
+    // ï¿½ï¿½ï¿½ ï¿½Å´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (StageManager) { StageManager->RemoveFromRoot(); StageManager = nullptr; }
     if (SpawnManager) { SpawnManager->RemoveFromRoot(); SpawnManager = nullptr; }
     if (UIManager) { UIManager->RemoveFromRoot(); UIManager = nullptr; }
@@ -261,7 +311,7 @@ void UNDGameInstance::TriggerSelectStageEvent()
 
     if (EventManager && UIManager)
 	{
-		EventManager->TriggerStageSelected(CurrentGameState);
+		EventManager->TriggerStageSelectedMenu(CurrentGameState);
 	}
 	else
 	{
@@ -283,11 +333,11 @@ TArray<FPlanetInfo> UNDGameInstance::TriggerGetPlanetInfosEvent() const
 	return TArray<FPlanetInfo>();
 }
 
-void UNDGameInstance::TriggerPlanetClickedEvent(int32 PlanetIndex)
+void UNDGameInstance::TriggerPlanetClickedEvent(const FPlanetInfo& PlanetInfo)
 {
 	if (EventManager)
 	{
-		EventManager->TriggerPlanetClicked(PlanetIndex);
+		EventManager->TriggerPlanetZoomIn(PlanetInfo);
 	}
 	else
 	{
@@ -307,6 +357,48 @@ void UNDGameInstance::TriggerEnemySpawn(ANDEnemyBase* Enemy) const
     }
 }
 
+FStageInfo UNDGameInstance::GetStageInfo(int32 StageID) const
+{
+	if (const FStageInfo* FoundStage = StageDataMap.Find(StageID))
+	{
+		return *FoundStage;
+	}
+
+	// ìŠ¤í…Œì´ì§€ë¥¼ ì°¾ì§€ ëª»í•œ ê²½ìš° ê¸°ë³¸ ìŠ¤í…Œì´ì§€ ì •ë³´ ë°˜í™˜
+	FStageInfo DefaultStage;
+	DefaultStage.Name = TEXT("Unknown Stage");
+	DefaultStage.bIsUnlocked = false;
+	DefaultStage.bIsCompleted = false;
+    
+	UE_LOG(LogTemp, Warning, TEXT("Stage ID %d not found!"), StageID);
+	return DefaultStage;
+}
+
+FPlanetInfo UNDGameInstance::GetPlanetInfo(const FName& PlanetName) const
+{
+	if (const FPlanetInfo* FoundPlanet = PlanetDataMap.Find(PlanetName))
+	{
+		return *FoundPlanet;
+	}
+
+	// í–‰ì„±ì„ ì°¾ì§€ ëª»í•œ ê²½ìš° ê¸°ë³¸ í–‰ì„± ì •ë³´ ë°˜í™˜
+	FPlanetInfo DefaultPlanet;
+	DefaultPlanet.PlanetName = FName(TEXT("Unknown Planet"));
+	DefaultPlanet.Description = TEXT("Planet information not available");
+	DefaultPlanet.bIsUnlocked = false;
+	DefaultPlanet.Position = FVector2D::ZeroVector;
+    
+	UE_LOG(LogTemp, Warning, TEXT("Planet %s not found!"), *PlanetName.ToString());
+	return DefaultPlanet;
+}
+
+TArray<FPlanetInfo> UNDGameInstance::GetPlanets() const
+{
+	TArray<FPlanetInfo> Planets;
+	PlanetDataMap.GenerateValueArray(Planets);
+	return Planets;
+}
+
 
 void UNDGameInstance::Shutdown()
 {
@@ -316,10 +408,10 @@ void UNDGameInstance::Shutdown()
 
     CleanupManagers();
 
-    // Å¸ÀÌ¸Ó ÇØÁ¦
+    // Å¸ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½
     GetTimerManager().ClearAllTimersForObject(this);
 
-    // ±âÅ¸ Á¤¸® ÀÛ¾÷
+    // ï¿½ï¿½Å¸ ï¿½ï¿½ï¿½ï¿½ ï¿½Û¾ï¿½
     LevelGameModes.Empty();
     CurrentGameState = EGameState::Ready;
     CurrentLevelName = NAME_None;

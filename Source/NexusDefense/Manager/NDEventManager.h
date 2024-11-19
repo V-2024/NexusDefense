@@ -2,17 +2,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DamageSystem/ND_S_DamageInfo.h"
+#include "Stages/FPlanetInfo.h"
+#include "Stages/FStageInfo.h"
 #include "UObject/NoExportTypes.h"
 #include "Types/NDGametypes.h"
 #include "NDEventManager.generated.h"
 
-// 스테이지 번호 추가 등의 추가정보 파라미터 추가)
-// 실제 이벤트를 발생시키는 메서드 필요 (TriggerStageStart, TriggerStageEnd 등)
+
 
 class ANDEnemyBase;
 class ANDItemBase;
 class ANDCharacterBase;
-struct FPlanetInfo;
 
 DECLARE_MULTICAST_DELEGATE(FOnStartLevel);
 
@@ -28,6 +29,10 @@ DECLARE_MULTICAST_DELEGATE(FOnGameOver);
 // Planet Events Delegates
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlanetClicked, int32);
 
+// Planet Navigation Events
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlanetZoomIn, const FPlanetInfo&);
+DECLARE_MULTICAST_DELEGATE(FOnPlanetZoomOut);
+
 // Stage Events Delegates
 DECLARE_DELEGATE_RetVal(TArray<FPlanetInfo>, FOnGetPlanetInfos);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageSelected, EGameState);
@@ -37,11 +42,20 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageEnd, int32);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWaveStarted, int32, int32);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWaveCompleted, int32, int32);
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlanetZoomIn, const FPlanetInfo&);
+DECLARE_MULTICAST_DELEGATE(FOnPlanetZoomOut);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlanetInfoUpdated, const FPlanetInfo&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageInfoUpdated, const FStageInfo&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageUnlocked, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnStageCompleted, int32);
 
 // Spawn Enemy Events Delegates
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemySpawned, ANDEnemyBase*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBossSpawned, ANDEnemyBase*);
 
+// Damage Events
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged1, ACharacter*, float);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDamageReceived, ACharacter*, FND_S_DamageInfo);
 
 // Enemy Dead Events Delegates
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemyDefeated, AActor*);
@@ -100,22 +114,33 @@ public:
 
     // Planet Events
     FOnPlanetClicked        OnPlanetClicked;
+    
 
     // Stage Events
     FOnGetPlanetInfos       OnGetPlanetInfos;
     FOnStageSelected        OnStageSelected;
     FOnStageStarted         OnStageStarted;
     FOnStageCompleted       OnStageCompleted;
-    FOnStageEnd             OnStageEnd;
+    //FOnStageEnd             OnStageEnd;
     FOnWaveStarted          OnWaveStarted;
     FOnWaveCompleted        OnWaveCompleted;
+    FOnPlanetZoomIn         OnPlanetZoomIn;
+    FOnPlanetZoomOut        OnPlanetZoomOut;
+    FOnPlanetInfoUpdated    OnPlanetInfoUpdated;
+    FOnStageInfoUpdated     OnStageInfoUpdated;
+    FOnStageUnlocked        OnStageUnlocked;
 
-
+    
     // Spawn Enemy Events
     FOnEnemySpawned         OnEnemySpawned;
     FOnBossSpawned          OnBossSpawned;
 
+    
+    // Damage Events
+    FOnHealthChanged1        OnHealthChanged;
+    FOnDamageReceived       OnDamageReceived;
 
+    
     // Enemy Dead Events
     FOnEnemyDefeated        OnEnemyDefeated;
     FOnBossDefeated         OnBossDefeated;
@@ -172,21 +197,26 @@ public:
 
     TArray<FPlanetInfo> TriggerGetPlanetInfos();
 
-    void TriggerPlanetClicked(int32 PlanetIndex);
-
-    void TriggerStageSelected(EGameState GameState);
-
+    // Stage Triggers
+    void TriggerStageSelectedMenu(EGameState GameState);
     void TriggerStageStarted(int32 StageNumber);
-
-    void TriggerStageCompleted(int32 StageNumber);
-
+    void TriggerStageCompleted(int32 StageID);
     void TriggerWaveStarted(int32 StageNumber, int32 WaveNumber);
-
     void TriggerWaveCompleted(int32 StageNumber, int32 WaveNumber);
-
+    void TriggerPlanetZoomIn(const FPlanetInfo& PlanetInfo);
+    void TriggerPlanetZoomOut();
+    void TriggerPlanetInfoUpdated(const FPlanetInfo& PlanetInfo);
+    void TriggerStageInfoUpdated(const FStageInfo& StageInfo);
+    void TriggerStageUnlocked(int32 StageID);
+    
+    
     void TriggerEnemySpawned(ANDEnemyBase* SpawnedEnemy);
 
     void TriggerBossSpawned(ANDEnemyBase* SpawnedBoss);
+
+    void TriggerEnemyDamageTaken(ACharacter* HealthChangedCharacter, float Amount);
+
+    void TriggerEnemyDamageReceived(ACharacter* DamageTakenCharacter, FND_S_DamageInfo DamageInfo);
 
     void TriggerEnemyDefeated(AActor* DefeatedEnemy);
 

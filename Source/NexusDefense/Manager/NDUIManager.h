@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Types/NDGameTypes.h"
+#include "Blueprint/UserWidget.h"
+#include "Stages/FPlanetInfo.h"
+#include "Stages/FStageInfo.h"
 #include "NDUIManager.generated.h"
 
+class UNDPlanetOverviewWidget;
+class UNDStageInfoWidget;
 class UNDMainMenuWidget;
-class UNDPauseMenuWidget;
-class UNDGameUIWidget;
-class UNDGameOverUIWidget;
-class UNDStageSelectWidget;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDUIManager : public UObject
@@ -37,12 +38,6 @@ public:
 	void CloseStageSelectUI();
 	void OnPlanetClicked(int32 PlanetIndex);
 
-	FORCEINLINE UNDMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidget; }
-	FORCEINLINE UNDPauseMenuWidget* GetPauseMenuWidget() const { return PauseMenuWidget; }
-	FORCEINLINE UNDGameUIWidget* GetGameUIWidget() const { return GameUIWidget; }
-	FORCEINLINE UNDGameOverUIWidget* GetGameOverUIWidget() const { return GameOverUIWidget; }
-	FORCEINLINE UNDStageSelectWidget* GetStageSelectWidget() const { return StageSelectWidget; }
-
 private:
 	void CreateWidgets();
 	void ShowMainMenu();
@@ -50,30 +45,39 @@ private:
 	void ShowGameUI();
 	void ShowGameOverUI();
 
+	void ShowPlanetOverview();
+	void ShowPlanetDetail(const FPlanetInfo& PlanetInfo);
+	void UpdateStageInfo(const FStageInfo& StageInfo);
+	void HandlePlanetZoomIn(const FPlanetInfo& PlanetInfo);
+	void HandlePlanetZoomOut();
+
 private:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UNDMainMenuWidget>		MainMenuWidgetClass;
+	UPROPERTY(Transient)
+	class UNDPlanetOverviewWidget* PlanetOverviewWidget;
+    
+	UPROPERTY(Transient)
+	class UNDPlanetDetailWidget* PlanetDetailWidget;
+    
+	UPROPERTY(Transient)
+	class UNDStageInfoWidget* StageInfoWidget;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UNDPauseMenuWidget>		PauseMenuWidgetClass;
+	UPROPERTY()
+	TSubclassOf<UNDPlanetOverviewWidget> PlanetOverviewWidgetClass;
+    
+	UPROPERTY()
+	TSubclassOf<UNDPlanetDetailWidget> PlanetDetailWidgetClass;
+    
+	UPROPERTY()
+	TSubclassOf<UNDStageInfoWidget> StageInfoWidgetClass;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UNDGameUIWidget>			GameUIWidgetClass;
+	UPROPERTY()
+	TSubclassOf<UNDMainMenuWidget> MainMenuWidgetClass;
+    
+	UPROPERTY()
+	UNDMainMenuWidget* MainMenuWidget;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UNDGameOverUIWidget>		GameOverUIWidgetClass;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UNDStageSelectWidget>		StageSelectUIWidgetClass;
-
-
-	UNDMainMenuWidget*							MainMenuWidget;
-
-	UNDPauseMenuWidget*							PauseMenuWidget;
-
-	UNDGameUIWidget*							GameUIWidget;
-
-	UNDGameOverUIWidget*						GameOverUIWidget;
-
-	UNDStageSelectWidget*						StageSelectWidget;
+	// Navigation state
+	FPlanetInfo CurrentPlanetInfo;
+	FStageInfo CurrentStageInfo;
+	bool bIsInPlanetView;
 };

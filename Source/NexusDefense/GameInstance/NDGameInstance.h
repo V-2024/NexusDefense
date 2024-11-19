@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Stages/FStageInfo.h"
 #include "Types/NDGameTypes.h"
+#include "Stages/FPlanetInfo.h"
 #include "NDGameInstance.generated.h"
 
 class UNDStageManager;
@@ -19,7 +21,7 @@ class UNDScoreManager;
 class UNDSoundManager;
 class UNDItemManager;
 class ANDEnemyBase;
-struct FPlanetInfo;
+
 
 UCLASS()
 class NEXUSDEFENSE_API UNDGameInstance : public UGameInstance
@@ -60,8 +62,17 @@ public:
     void TriggerGameStartedEvent();
     void TriggerSelectStageEvent();
     TArray<FPlanetInfo> TriggerGetPlanetInfosEvent() const;
-    void TriggerPlanetClickedEvent(int32 PlanetIndex);
+    void TriggerPlanetClickedEvent(const FPlanetInfo& PlanetInfo);
     void TriggerEnemySpawn(ANDEnemyBase* Enemy) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Stage System")
+	FStageInfo GetStageInfo(int32 StageID) const;
+    
+	UFUNCTION(BlueprintCallable, Category = "Stage System")
+	FPlanetInfo GetPlanetInfo(const FName& PlanetName) const;
+	
+	UFUNCTION(BlueprintCallable, Category = "Planet System")
+	TArray<FPlanetInfo> GetPlanets() const;
 
 private:
     template<typename T>
@@ -71,6 +82,10 @@ private:
     void StartGame();
     void CheckInitialization();
     bool AreAllManagersInitialized();
+
+	void InitializeGameData();
+	void LoadStageData();
+	void LoadPlanetData();
 
 private:
 	UPROPERTY()
@@ -97,17 +112,25 @@ private:
     UPROPERTY()
     UNDSoundManager*        SoundManager;
 
+	UPROPERTY()
+	TMap<int32, FStageInfo> StageDataMap;
+    
+	UPROPERTY()
+	TMap<FName, FPlanetInfo> PlanetDataMap;
+
     EGameState              CurrentGameState;
 
     FTimerHandle InitializationTimerHandle;
 
     FName CurrentLevelName;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-    float InitializationCheckInterval = 0.5f; // ÃÊ±âÈ­ »óÅÂ È®ÀÎ °£°Ý (ÃÊ)
+	
 
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-    float MaxInitializationTime = 10.0f; // ÃÖ´ë ÃÊ±âÈ­ ´ë±â ½Ã°£ (ÃÊ)
+    float InitializationCheckInterval = 0.5f; // ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½)
+
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    float MaxInitializationTime = 10.0f; // ï¿½Ö´ï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ (ï¿½ï¿½)
 
     float InitializationTimer = 0.0f;
 };

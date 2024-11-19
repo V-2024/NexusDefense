@@ -1,19 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// NDAICBase.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Enemy/NDEnemyBase.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "NDAICBase.generated.h"
 
-/**
- * 
- */
-
+// AI Behavior State를 표현하는 새로운 enum
 UENUM(BlueprintType)
-enum class EEnemyState : uint8
+enum class EAIBehaviorState : uint8
 {
     Idle,
     Pursuit,
@@ -23,24 +20,30 @@ enum class EEnemyState : uint8
 UCLASS()
 class NEXUSDEFENSE_API ANDAICBase : public AAIController
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+    
 public:
     ANDAICBase();
 
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
+    // Enemy의 상태를 확인하는 helper 함수
+    bool CanPerformAction() const;
+    
 protected:
     UFUNCTION()
     void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
-    void UpdateEnemyState();
+    void UpdateBehaviorState();
     void PursuitPlayer();
     void AttackPlayer();
     void FindPlayerCharacters();
     void UpdateTargetCharacter();
 
+    // Enemy의 현재 상태를 가져오는 함수
+    EEnemyState GetEnemyState() const;
+    class ANDEnemyBase* GetControlledEnemy() const;
 
 public:
     UPROPERTY(EditDefaultsOnly, Category = "AI")
@@ -53,13 +56,10 @@ public:
     UAIPerceptionComponent* AIPerceptionComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
-    EEnemyState CurrentState;
+    EAIBehaviorState CurrentBehaviorState;
 
     ACharacter* TargetCharacter;
-
     ACharacter* ClosestCharacter;
-
     TArray<ACharacter*> PlayerCharacters;
-
     float ClosestDistance;
 };

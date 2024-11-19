@@ -2,37 +2,34 @@
 
 
 #include "Manager/NDUIManager.h"
+#include "UI/MainUI/NDPlanetOverviewWidget.h"
+#include "UI/MainUI/NDPlanetDetailWidget.h"
+#include "UI/MainUI/NDStageInfoWidget.h"
 #include "UI/MainUI/NDMainMenuWidget.h"
-#include "UI/MainUI/NDGameUIWidget.h"
-#include "UI/MainUI/NDPauseMenuWidget.h"
-#include "UI/MainUI/NDGameOverUIWidget.h"
-#include "UI/MainUI/NDStageSelectWidget.h"
+#include "GameInstance/NDGameInstance.h"
+#include "Manager/NDEventManager.h"
 
 UNDUIManager::UNDUIManager()
 {
-	MainMenuWidgetClass			= nullptr;
-	GameUIWidgetClass			= nullptr;
-	PauseMenuWidgetClass		= nullptr;
-	GameOverUIWidgetClass		= nullptr;
-	StageSelectUIWidgetClass	= nullptr;
-	MainMenuWidget				= nullptr;
-	GameUIWidget				= nullptr;
-	PauseMenuWidget				= nullptr;
-	GameOverUIWidget			= nullptr;
-	StageSelectWidget			= nullptr;
+	static ConstructorHelpers::FClassFinder<UNDPlanetOverviewWidget> PlanetOverviewWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_PlanetOverviewWidget.WBP_PlanetOverviewWidget_C"));
+	static ConstructorHelpers::FClassFinder<UNDPlanetDetailWidget> PlanetDetailWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_PlanetDetailWidget.WBP_PlanetDetailWidget_C"));
+	static ConstructorHelpers::FClassFinder<UNDStageInfoWidget> StageInfoWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_StageInfoWidget.WBP_StageInfoWidget_C"));
+	static ConstructorHelpers::FClassFinder<UNDMainMenuWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_MainMenuWidget.WBP_MainMenuWidget_C"));
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_MainmenuWidget.WBP_MainmenuWidget_C"));
-	static ConstructorHelpers::FClassFinder<UUserWidget> StageSelectWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_StageSelectWidget.WBP_StageSelectWidget_C"));
-
-	if (MainMenuWidgetClassFinder.Class && StageSelectWidgetClassFinder.Class)
-	{
+	
+	if (PlanetOverviewWidgetClassFinder.Succeeded())
+		PlanetOverviewWidgetClass = PlanetOverviewWidgetClassFinder.Class;
+	if (PlanetDetailWidgetClassFinder.Succeeded())
+		PlanetDetailWidgetClass = PlanetDetailWidgetClassFinder.Class;
+	if (StageInfoWidgetClassFinder.Succeeded())
+		StageInfoWidgetClass = StageInfoWidgetClassFinder.Class;
+	if (MainMenuWidgetClassFinder.Succeeded())
 		MainMenuWidgetClass = MainMenuWidgetClassFinder.Class;
-		StageSelectUIWidgetClass = StageSelectWidgetClassFinder.Class;
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass or StageSelectWidgetClass is not found!"));
-	}
+
+
+	MainMenuWidget = nullptr;
+
+	bIsInPlanetView = false;
 }
 
 void UNDUIManager::StartUI()
@@ -43,8 +40,7 @@ void UNDUIManager::StartUI()
 void UNDUIManager::UpdateUI(EGameState NewState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UpdateUI"));
-
-	UE_LOG(LogTemp, Warning, TEXT("this UIManager address: %p"), this);
+	
 	switch (NewState)
 	{
 		case EGameState::Ready:
@@ -89,59 +85,47 @@ void UNDUIManager::CreateWidgets()
 
 void UNDUIManager::ShowMainMenu()
 {
-	if (MainMenuWidgetClass)
+	// Îã§Î•∏ UIÎì§ Îã´Í∏∞
+	CloseGameUI();
+	ClosePauseMenu();
+	CloseGameOverUI();
+	CloseStageSelectUI();
+
+	// Î©îÏù∏ Î©îÎâ¥ ÏÉùÏÑ± Î∞è ÌëúÏãú
+	if (!MainMenuWidget && MainMenuWidgetClass)
 	{
 		MainMenuWidget = CreateWidget<UNDMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
-
 	}
 
 	if (MainMenuWidget)
 	{
 		MainMenuWidget->AddToViewport();
-
-		// ¿¸√º »≠∏È ∏µÂ º≥¡§
-		//MainMenuWidget->SetDesiredSizeInViewport(FVector2D(1920, 1080));  // ø¯«œ¥¬ «ÿªÛµµ
-		//MainMenuWidget->SetAnchorsInViewport(FAnchors(0, 0, 1, 1));
-		//MainMenuWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
-
-		// ¿‘∑¬ ∏µÂ º≥¡§
-		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-		if (PlayerController)
-		{
-			PlayerController->SetShowMouseCursor(true);
-			FInputModeUIOnly InputMode;
-			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			PlayerController->SetInputMode(InputMode);
-		}
 	}
-	else
+
+	// ÏûÖÎ†• Î™®Îìú ÏÑ§Ï†ï
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
-		UE_LOG(LogTemp, Error, TEXT("MainMenuWidgetClass is not set!"));
+		PlayerController->SetShowMouseCursor(true);
+		FInputModeUIOnly InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PlayerController->SetInputMode(InputMode);
 	}
 }
 
 void UNDUIManager::ShowStageSelectUI()
 {
+	// Í∏∞Ï°¥ UI Ï†úÍ±∞
+	CloseMainMenu();
+	CloseGameUI();
+	ClosePauseMenu();
+	CloseGameOverUI();
 
-	if (StageSelectUIWidgetClass)
-	{
-		StageSelectWidget = CreateWidget<UNDStageSelectWidget>(GetWorld(), StageSelectUIWidgetClass);
-	}
+	UE_LOG(LogTemp, Warning, TEXT("StageSelectedLevel"));
+	// ÌñâÏÑ± Ïò§Î≤ÑÎ∑∞ ÌëúÏãú
+	ShowPlanetOverview();
 
-	UE_LOG(LogTemp, Warning, TEXT("ShowStageSelectUI"));
-
-	if(StageSelectWidget)
-	{
-		StageSelectWidget->AddToViewport();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("StageSelectWidget is not set!"));
-	}
-
-	// ¿‘∑¬ ∏µÂ º≥¡§
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
+	// ÏûÖÎ†• Î™®Îìú ÏÑ§Ï†ï
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
 		PlayerController->SetShowMouseCursor(true);
 		FInputModeUIOnly InputMode;
@@ -165,49 +149,145 @@ void UNDUIManager::ShowGameOverUI()
 
 }
 
+void UNDUIManager::ShowPlanetOverview()
+{
+	if (!PlanetOverviewWidget && PlanetOverviewWidgetClass)
+	{
+		PlanetOverviewWidget = CreateWidget<UNDPlanetOverviewWidget>(GetWorld(), PlanetOverviewWidgetClass);
+	}
+
+	if (PlanetOverviewWidget)
+	{
+		PlanetOverviewWidget->AddToViewport();
+        
+		// ÌñâÏÑ± ÏÉÅÏÑ∏ Ï†ïÎ≥¥ ÏúÑÏ†ØÏù¥ ÏûàÎã§Î©¥ Ï†úÍ±∞
+		if (PlanetDetailWidget)
+		{
+			PlanetDetailWidget->RemoveFromParent();
+			PlanetDetailWidget = nullptr;
+		}
+	}
+}
+
+void UNDUIManager::ShowPlanetDetail(const FPlanetInfo& PlanetInfo)
+{
+	if (!PlanetDetailWidget && PlanetDetailWidgetClass)
+	{
+		PlanetDetailWidget = CreateWidget<UNDPlanetDetailWidget>(GetWorld(), PlanetDetailWidgetClass);
+	}
+
+	if (PlanetDetailWidget)
+	{
+		CurrentPlanetInfo = PlanetInfo;
+		PlanetDetailWidget->UpdatePlanetInfo(PlanetInfo);
+		PlanetDetailWidget->AddToViewport();
+		bIsInPlanetView = true;
+
+		// Ïä§ÌÖåÏù¥ÏßÄ Ï†ïÎ≥¥ ÏóÖÎç∞Ïù¥Ìä∏
+		if (UNDGameInstance* GameInstance = Cast<UNDGameInstance>(GetWorld()->GetGameInstance()))
+		{
+			for (int32 StageID : PlanetInfo.StageIDs)
+			{
+				FStageInfo StageInfo = GameInstance->GetStageInfo(StageID);
+				UpdateStageInfo(StageInfo);
+			}
+		}
+	}
+}
+
+void UNDUIManager::UpdateStageInfo(const FStageInfo& StageInfo)
+{
+	if (!StageInfoWidget && StageInfoWidgetClass)
+	{
+		StageInfoWidget = CreateWidget<UNDStageInfoWidget>(GetWorld(), StageInfoWidgetClass);
+	}
+
+	if (StageInfoWidget)
+	{
+		CurrentStageInfo = StageInfo;
+		StageInfoWidget->SetStageInfo(StageInfo);
+        
+		if (!StageInfoWidget->IsInViewport())
+		{
+			StageInfoWidget->AddToViewport();
+		}
+	}
+}
+
+void UNDUIManager::HandlePlanetZoomIn(const FPlanetInfo& PlanetInfo)
+{
+	if (!bIsInPlanetView)
+	{
+		ShowPlanetDetail(PlanetInfo);
+        
+		if (UNDGameInstance* GameInstance = Cast<UNDGameInstance>(GetWorld()->GetGameInstance()))
+		{
+			if (UNDEventManager* EventManager = GameInstance->GetEventManager())
+			{
+				EventManager->TriggerPlanetZoomIn(PlanetInfo);
+			}
+		}
+	}
+}
+
+void UNDUIManager::HandlePlanetZoomOut()
+{
+	if (bIsInPlanetView)
+	{
+		bIsInPlanetView = false;
+        
+		if (PlanetDetailWidget)
+		{
+			PlanetDetailWidget->RemoveFromParent();
+			PlanetDetailWidget = nullptr;
+		}
+
+		if (StageInfoWidget)
+		{
+			StageInfoWidget->RemoveFromParent();
+			StageInfoWidget = nullptr;
+		}
+
+		ShowPlanetOverview();
+        
+		if (UNDGameInstance* GameInstance = Cast<UNDGameInstance>(GetWorld()->GetGameInstance()))
+		{
+			if (UNDEventManager* EventManager = GameInstance->GetEventManager())
+			{
+				EventManager->TriggerPlanetZoomOut();
+			}
+		}
+	}
+}
+
 
 void UNDUIManager::CloseMainMenu()
 {
-	if (MainMenuWidget)
-	{
-		MainMenuWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::ClosePauseMenu()
 {
-	if (PauseMenuWidget)
-	{
-		PauseMenuWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::CloseGameUI()
 {
-	if (GameUIWidget)
-	{
-		GameUIWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::CloseGameOverUI()
 {
-	if (GameOverUIWidget)
-	{
-		GameOverUIWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::CloseStageSelectUI()
 {
-	if (StageSelectWidget)
-	{
-		StageSelectWidget->RemoveFromParent();
-	}
+
 }
 
 void UNDUIManager::OnPlanetClicked(int32 PlanetIndex)
 {
-	StageSelectWidget->OnPlanetClicked(PlanetIndex);
+	//StageSelectWidget->OnPlanetClicked(PlanetIndex);
 }
 
