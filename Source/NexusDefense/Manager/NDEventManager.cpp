@@ -130,6 +130,16 @@ void UNDEventManager::TriggerBossSpawned(ANDEnemyBase* Boss)
 	OnBossSpawned.Broadcast(Boss);
 }
 
+void UNDEventManager::TriggerEnemyDamageTaken(ACharacter* HealthChangedCharacter, float Amount)
+{
+	OnHealthChanged.Broadcast(HealthChangedCharacter, Amount);
+}
+
+void UNDEventManager::TriggerEnemyDamageReceived(ACharacter* DamageTakenCharacter, FND_S_DamageInfo DamageInfo)
+{
+	OnDamageReceived.Broadcast(DamageTakenCharacter, DamageInfo);
+}
+
 void UNDEventManager::TriggerEnemyDefeated(AActor* Enemy)
 {
 	OnEnemyDefeated.Broadcast(Enemy);

@@ -1,88 +1,150 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// NDEnemyBase.h
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "UI/UIBase/NDEnemyWidgetInterface.h"
 #include "Components/NDHealthComponent.h"
+#include "Interfaces/NDEnemyInterface.h"
 #include "NDEnemyBase.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDestroyedSignature, ANDEnemyBase*, DestroyedEnemy);
-
-UCLASS()
-class NEXUSDEFENSE_API ANDEnemyBase : public ACharacter, public INDEnemyWidgetInterface
+UENUM(BlueprintType)
+enum class EEnemyState : uint8
 {
-	GENERATED_BODY()
+    Idle,
+    Spawning,
+    Active,
+    Attacking,
+    Stunned,
+    Dying,
+    Inactive
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyData : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float BaseHealth = 100.0f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float BaseDamage = 10.0f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float AttackRange = 150.0f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float DetectionRange = 1000.0f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float ThreatLevel = 1.0f;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 ExperiencePoints = 10;
+};
+
+UCLASS(Config=Game)
+class NEXUSDEFENSE_API ANDEnemyBase : public ACharacter, public INDEnemyWidgetInterface, public INDEnemyInterface
+{
+    GENERATED_BODY()
 
 public:
-	ANDEnemyBase();
+    ANDEnemyBase();
 
+    // Interface Implementation
+    virtual float GetThreatLevel() const override { return EnemyData.ThreatLevel; }
+    virtual bool CanBeStunned() const override { return true; }
+    virtual void ApplyStun(float Duration) override;
+    virtual bool IsStunned() const override { return CurrentState == EEnemyState::Stunned; }
+    virtual void OnSpawn() override;
+    virtual void OnDeath() override;
+    virtual void OnHit() override;
+    virtual float GetAttackDamage() const override { return EnemyData.BaseDamage; }
+    virtual float GetAttackRange() const override { return EnemyData.AttackRange; }
+    virtual float GetDetectionRange() const override { return EnemyData.DetectionRange; }
+
+    // Core Functions
     UFUNCTION(BlueprintCallable, Category = "Enemy")
     virtual void Activate();
 
     UFUNCTION(BlueprintCallable, Category = "Enemy")
     virtual void Deactivate();
 
+    // Getters
     UFUNCTION(BlueprintCallable, Category = "Enemy")
-    virtual void Reset();
+    EEnemyState GetCurrentState() const { return CurrentState; }
+    
+    UFUNCTION(BlueprintPure, Category = "Enemy")
+    int32 GetScoreValue() const { return EnemyData.ExperiencePoints; }
 
-    UFUNCTION(BlueprintCallable, Category = "Enemy")
-    int32 GetScoreValue() const { return ExperiencePoints; }
+protected:
+    virtual void BeginPlay() override;
+    virtual void Destroyed() override;
+    virtual void SetUpEnemyWidget(class UNDUserWidget* Widget) override;
 
-    void SetComponents();
-    void PlaySpawnEffect();
-    void PlayDestroyEffect();
-    void PlaySpawnSound();
-    void PlayDestroySound();
+    // Event Handlers
+    UFUNCTION()
+    virtual void OnHealthChanged(float NewHealth, float Delta);
+    
+    UFUNCTION()
+    virtual void OnDamageTaken(const FND_S_DamageInfo& DamageInfo);
+    
+    UFUNCTION()
+    virtual void OnDeathTriggered();
+
+    // State Management
+    virtual void SetEnemyState(EEnemyState NewState);
+
+    // VFX & SFX
+    virtual void PlayStateEffects(EEnemyState NewState);
+    void PlaySpawnEffect() const;
+    void PlayDestroyEffect() const;
+    void PlaySpawnSound() const;
+    void PlayDestroySound() const;
     void PlaySpawnAnimMontage();
     void PlayDeathAnimMontage();
 
-    FORCEINLINE void    SetActive(bool IsActive)       {   bIsActive = IsActive;       }
-    FORCEINLINE bool    IsActive() const               {   return bIsActive;           }
-    FORCEINLINE float   GetScore() const              {   return ExperiencePoints;    }
-
-
 protected:
-	virtual void BeginPlay() override;
-	virtual void Destroyed() override;
+    // Components
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+    UNDHealthComponent* HealthComponent;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+    TObjectPtr<class UNDWidgetComponent> HPBar;
 
-public:	
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    // State
+    UPROPERTY()
+    EEnemyState CurrentState;
+
+    // Data
+    UPROPERTY(EditDefaultsOnly, Category = "Enemy|Data")
+    FEnemyData EnemyData;
+
+    // Effects
+    UPROPERTY(EditDefaultsOnly, Category = "Enemy|Effects")
     UParticleSystem* SpawnEffect;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    UPROPERTY(EditDefaultsOnly, Category = "Enemy|Effects")
     UParticleSystem* DestroyEffect;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sounds")
+    UPROPERTY(EditDefaultsOnly, Category = "Enemy|Sounds")
     USoundBase* SpawnSound;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sounds")
+    UPROPERTY(EditDefaultsOnly, Category = "Enemy|Sounds")
     USoundBase* DestroySound;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-    FString Name;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-    int32 ExperiencePoints;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "Enemy|Animation")
     UAnimMontage* SpawnAnimMontage;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "Enemy|Animation")
     UAnimMontage* DeathAnimMontage;
-
-
-protected:
-    virtual void SetUpEnemyWidget(class UNDUserWidget* Widget) override;
 
 private:
     bool bIsActive;
+    FTimerHandle StunTimerHandle;
+    void SetupComponents();
 
-protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-    UNDHealthComponent* HealthComponent;
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = "true"))
-    TObjectPtr<class UNDWidgetComponent> HPBar;
+    UPROPERTY()
+    class UNDEventManager* EventManager;
 };

@@ -2,12 +2,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DamageSystem/ND_S_DamageInfo.h"
 #include "UObject/NoExportTypes.h"
 #include "Types/NDGametypes.h"
 #include "NDEventManager.generated.h"
 
-// 스테이지 번호 추가 등의 추가정보 파라미터 추가)
-// 실제 이벤트를 발생시키는 메서드 필요 (TriggerStageStart, TriggerStageEnd 등)
+
 
 class ANDEnemyBase;
 class ANDItemBase;
@@ -42,6 +42,9 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWaveCompleted, int32, int32);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemySpawned, ANDEnemyBase*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBossSpawned, ANDEnemyBase*);
 
+// Damage Events
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, ACharacter*, float);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDamageReceived, ACharacter*, FND_S_DamageInfo);
 
 // Enemy Dead Events Delegates
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemyDefeated, AActor*);
@@ -110,12 +113,17 @@ public:
     FOnWaveStarted          OnWaveStarted;
     FOnWaveCompleted        OnWaveCompleted;
 
-
+    
     // Spawn Enemy Events
     FOnEnemySpawned         OnEnemySpawned;
     FOnBossSpawned          OnBossSpawned;
 
+    
+    // Damage Events
+    FOnHealthChanged        OnHealthChanged;
+    FOnDamageReceived       OnDamageReceived;
 
+    
     // Enemy Dead Events
     FOnEnemyDefeated        OnEnemyDefeated;
     FOnBossDefeated         OnBossDefeated;
@@ -187,6 +195,10 @@ public:
     void TriggerEnemySpawned(ANDEnemyBase* SpawnedEnemy);
 
     void TriggerBossSpawned(ANDEnemyBase* SpawnedBoss);
+
+    void TriggerEnemyDamageTaken(ACharacter* HealthChangedCharacter, float Amount);
+
+    void TriggerEnemyDamageReceived(ACharacter* DamageTakenCharacter, FND_S_DamageInfo DamageInfo);
 
     void TriggerEnemyDefeated(AActor* DefeatedEnemy);
 
