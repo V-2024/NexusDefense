@@ -12,6 +12,7 @@
 
 class UNDPlanetOverviewWidget;
 class UNDStageInfoWidget;
+class UNDMainMenuWidget;
 
 UCLASS()
 class NEXUSDEFENSE_API UNDUIManager : public UObject
@@ -59,6 +60,21 @@ private:
     
 	UPROPERTY(Transient)
 	class UNDStageInfoWidget* StageInfoWidget;
+
+	UPROPERTY()
+	TSubclassOf<UNDPlanetOverviewWidget> PlanetOverviewWidgetClass;
+    
+	UPROPERTY()
+	TSubclassOf<UNDPlanetDetailWidget> PlanetDetailWidgetClass;
+    
+	UPROPERTY()
+	TSubclassOf<UNDStageInfoWidget> StageInfoWidgetClass;
+
+	UPROPERTY()
+	TSubclassOf<UNDMainMenuWidget> MainMenuWidgetClass;
+    
+	UPROPERTY()
+	UNDMainMenuWidget* MainMenuWidget;
 
 	// Navigation state
 	FPlanetInfo CurrentPlanetInfo;

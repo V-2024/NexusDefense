@@ -14,6 +14,9 @@ class NEXUSDEFENSE_API UNDPlanetIconWidget : public UUserWidget
 
 public:
 	void SetPlanetInfo(const FPlanetInfo& InPlanetInfo);
+	// 위치 설정
+	void SetPosition(const FVector2D& NewPosition);
+	
 	const FPlanetInfo& GetPlanetInfo() const { return PlanetInfo; }
     
 	// 애니메이션 관련 함수들
@@ -21,9 +24,7 @@ public:
 	void PlayZoomOutAnimation();
 	void PlayFadeOutAnimation();
 	void PlayHighlightAnimation();
-    
-	// 위치 설정
-	void SetPosition(const FVector2D& NewPosition);
+
 
 protected:
 	virtual void NativeConstruct() override;
@@ -43,8 +44,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* PlanetNameText;
 
-	UPROPERTY(meta = (BindWidget))
-	class UCanvasPanel* ConnectionLinesPanel;  // 행성 간 연결선을 그릴 패널
+	//UPROPERTY(meta = (BindWidget))
+	//class UCanvasPanel* ConnectionLinesPanel;  // 행성 간 연결선을 그릴 패널
 
 	// 애니메이션
 	UPROPERTY(Transient, meta = (BindWidgetAnim))

@@ -2,12 +2,34 @@
 
 
 #include "Manager/NDUIManager.h"
+#include "UI/MainUI/NDPlanetOverviewWidget.h"
+#include "UI/MainUI/NDPlanetDetailWidget.h"
+#include "UI/MainUI/NDStageInfoWidget.h"
+#include "UI/MainUI/NDMainMenuWidget.h"
+#include "GameInstance/NDGameInstance.h"
+#include "Manager/NDEventManager.h"
 
 UNDUIManager::UNDUIManager()
 {
+	static ConstructorHelpers::FClassFinder<UNDPlanetOverviewWidget> PlanetOverviewWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_PlanetOverviewWidget.WBP_PlanetOverviewWidget_C"));
+	static ConstructorHelpers::FClassFinder<UNDPlanetDetailWidget> PlanetDetailWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_PlanetDetailWidget.WBP_PlanetDetailWidget_C"));
+	static ConstructorHelpers::FClassFinder<UNDStageInfoWidget> StageInfoWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_StageInfoWidget.WBP_StageInfoWidget_C"));
+	static ConstructorHelpers::FClassFinder<UNDMainMenuWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/UI/MainUI/WBP_MainMenuWidget.WBP_MainMenuWidget_C"));
+
 	
-	//static ConstructorHelpers::FClassFinder<UUserWidget> MainMenuWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_MainmenuWidget.WBP_MainmenuWidget_C"));
-	//static ConstructorHelpers::FClassFinder<UUserWidget> StageSelectWidgetClassFinder(TEXT("/Game/NexusDefense/Blueprint/UI/MainUI/WBP_StageSelectWidget.WBP_StageSelectWidget_C"));
+	if (PlanetOverviewWidgetClassFinder.Succeeded())
+		PlanetOverviewWidgetClass = PlanetOverviewWidgetClassFinder.Class;
+	if (PlanetDetailWidgetClassFinder.Succeeded())
+		PlanetDetailWidgetClass = PlanetDetailWidgetClassFinder.Class;
+	if (StageInfoWidgetClassFinder.Succeeded())
+		StageInfoWidgetClass = StageInfoWidgetClassFinder.Class;
+	if (MainMenuWidgetClassFinder.Succeeded())
+		MainMenuWidgetClass = MainMenuWidgetClassFinder.Class;
+
+
+	MainMenuWidget = nullptr;
+
+	bIsInPlanetView = false;
 }
 
 void UNDUIManager::StartUI()
@@ -18,8 +40,7 @@ void UNDUIManager::StartUI()
 void UNDUIManager::UpdateUI(EGameState NewState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UpdateUI"));
-
-	UE_LOG(LogTemp, Warning, TEXT("this UIManager address: %p"), this);
+	
 	switch (NewState)
 	{
 		case EGameState::Ready:
@@ -64,20 +85,47 @@ void UNDUIManager::CreateWidgets()
 
 void UNDUIManager::ShowMainMenu()
 {
-	
+	// 다른 UI들 닫기
+	CloseGameUI();
+	ClosePauseMenu();
+	CloseGameOverUI();
+	CloseStageSelectUI();
+
+	// 메인 메뉴 생성 및 표시
+	if (!MainMenuWidget && MainMenuWidgetClass)
+	{
+		MainMenuWidget = CreateWidget<UNDMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
+	}
+
+	if (MainMenuWidget)
+	{
+		MainMenuWidget->AddToViewport();
+	}
+
+	// 입력 모드 설정
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+	{
+		PlayerController->SetShowMouseCursor(true);
+		FInputModeUIOnly InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PlayerController->SetInputMode(InputMode);
+	}
 }
 
 void UNDUIManager::ShowStageSelectUI()
 {
+	// 기존 UI 제거
+	CloseMainMenu();
+	CloseGameUI();
+	ClosePauseMenu();
+	CloseGameOverUI();
 
+	UE_LOG(LogTemp, Warning, TEXT("StageSelectedLevel"));
+	// 행성 오버뷰 표시
+	ShowPlanetOverview();
 
-	UE_LOG(LogTemp, Warning, TEXT("ShowStageSelectUI"));
-
-
-
-	// �Է� ��� ����
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
+	// 입력 모드 설정
+	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
 		PlayerController->SetShowMouseCursor(true);
 		FInputModeUIOnly InputMode;
@@ -99,6 +147,117 @@ void UNDUIManager::ShowGameUI()
 void UNDUIManager::ShowGameOverUI()
 {
 
+}
+
+void UNDUIManager::ShowPlanetOverview()
+{
+	if (!PlanetOverviewWidget && PlanetOverviewWidgetClass)
+	{
+		PlanetOverviewWidget = CreateWidget<UNDPlanetOverviewWidget>(GetWorld(), PlanetOverviewWidgetClass);
+	}
+
+	if (PlanetOverviewWidget)
+	{
+		PlanetOverviewWidget->AddToViewport();
+        
+		// 행성 상세 정보 위젯이 있다면 제거
+		if (PlanetDetailWidget)
+		{
+			PlanetDetailWidget->RemoveFromParent();
+			PlanetDetailWidget = nullptr;
+		}
+	}
+}
+
+void UNDUIManager::ShowPlanetDetail(const FPlanetInfo& PlanetInfo)
+{
+	if (!PlanetDetailWidget && PlanetDetailWidgetClass)
+	{
+		PlanetDetailWidget = CreateWidget<UNDPlanetDetailWidget>(GetWorld(), PlanetDetailWidgetClass);
+	}
+
+	if (PlanetDetailWidget)
+	{
+		CurrentPlanetInfo = PlanetInfo;
+		PlanetDetailWidget->UpdatePlanetInfo(PlanetInfo);
+		PlanetDetailWidget->AddToViewport();
+		bIsInPlanetView = true;
+
+		// 스테이지 정보 업데이트
+		if (UNDGameInstance* GameInstance = Cast<UNDGameInstance>(GetWorld()->GetGameInstance()))
+		{
+			for (int32 StageID : PlanetInfo.StageIDs)
+			{
+				FStageInfo StageInfo = GameInstance->GetStageInfo(StageID);
+				UpdateStageInfo(StageInfo);
+			}
+		}
+	}
+}
+
+void UNDUIManager::UpdateStageInfo(const FStageInfo& StageInfo)
+{
+	if (!StageInfoWidget && StageInfoWidgetClass)
+	{
+		StageInfoWidget = CreateWidget<UNDStageInfoWidget>(GetWorld(), StageInfoWidgetClass);
+	}
+
+	if (StageInfoWidget)
+	{
+		CurrentStageInfo = StageInfo;
+		StageInfoWidget->SetStageInfo(StageInfo);
+        
+		if (!StageInfoWidget->IsInViewport())
+		{
+			StageInfoWidget->AddToViewport();
+		}
+	}
+}
+
+void UNDUIManager::HandlePlanetZoomIn(const FPlanetInfo& PlanetInfo)
+{
+	if (!bIsInPlanetView)
+	{
+		ShowPlanetDetail(PlanetInfo);
+        
+		if (UNDGameInstance* GameInstance = Cast<UNDGameInstance>(GetWorld()->GetGameInstance()))
+		{
+			if (UNDEventManager* EventManager = GameInstance->GetEventManager())
+			{
+				EventManager->TriggerPlanetZoomIn(PlanetInfo);
+			}
+		}
+	}
+}
+
+void UNDUIManager::HandlePlanetZoomOut()
+{
+	if (bIsInPlanetView)
+	{
+		bIsInPlanetView = false;
+        
+		if (PlanetDetailWidget)
+		{
+			PlanetDetailWidget->RemoveFromParent();
+			PlanetDetailWidget = nullptr;
+		}
+
+		if (StageInfoWidget)
+		{
+			StageInfoWidget->RemoveFromParent();
+			StageInfoWidget = nullptr;
+		}
+
+		ShowPlanetOverview();
+        
+		if (UNDGameInstance* GameInstance = Cast<UNDGameInstance>(GetWorld()->GetGameInstance()))
+		{
+			if (UNDEventManager* EventManager = GameInstance->GetEventManager())
+			{
+				EventManager->TriggerPlanetZoomOut();
+			}
+		}
+	}
 }
 
 

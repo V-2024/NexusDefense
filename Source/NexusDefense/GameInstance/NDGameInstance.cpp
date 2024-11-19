@@ -204,7 +204,7 @@ void UNDGameInstance::SubscribeToEvents()
         UE_LOG(LogTemp, Warning, TEXT("Subscribing to events"));
         UE_LOG(LogTemp, Warning, TEXT("UIManager address: %p"), UIManager);
 
-        //EventManager->OnStageSelected.AddUObject(UIManager, &UNDUIManager::UpdateUI);
+        EventManager->OnStageSelected.AddUObject(UIManager, &UNDUIManager::UpdateUI);
         EventManager->OnStartLevel.AddUObject(UIManager, &UNDUIManager::StartUI);
         //EventManager->OnGetPlanetInfos.BindUObject(StageManager, &UNDStageManager::GetPlanetInfos);
         EventManager->OnPlanetClicked.AddUObject(UIManager, &UNDUIManager::OnPlanetClicked);
