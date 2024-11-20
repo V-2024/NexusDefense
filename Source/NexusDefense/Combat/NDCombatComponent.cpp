@@ -26,6 +26,11 @@ void UNDCombatComponent::BeginPlay()
 	}
 }
 
+void UNDCombatComponent::NotifySkillEnd()
+{
+	CurrentState = ECombatState::None;
+}
+
 bool UNDCombatComponent::ExecuteSkill(FName SkillName)
 {
 	if (!OwnerCharacter.IsValid())
@@ -116,12 +121,6 @@ void UNDCombatComponent::ProcessAttackHit()
 			CurrentSkillData->HitLength
 		);
 	}
-}
-
-void UNDCombatComponent::NotifySkillEnd()
-{
-	OnSkillEnd.Broadcast();
-	CurrentState = ECombatState::None;
 }
 
 void UNDCombatComponent::StartCooldown(FName SkillName, float CoolTime)

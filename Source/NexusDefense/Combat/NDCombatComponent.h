@@ -11,7 +11,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillExecuted, FName, SkillName);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCooldownEnd, FName, SkillName);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillEnd);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class NEXUSDEFENSE_API UNDCombatComponent : public UActorComponent
@@ -32,10 +31,6 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
     FOnCooldownEnd OnCooldownEnd;
 
-    UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
-    FOnSkillEnd OnSkillEnd;
-
-    // 노티파이 함수
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void NotifySkillEnd();
 

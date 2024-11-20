@@ -24,6 +24,7 @@ protected:
 	virtual void HandleAttack(FName SkillName);
 
 	// Input 처리 virtual 함수들
+	virtual void PressLMB();
 	virtual void PressKeyboard1();
 	virtual void PressKeyboard2();
 	virtual void PressKeyboard3();
@@ -39,11 +40,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat)
 	UNDAttacksComponent* AttacksComponent;
-	
-	// 공격 확인용
-	bool bIsAttacking;
-	UFUNCTION()
-	void OnAttackEnd();
 
 	// 타겟팅 Trace
 	UPROPERTY(EditAnywhere, Category = "Combat")

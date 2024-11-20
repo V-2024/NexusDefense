@@ -8,18 +8,11 @@ ANDCombatCharacter::ANDCombatCharacter()
     // 전투 컴포넌트 생성
     CombatComponent = CreateDefaultSubobject<UNDCombatComponent>(TEXT("CombatComponent"));
     AttacksComponent = CreateDefaultSubobject<UNDAttacksComponent>(TEXT("AttacksComponent"));
-
-    bIsAttacking = false;
 }
 
 void ANDCombatCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
-    if (CombatComponent)
-    {
-        CombatComponent->OnSkillEnd.AddDynamic(this, &ANDCombatCharacter::OnAttackEnd);
-    }
 }
 
 void ANDCombatCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -27,6 +20,7 @@ void ANDCombatCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     // 전투 입력 바인딩
+    PlayerInputComponent->BindAction("LMB", IE_Pressed, this, & ANDCombatCharacter::PressLMB);
     PlayerInputComponent->BindAction("Attack1", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard1);
     PlayerInputComponent->BindAction("Attack2", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard2);
     PlayerInputComponent->BindAction("Attack3", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard3);
@@ -79,8 +73,6 @@ void ANDCombatCharacter::HandleAttack(FName SkillName)
         SetActorRotation(Direction.Rotation());
     }
 
-    bIsAttacking = true;
-
     // 스킬 실행
     if (CombatComponent)
     {
@@ -88,10 +80,9 @@ void ANDCombatCharacter::HandleAttack(FName SkillName)
     }
 }
 
-void ANDCombatCharacter::OnAttackEnd()
+void ANDCombatCharacter::PressLMB()
 {
-    UE_LOG(LogTemp, Display, TEXT("NDCombatCharacter::OnAttackEnd()"));
-    bIsAttacking = false;
+    HandleAttack(FName("LMBAttack"));
 }
 
 void ANDCombatCharacter::PressKeyboard1()
@@ -116,14 +107,20 @@ void ANDCombatCharacter::PressKeyboard4()
 
 void ANDCombatCharacter::MoveForward(float Value)
 {
-    if (bIsAttacking) return;  // 공격 중에는 이동 불가
+    if (CombatComponent && CombatComponent->GetCurrentState() == ECombatState::Attacking)
+    {
+        return;
+    }
 
     Super::MoveForward(Value);
 }
 
 void ANDCombatCharacter::MoveRight(float Value)
 {
-    if (bIsAttacking) return;  // 공격 중에는 이동 불가
+    if (CombatComponent && CombatComponent->GetCurrentState() == ECombatState::Attacking)
+    {
+        return;
+    }
 
     Super::MoveRight(Value);
 }
