@@ -35,7 +35,7 @@ ANDBaseCharacter::ANDBaseCharacter()
     // 이동 설정
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.f, 0.0f);
-    GetCharacterMovement()->JumpZVelocity = 650.f;
+    GetCharacterMovement()->JumpZVelocity = 100.f;
     GetCharacterMovement()->AirControl = 0.2f;
 
 }
