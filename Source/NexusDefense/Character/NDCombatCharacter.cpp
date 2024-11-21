@@ -2,6 +2,7 @@
 
 
 #include "Character/NDCombatCharacter.h"
+#include "Weapon/NDBaseWeapon.h"
 
 ANDCombatCharacter::ANDCombatCharacter()
 {
@@ -13,6 +14,8 @@ ANDCombatCharacter::ANDCombatCharacter()
 void ANDCombatCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    EquipWeapon();
 }
 
 void ANDCombatCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -20,11 +23,28 @@ void ANDCombatCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     // 전투 입력 바인딩
-    PlayerInputComponent->BindAction("LMB", IE_Pressed, this, & ANDCombatCharacter::PressLMB);
-    PlayerInputComponent->BindAction("Attack1", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard1);
-    PlayerInputComponent->BindAction("Attack2", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard2);
-    PlayerInputComponent->BindAction("Attack3", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard3);
-    PlayerInputComponent->BindAction("Attack4", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard4);
+    PlayerInputComponent->BindAction("BasicAttack", IE_Pressed, this, & ANDCombatCharacter::PressLMB);
+    PlayerInputComponent->BindAction("Skill1", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard1);
+    PlayerInputComponent->BindAction("Skill2", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard2);
+    PlayerInputComponent->BindAction("Skill3", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard3);
+    PlayerInputComponent->BindAction("Skill4", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard4);
+}
+
+void ANDCombatCharacter::EquipWeapon()
+{
+    if (WeaponClass)
+    {
+        Weapon = GetWorld()->SpawnActor<ANDBaseWeapon>(WeaponClass);
+
+        if (Weapon)
+        {
+            Weapon->AttachToComponent(GetMesh(),
+                FAttachmentTransformRules::KeepRelativeTransform,
+                TEXT("WeaponSocket"));
+
+            Weapon->SetOwner(this);
+        }
+    }
 }
 
 AActor* ANDCombatCharacter::FindTargetInFront()
@@ -80,9 +100,14 @@ void ANDCombatCharacter::HandleAttack(FName SkillName)
     }
 }
 
+void ANDCombatCharacter::ExecuteBasicAttack()
+{
+    CombatComponent->ProcessComboCommand();
+}
+
 void ANDCombatCharacter::PressLMB()
 {
-    HandleAttack(FName("LMBAttack"));
+    ExecuteBasicAttack();
 }
 
 void ANDCombatCharacter::PressKeyboard1()

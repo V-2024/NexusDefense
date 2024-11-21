@@ -8,6 +8,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "NDCombatCharacter.generated.h"
 
+class ANDBaseWeapon;
+
 UCLASS()
 class NEXUSDEFENSE_API ANDCombatCharacter : public ANDBaseCharacter
 {
@@ -22,6 +24,7 @@ protected:
 
 	// 전투 관련 함수들
 	virtual void HandleAttack(FName SkillName);
+	virtual void ExecuteBasicAttack();
 
 	// Input 처리 virtual 함수들
 	virtual void PressLMB();
@@ -40,6 +43,15 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat)
 	UNDAttacksComponent* AttacksComponent;
+
+	// 무기 장착
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<ANDBaseWeapon> WeaponClass;
+
+	UPROPERTY()
+	ANDBaseWeapon* Weapon;
+
+	void EquipWeapon();
 
 	// 타겟팅 Trace
 	UPROPERTY(EditAnywhere, Category = "Combat")

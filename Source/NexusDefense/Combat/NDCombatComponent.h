@@ -51,14 +51,17 @@ public:
     UFUNCTION(BlueprintPure, Category = "Combat")
     FName GetCurrentSkillName() const { return CurrentSkillName; }
 
-    // 데이터 테이블 참조
-    UPROPERTY(EditDefaultsOnly, Category = "Combat", meta = (AllowedClasses = "DataTable"))
-    TSoftObjectPtr<UDataTable> SkillDataTable;
-
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void ProcessAttackHit();
 
+    // 콤보 관련 함수
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void ProcessComboCommand();
+
 protected:
+    // 데이터 테이블 참조
+    UPROPERTY(EditDefaultsOnly, Category = "Combat", meta = (AllowedClasses = "DataTable"))
+    TSoftObjectPtr<UDataTable> SkillDataTable;
 
     // 상태 변수들
     UPROPERTY(VisibleAnywhere, Category = "Combat")
@@ -69,6 +72,37 @@ protected:
 
     UPROPERTY(VisibleAnywhere, Category = "Combat")
     FName CurrentSkillName;
+
+    // 콤보 관련 변수
+    UPROPERTY()
+    int32 CurrentCombo = 0;
+
+    UPROPERTY()
+    bool HasNextComboCommand = false;
+
+    FTimerHandle ComboTimerHandle;
+
+    // 콤보 데이터
+    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
+    UAnimMontage* ComboActionMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
+    TArray<float> EffectiveFrameCount;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
+    float FrameRate = 30.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
+    int32 MaxComboCount = 4;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
+    FString MontageSectionNamePrefix = "Attack";
+
+    // 콤보 관련 함수들
+    void ComboActionBegin();
+    void ComboActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded);
+    void SetComboCheckTimer();
+    void ComboCheck();
 
 private:
     UPROPERTY()
