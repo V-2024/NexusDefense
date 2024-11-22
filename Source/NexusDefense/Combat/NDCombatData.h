@@ -18,14 +18,10 @@ public:
         , CoolTime(0.0f)
         , HitRadius(0.0f)
         , HitLength(0.0f)
-        , bIsComboAttack(false)
-        , ComboIndex(0)
-        , ComboResetTime(2.0f)
+        , bCanBeCombo(false)
     {
     }
 
-
-    // 胶懦 加己
     UPROPERTY(EditDefaultsOnly, Category = "Skill")
     FName SkillName;
 
@@ -47,15 +43,8 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = "Skill", meta = (ClampMin = "0.0"))
     float HitLength;
 
-    // 霓焊 加己
-    UPROPERTY(EditDefaultsOnly, Category = "Combo")
-    bool bIsComboAttack;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Combo", meta = (EditCondition = "bIsComboAttack"))
-    int32 ComboIndex;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Combo", meta = (EditCondition = "bIsComboAttack"))
-    float ComboResetTime;
+    UPROPERTY(EditDefaultsOnly, Category = "Skill")
+    bool bCanBeCombo;
 };
 
 USTRUCT()

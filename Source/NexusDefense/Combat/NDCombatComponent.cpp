@@ -26,6 +26,11 @@ void UNDCombatComponent::BeginPlay()
 	}
 }
 
+void UNDCombatComponent::NotifySkillEnd()
+{
+	CurrentState = ECombatState::None;
+}
+
 bool UNDCombatComponent::ExecuteSkill(FName SkillName)
 {
 	if (!OwnerCharacter.IsValid())
@@ -71,114 +76,6 @@ bool UNDCombatComponent::ExecuteSkill(FName SkillName)
 	return false;
 }
 
-void UNDCombatComponent::ProcessComboCommand()
-{
-	if (CurrentCombo == 0)
-	{
-		ComboActionBegin();
-		return;
-	}
-
-	if (!ComboTimerHandle.IsValid())
-	{
-		HasNextComboCommand = false;
-	}
-	else
-	{
-		HasNextComboCommand = true;
-	}
-}
-
-void UNDCombatComponent::ComboActionBegin()
-{
-	CurrentCombo = 1;
-	CurrentState = ECombatState::Attacking;
-
-	const float AttackSpeedRate = 1.0f;
-	if (OwnerCharacter.IsValid())
-	{
-		UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
-		if (AnimInstance && ComboActionMontage)
-		{
-			AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
-
-			FOnMontageEnded EndDelegate;
-			EndDelegate.BindUObject(this, &UNDCombatComponent::ComboActionEnd);
-			AnimInstance->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
-
-			ComboTimerHandle.Invalidate();
-			SetComboCheckTimer();
-		}
-	}
-}
-
-void UNDCombatComponent::ComboActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded)
-{
-	ensure(CurrentCombo != 0);
-	CurrentCombo = 0;
-	CurrentState = ECombatState::None;
-}
-
-void UNDCombatComponent::SetComboCheckTimer()
-{
-	int32 ComboIndex = CurrentCombo - 1;
-	if (!EffectiveFrameCount.IsValidIndex(ComboIndex)) return;
-
-	const float AttackSpeedRate = 1.0f;
-	float ComboEffectiveTime = (EffectiveFrameCount[ComboIndex] / FrameRate) / AttackSpeedRate;
-	if (ComboEffectiveTime > 0.0f)
-	{
-		GetWorld()->GetTimerManager().SetTimer(
-			ComboTimerHandle,
-			this,
-			&UNDCombatComponent::ComboCheck,
-			ComboEffectiveTime,
-			false
-		);
-	}
-}
-
-void UNDCombatComponent::ComboCheck()
-{
-	ComboTimerHandle.Invalidate();
-	if (HasNextComboCommand)
-	{
-		if (OwnerCharacter.IsValid())
-		{
-			UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
-			if (AnimInstance && ComboActionMontage)
-			{
-				CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, MaxComboCount);
-				FName NextSection = *FString::Printf(TEXT("%s%d"), *MontageSectionNamePrefix, CurrentCombo);
-				AnimInstance->Montage_JumpToSection(NextSection, ComboActionMontage);
-				SetComboCheckTimer();
-				HasNextComboCommand = false;
-			}
-		}
-	}
-}
-
-void UNDCombatComponent::NotifySkillEnd()
-{
-	CurrentState = ECombatState::None;
-}
-
-void UNDCombatComponent::ProcessAttackHit()
-{
-	if (CurrentSkillData && AttacksComponent)
-	{
-		FND_S_AttackInfo AttackInfo;
-		AttackInfo.DamageInfo.Amount = CurrentSkillData->Damage;
-
-		AttacksComponent->ExecuteAttack(
-			CurrentSkillData->AttackTraceType,
-			AttackInfo,
-			CurrentSkillData->HitRadius,
-			CurrentSkillData->HitLength
-		);
-	}
-}
-
 bool UNDCombatComponent::IsSkillReady(FName SkillName) const
 {
 	const FSkillState* State = SkillStates.Find(SkillName);
@@ -208,6 +105,22 @@ float UNDCombatComponent::GetSkillCooldownRemaining(FName SkillName) const
 	const float CurrentTime = GetWorld()->GetTimeSeconds();
 	const float TimeSinceUse = CurrentTime - State->LastUsedTime;
 	return FMath::Max(0.0f, SkillData->CoolTime - TimeSinceUse);
+}
+
+void UNDCombatComponent::ProcessAttackHit()
+{
+	if (CurrentSkillData && AttacksComponent)
+	{
+		FND_S_AttackInfo AttackInfo;
+		AttackInfo.DamageInfo.Amount = CurrentSkillData->Damage;
+
+		AttacksComponent->ExecuteAttack(
+			CurrentSkillData->AttackTraceType,
+			AttackInfo,
+			CurrentSkillData->HitRadius,
+			CurrentSkillData->HitLength
+		);
+	}
 }
 
 void UNDCombatComponent::StartCooldown(FName SkillName, float CoolTime)

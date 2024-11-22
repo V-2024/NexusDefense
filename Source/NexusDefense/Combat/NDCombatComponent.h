@@ -24,21 +24,21 @@ protected:
     virtual void BeginPlay() override;
 
 public:
-    // 델리게이트
+    // 델리게이트 함수
     UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
     FOnSkillExecuted OnSkillExecuted;
 
     UPROPERTY(BlueprintAssignable, Category = "Combat|Events")
     FOnCooldownEnd OnCooldownEnd;
 
+    // 노티파이 함수
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void NotifySkillEnd();
 
-    // 스킬 실행 함수
+    // 스킬 관련 함수
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool ExecuteSkill(FName SkillName);
 
-    // 스킬 상태 확인 함수
     UFUNCTION(BlueprintPure, Category = "Combat")
     bool IsSkillReady(FName SkillName) const;
 
@@ -54,55 +54,21 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Combat")
     void ProcessAttackHit();
 
-    // 콤보 관련 함수
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void ProcessComboCommand();
-
-protected:
-    // 데이터 테이블 참조
+    // 데이터 테이블 가져오기
     UPROPERTY(EditDefaultsOnly, Category = "Combat", meta = (AllowedClasses = "DataTable"))
     TSoftObjectPtr<UDataTable> SkillDataTable;
+
+    // 상태 변수
+    UPROPERTY(VisibleAnywhere, Category = "Combat")
+    ECombatState CurrentState;
+protected:
 
     // 상태 변수들
     UPROPERTY(VisibleAnywhere, Category = "Combat")
     TMap<FName, FSkillState> SkillStates;
 
     UPROPERTY(VisibleAnywhere, Category = "Combat")
-    ECombatState CurrentState;
-
-    UPROPERTY(VisibleAnywhere, Category = "Combat")
     FName CurrentSkillName;
-
-    // 콤보 관련 변수
-    UPROPERTY()
-    int32 CurrentCombo = 0;
-
-    UPROPERTY()
-    bool HasNextComboCommand = false;
-
-    FTimerHandle ComboTimerHandle;
-
-    // 콤보 데이터
-    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
-    UAnimMontage* ComboActionMontage;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
-    TArray<float> EffectiveFrameCount;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
-    float FrameRate = 30.0f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
-    int32 MaxComboCount = 4;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Combat|Combo")
-    FString MontageSectionNamePrefix = "Attack";
-
-    // 콤보 관련 함수들
-    void ComboActionBegin();
-    void ComboActionEnd(UAnimMontage* TargetMontage, bool IsProperlyEnded);
-    void SetComboCheckTimer();
-    void ComboCheck();
 
 private:
     UPROPERTY()
@@ -114,7 +80,7 @@ private:
     FCombatSkillData* CurrentSkillData;
 
 
-    // 내부 유틸리티 함수
+    // 유틸리티 함수들
     void StartCooldown(FName SkillName, float CoolTime);
     UFUNCTION()
     void OnCooldownFinished(FName SkillName);

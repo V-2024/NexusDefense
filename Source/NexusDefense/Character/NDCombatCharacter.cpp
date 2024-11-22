@@ -102,7 +102,13 @@ void ANDCombatCharacter::HandleAttack(FName SkillName)
 
 void ANDCombatCharacter::ExecuteBasicAttack()
 {
-    CombatComponent->ProcessComboCommand();
+    if (AActor* Target = FindTargetInFront())
+    {
+        // 타겟을 향해 회전
+        FVector Direction = Target->GetActorLocation() - GetActorLocation();
+        Direction.Z = 0;
+        SetActorRotation(Direction.Rotation());
+    }
 }
 
 void ANDCombatCharacter::PressLMB()
@@ -112,22 +118,21 @@ void ANDCombatCharacter::PressLMB()
 
 void ANDCombatCharacter::PressKeyboard1()
 {
-    HandleAttack(FName("SkillA"));
 }
 
 void ANDCombatCharacter::PressKeyboard2()
 {
-    HandleAttack(FName("SkillB"));
+
 }
 
 void ANDCombatCharacter::PressKeyboard3()
 {
-    HandleAttack(FName("SkillC"));
+
 }
 
 void ANDCombatCharacter::PressKeyboard4()
 {
-    HandleAttack(FName("SkillD"));
+
 }
 
 void ANDCombatCharacter::MoveForward(float Value)

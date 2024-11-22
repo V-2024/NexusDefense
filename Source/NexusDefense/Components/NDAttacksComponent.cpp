@@ -42,7 +42,6 @@ bool UNDAttacksComponent::DoLineTrace(const FND_S_AttackInfo& AttackInfo, float 
 	const bool bHit = UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, UEngineTypes::ConvertToTraceType(ECC_Pawn), false,
 		TArray<AActor*>{OwnerCharacter}, EDrawDebugTrace::ForDuration, HitResult, true, FLinearColor::Red, FLinearColor::Green, 3.0f);
 
-	// 单固瘤 贸府
 	if (bHit && HitResult.GetActor())
 	{
 		if (UNDHealthComponent* HealthComp = HitResult.GetActor()->FindComponentByClass<UNDHealthComponent>())
@@ -66,20 +65,25 @@ bool UNDAttacksComponent::DoSphereTrace(const FND_S_AttackInfo& AttackInfo, floa
 		TArray<AActor*>{OwnerCharacter}, EDrawDebugTrace::ForDuration, HitResults, true, FLinearColor::Red, FLinearColor::Green, 3.0f
 	);
 
-	// 单固瘤 贸府
+	TSet<AActor*> DamagedActors;
 	bool bAnyDamageDealt = false;
+
 	if (bHit)
 	{
 		for (const FHitResult& Hit : HitResults)
 		{
-			if (AActor* HitActor = Hit.GetActor())
+			AActor* HitActor = Hit.GetActor();
+			if (!HitActor || DamagedActors.Contains(HitActor))
 			{
-				if (UNDHealthComponent* HealthComp = HitActor->FindComponentByClass<UNDHealthComponent>())
+				continue;
+			}
+
+			if (UNDHealthComponent* HealthComp = HitActor->FindComponentByClass<UNDHealthComponent>())
+			{
+				if (HealthComp->TakeDamage(AttackInfo.DamageInfo))
 				{
-					if (HealthComp->TakeDamage(AttackInfo.DamageInfo))
-					{
-						bAnyDamageDealt = true;
-					}
+					bAnyDamageDealt = true;
+					DamagedActors.Add(HitActor);
 				}
 			}
 		}
