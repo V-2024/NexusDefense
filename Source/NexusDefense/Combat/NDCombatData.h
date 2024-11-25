@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "NDCombatTypes.h"
 #include "NDCombatData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -61,4 +62,21 @@ struct FSkillState
     float LastUsedTime;
     bool bIsOnCooldown;
     FTimerHandle CooldownTimer;
+};
+
+USTRUCT(BlueprintType)
+struct FAttackInfo
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float Damage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<UDamageType> DamageType;
+
+    FAttackInfo()
+        : Damage(0.0f)
+        , DamageType(nullptr)
+    {}
 };

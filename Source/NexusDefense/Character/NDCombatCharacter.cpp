@@ -3,18 +3,20 @@
 
 #include "Character/NDCombatCharacter.h"
 #include "Weapon/NDBaseWeapon.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "DrawDebugHelpers.h"
 
 ANDCombatCharacter::ANDCombatCharacter()
 {
     // 전투 컴포넌트 생성
     CombatComponent = CreateDefaultSubobject<UNDCombatComponent>(TEXT("CombatComponent"));
-    AttacksComponent = CreateDefaultSubobject<UNDAttacksComponent>(TEXT("AttacksComponent"));
+    AttackComponent = CreateDefaultSubobject<UNDAttacksComponent>(TEXT("AttackComponent"));
+    SkillComponent = CreateDefaultSubobject<UNDSkillComponent>(TEXT("SkillComponent"));
 }
 
 void ANDCombatCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
     EquipWeapon();
 }
 
@@ -22,28 +24,25 @@ void ANDCombatCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    // 전투 입력 바인딩
-    PlayerInputComponent->BindAction("BasicAttack", IE_Pressed, this, & ANDCombatCharacter::PressLMB);
+    PlayerInputComponent->BindAction("BasicAttack", IE_Pressed, this, &ANDCombatCharacter::PressLMB);
     PlayerInputComponent->BindAction("Skill1", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard1);
     PlayerInputComponent->BindAction("Skill2", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard2);
     PlayerInputComponent->BindAction("Skill3", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard3);
     PlayerInputComponent->BindAction("Skill4", IE_Pressed, this, &ANDCombatCharacter::PressKeyboard4);
 }
 
-void ANDCombatCharacter::EquipWeapon()
+void ANDCombatCharacter::HandleAttack(FName SkillName)
 {
-    if (WeaponClass)
+    if (AActor* Target = FindTargetInFront())
     {
-        Weapon = GetWorld()->SpawnActor<ANDBaseWeapon>(WeaponClass);
+        FVector Direction = Target->GetActorLocation() - GetActorLocation();
+        Direction.Z = 0;
+        SetActorRotation(Direction.Rotation());
+    }
 
-        if (Weapon)
-        {
-            Weapon->AttachToComponent(GetMesh(),
-                FAttachmentTransformRules::KeepRelativeTransform,
-                TEXT("WeaponSocket"));
-
-            Weapon->SetOwner(this);
-        }
+    if (SkillComponent)
+    {
+        SkillComponent->ExecuteSkill(SkillName);
     }
 }
 
@@ -72,42 +71,21 @@ AActor* ANDCombatCharacter::FindTargetInFront()
         2.0f
     );
 
-    // 디버그 로그
-    if (bHit && HitResult.GetActor())
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow,
-            FString::Printf(TEXT("Target Found: %s"), *HitResult.GetActor()->GetName()));
-    }
-
     return bHit ? HitResult.GetActor() : nullptr;
 }
 
-void ANDCombatCharacter::HandleAttack(FName SkillName)
+void ANDCombatCharacter::EquipWeapon()
 {
-    // 전방의 적 탐지
-    if (AActor* Target = FindTargetInFront())
+    if (WeaponClass)
     {
-        // 타겟을 향해 회전
-        FVector Direction = Target->GetActorLocation() - GetActorLocation();
-        Direction.Z = 0;
-        SetActorRotation(Direction.Rotation());
-    }
-
-    // 스킬 실행
-    if (CombatComponent)
-    {
-        CombatComponent->ExecuteSkill(SkillName);
-    }
-}
-
-void ANDCombatCharacter::ExecuteBasicAttack()
-{
-    if (AActor* Target = FindTargetInFront())
-    {
-        // 타겟을 향해 회전
-        FVector Direction = Target->GetActorLocation() - GetActorLocation();
-        Direction.Z = 0;
-        SetActorRotation(Direction.Rotation());
+        Weapon = GetWorld()->SpawnActor<ANDBaseWeapon>(WeaponClass);
+        if (Weapon)
+        {
+            Weapon->AttachToComponent(GetMesh(),
+                FAttachmentTransformRules::KeepRelativeTransform,
+                TEXT("WeaponSocket"));
+            Weapon->SetOwner(this);
+        }
     }
 }
 
@@ -116,23 +94,41 @@ void ANDCombatCharacter::PressLMB()
     ExecuteBasicAttack();
 }
 
+void ANDCombatCharacter::ExecuteBasicAttack()
+{
+    if (AActor* Target = FindTargetInFront())
+    {
+        FVector Direction = Target->GetActorLocation() - GetActorLocation();
+        Direction.Z = 0;
+        SetActorRotation(Direction.Rotation());
+
+        if (AttackComponent)
+        {
+            FND_S_AttackInfo AttackInfo;
+            AttackInfo.Damage = 10.0f; // 기본 공격 데미지
+            AttackComponent->ExecuteAttack(EAttackTraceType::SphereTrace, AttackInfo, AttackTraceRadius, AttackTraceDistance);
+        }
+    }
+}
+
 void ANDCombatCharacter::PressKeyboard1()
 {
+    HandleAttack(FName("SkillA"));
 }
 
 void ANDCombatCharacter::PressKeyboard2()
 {
-
+    HandleAttack(FName("SkillB"));
 }
 
 void ANDCombatCharacter::PressKeyboard3()
 {
-
+    HandleAttack(FName("SkillC"));
 }
 
 void ANDCombatCharacter::PressKeyboard4()
 {
-
+    HandleAttack(FName("SkillD"));
 }
 
 void ANDCombatCharacter::MoveForward(float Value)

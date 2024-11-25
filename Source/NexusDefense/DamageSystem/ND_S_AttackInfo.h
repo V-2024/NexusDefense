@@ -3,29 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ND_S_DamageInfo.h"
+#include "GameFramework/DamageType.h"
 #include "ND_S_AttackInfo.generated.h"
 
-/**
- * 
- */
 USTRUCT(BlueprintType)
 struct FND_S_AttackInfo
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FName AttackTarget;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UAnimMontage* Montage;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FND_S_DamageInfo DamageInfo;
-
+public:
     FND_S_AttackInfo()
-        : AttackTarget(NAME_None)
-        , Montage(nullptr)
+        : Damage(0.0f)
+        , DamageType(nullptr)
     {}
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    float Damage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    TSubclassOf<UDamageType> DamageType;
 };
 
