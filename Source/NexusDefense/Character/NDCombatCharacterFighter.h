@@ -3,47 +3,34 @@
 
 #include "CoreMinimal.h"
 #include "Character/NDCombatCharacter.h"
+#include "Components/NDComboComponent.h"
 #include "NDCombatCharacterFighter.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class NEXUSDEFENSE_API ANDCombatCharacterFighter : public ANDCombatCharacter
 {
-	GENERATED_BODY()
-	
-public:
-	ANDCombatCharacterFighter();
+    GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void ProcessAttackHit();
+    ANDCombatCharacterFighter();
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-	virtual void PressLMB() override;
-	virtual void PressKeyboard1() override;
-	virtual void PressKeyboard2() override;
-	virtual void PressKeyboard3() override;
-	virtual void PressKeyboard4() override;
+    // 전투 입력 처리 오버라이드
+    virtual void PressLMB() override;
+    virtual void PressKeyboard1() override;
+    virtual void PressKeyboard2() override;
+    virtual void PressKeyboard3() override;
+    virtual void PressKeyboard4() override;
 
-	// 고유 기능
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-	TObjectPtr<class UAnimMontage> ComboActionMontage;
+    // 콤보 시스템
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat)
+    UNDComboComponent* ComboComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UNDComboActionData> ComboActionData;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    TObjectPtr<UAnimMontage> ComboActionMontage;
 
-	void ProcessComboCommand();
-
-	void ComboActionBegin();
-	void ComboActionEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
-	void SetComboCheckTimer();
-	void ComboCheck();
-
-	int32 CurrentCombo = 0;
-	FTimerHandle ComboTimerHandle;
-	bool hasNextComboCommand = false;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
+    TObjectPtr<class UNDComboActionData> ComboActionData;
 };

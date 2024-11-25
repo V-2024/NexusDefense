@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "Character/NDBaseCharacter.h"
 #include "Combat/NDCombatComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Components/NDAttacksComponent.h"
+#include "Components/NDSkillComponent.h"
 #include "NDCombatCharacter.generated.h"
 
 class ANDBaseWeapon;
@@ -13,55 +14,55 @@ class ANDBaseWeapon;
 UCLASS()
 class NEXUSDEFENSE_API ANDCombatCharacter : public ANDBaseCharacter
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	ANDCombatCharacter();
+    ANDCombatCharacter();
 
 protected:
-	virtual void BeginPlay() override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void BeginPlay() override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// 전투 관련 함수들
-	virtual void HandleAttack(FName SkillName);
-	virtual void ExecuteBasicAttack();
+    // 전투 관련 함수들
+    virtual void HandleAttack(FName SkillName);
+    virtual AActor* FindTargetInFront();
 
-	// Input 처리 virtual 함수들
-	virtual void PressLMB();
-	virtual void PressKeyboard1();
-	virtual void PressKeyboard2();
-	virtual void PressKeyboard3();
-	virtual void PressKeyboard4();
+    // 입력 처리 함수들
+    virtual void PressLMB();
+    void ExecuteBasicAttack();
+    virtual void PressKeyboard1();
+    virtual void PressKeyboard2();
+    virtual void PressKeyboard3();
+    virtual void PressKeyboard4();
 
-	virtual void MoveForward(float Value);
-	virtual void MoveRight(float Value);
+    // 이동 제한
+    virtual void MoveForward(float Value) override;
+    virtual void MoveRight(float Value) override;
 
 protected:
-	// 전투 컴포넌트들
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat)
-	UNDCombatComponent* CombatComponent;
+    // 전투 컴포넌트들
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat)
+    UNDCombatComponent* CombatComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat)
-	UNDAttacksComponent* AttacksComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat)
+    UNDAttacksComponent* AttackComponent;
 
-	// 무기 장착
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TSubclassOf<ANDBaseWeapon> WeaponClass;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat)
+    UNDSkillComponent* SkillComponent;
 
-	UPROPERTY()
-	ANDBaseWeapon* Weapon;
+    // 무기 시스템
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    TSubclassOf<ANDBaseWeapon> WeaponClass;
 
-	void EquipWeapon();
+    UPROPERTY()
+    ANDBaseWeapon* Weapon;
 
-	// 타겟팅 Trace
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	float AttackTraceRadius = 100.f;
+    void EquipWeapon();
 
-	UPROPERTY(EditAnywhere, Category = "Combat")
-	float AttackTraceDistance = 300.f;
+    // 타겟팅 시스템
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    float AttackTraceRadius = 100.f;
 
-	UPROPERTY()
-	AActor* SubTarget;
-
-	AActor* FindTargetInFront();
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    float AttackTraceDistance = 300.f;
 };

@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Character/NDBaseCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -9,8 +8,7 @@
 
 ANDBaseCharacter::ANDBaseCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = true;
 
     // Camera Boom 설정
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -37,26 +35,17 @@ ANDBaseCharacter::ANDBaseCharacter()
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.f, 0.0f);
     GetCharacterMovement()->JumpZVelocity = 100.f;
     GetCharacterMovement()->AirControl = 0.2f;
-
-}
-
-void ANDBaseCharacter::BeginPlay()
-{
-    Super::BeginPlay();
-
 }
 
 void ANDBaseCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
+    Super::Tick(DeltaTime);
 }
 
 void ANDBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    // 기본 입력 바인딩
     PlayerInputComponent->BindAxis("MoveForward", this, &ANDBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ANDBaseCharacter::MoveRight);
     PlayerInputComponent->BindAxis("Turn", this, &ANDBaseCharacter::Turn);
@@ -118,4 +107,9 @@ void ANDBaseCharacter::AddHealth(float Amount)
     {
         HealthComponent->AddHealth(Amount);
     }
+}
+
+void ANDBaseCharacter::BeginPlay()
+{
+    Super::BeginPlay();
 }
